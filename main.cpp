@@ -1,4 +1,3 @@
-#include <chrono>
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
@@ -8,11 +7,9 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
 
 using namespace std;
-using namespace std::chrono;
 using namespace glm;
 
 static const GLfloat g_color_buffer_data[36*3] = {
@@ -66,9 +63,17 @@ static void log_vector(ostream& o, vector<char> message) {
     o << endl;
 }
 
+mat4 move_mat = mat4(1.);
+
 static void key_callback(GLFWwindow* window, int key, int, int action, int) {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-        glfwSetWindowShouldClose(window, GLFW_TRUE);
+    if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+        switch (key) {
+            case GLFW_KEY_ESCAPE: glfwSetWindowShouldClose(window, GLFW_TRUE); break;
+            case GLFW_KEY_W: move_mat = translate(vec3(0, -0.05, 0)) * move_mat; break;
+            case GLFW_KEY_S: move_mat = translate(vec3(0,  0.05, 0)) * move_mat; break;
+            case GLFW_KEY_A: move_mat = translate(vec3( 0.05, 0, 0)) * move_mat; break;
+            case GLFW_KEY_D: move_mat = translate(vec3(-0.05, 0, 0)) * move_mat; break;
+        }
     }
 }
 
@@ -219,8 +224,8 @@ int main() {
 
     GLuint matrix_ID = glGetUniformLocation(program_ID, "MVP");
     mat4 projection  = perspective(radians(45.), 4. / 3., 0.1, 100.);
-    mat4 view        = lookAt(vec3(0.5, 0.5, 0.2), vec3(0, 0, 0), vec3(0, 0, 1));
-    mat4 mvp         = projection * view;
+    mat4 view        = lookAt(vec3(0., -0.5, 0.2), vec3(0, 0, 0), vec3(0, 0, 1));
+    mat4 vp          = projection * view;
 
     GLuint vertex_buffer;
     glGenBuffers(1, &vertex_buffer);
@@ -237,11 +242,8 @@ int main() {
 
         glUseProgram(program_ID);
 
-        long int t = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-        float angle = radians((float)(t / 10 % 400) * 0.9f);
-        mat4 rotatex = rotate(angle, vec3(0, 0, 1));
-        mat4 mat = mvp * rotatex;
-        glUniformMatrix4fv(matrix_ID, 1, GL_FALSE, &mat[0][0]);
+        mat4 mvp = vp * move_mat;
+        glUniformMatrix4fv(matrix_ID, 1, GL_FALSE, &mvp[0][0]);
 
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
