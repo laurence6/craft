@@ -7,48 +7,49 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <glm/gtx/string_cast.hpp>
 #include <glm/gtx/transform.hpp>
 
 using namespace std;
 using namespace glm;
 
 static const GLfloat g_color_buffer_data[36*3] = {
-    0.0, 0.9, 0.0,
-    0.0, 0.9, 0.0,
-    0.0, 0.9, 0.0,
-    0.0, 0.9, 0.0,
-    0.0, 0.9, 0.0,
-    0.0, 0.9, 0.0,
-    0.9, 0.0, 0.0,
-    0.9, 0.0, 0.0,
-    0.9, 0.0, 0.0,
-    0.9, 0.0, 0.0,
-    0.9, 0.0, 0.0,
-    0.9, 0.0, 0.0,
-    0.0, 0.0, 0.9,
-    0.0, 0.0, 0.9,
-    0.0, 0.0, 0.9,
-    0.0, 0.0, 0.9,
-    0.0, 0.0, 0.9,
-    0.0, 0.0, 0.9,
-    0.9, 0.0, 0.0,
-    0.9, 0.0, 0.0,
-    0.9, 0.0, 0.0,
-    0.9, 0.0, 0.0,
-    0.9, 0.0, 0.0,
-    0.9, 0.0, 0.0,
-    0.0, 0.0, 0.9,
-    0.0, 0.0, 0.9,
-    0.0, 0.0, 0.9,
-    0.0, 0.0, 0.9,
-    0.0, 0.0, 0.9,
-    0.0, 0.0, 0.9,
-    0.0, 0.0, 0.0,
-    0.0, 0.0, 0.0,
-    0.0, 0.0, 0.0,
-    0.0, 0.0, 0.0,
-    0.0, 0.0, 0.0,
-    0.0, 0.0, 0.0,
+    0.5, 0.8, 0.5,
+    0.5, 0.8, 0.5,
+    0.5, 0.8, 0.5,
+    0.5, 0.8, 0.5,
+    0.5, 0.8, 0.5,
+    0.5, 0.8, 0.5,
+    0.8, 0.5, 0.5,
+    0.8, 0.5, 0.5,
+    0.8, 0.5, 0.5,
+    0.8, 0.5, 0.5,
+    0.8, 0.5, 0.5,
+    0.8, 0.5, 0.5,
+    0.5, 0.5, 0.8,
+    0.5, 0.5, 0.8,
+    0.5, 0.5, 0.8,
+    0.5, 0.5, 0.8,
+    0.5, 0.5, 0.8,
+    0.5, 0.5, 0.8,
+    0.8, 0.5, 0.5,
+    0.8, 0.5, 0.5,
+    0.8, 0.5, 0.5,
+    0.8, 0.5, 0.5,
+    0.8, 0.5, 0.5,
+    0.8, 0.5, 0.5,
+    0.5, 0.5, 0.8,
+    0.5, 0.5, 0.8,
+    0.5, 0.5, 0.8,
+    0.5, 0.5, 0.8,
+    0.5, 0.5, 0.8,
+    0.5, 0.5, 0.8,
+    0.5, 0.5, 0.5,
+    0.5, 0.5, 0.5,
+    0.5, 0.5, 0.5,
+    0.5, 0.5, 0.5,
+    0.5, 0.5, 0.5,
+    0.5, 0.5, 0.5,
 };
 
 static void _exit(int code) {
@@ -63,18 +64,38 @@ static void log_vector(ostream& o, vector<char> message) {
     o << endl;
 }
 
-mat4 move_mat = mat4(1.);
+vec3 cam_pos = vec3(0, -0.5, 0.05);
+vec3 cam_d   = vec3(0, 1, 0);
+const float cam_speed = 0.005;
+const float rot_speed = 0.25;
 
 static void key_callback(GLFWwindow* window, int key, int, int action, int) {
     if (action == GLFW_PRESS || action == GLFW_REPEAT) {
         switch (key) {
             case GLFW_KEY_ESCAPE: glfwSetWindowShouldClose(window, GLFW_TRUE); break;
-            case GLFW_KEY_W: move_mat = translate(vec3(0, -0.05, 0)) * move_mat; break;
-            case GLFW_KEY_S: move_mat = translate(vec3(0,  0.05, 0)) * move_mat; break;
-            case GLFW_KEY_A: move_mat = translate(vec3( 0.05, 0, 0)) * move_mat; break;
-            case GLFW_KEY_D: move_mat = translate(vec3(-0.05, 0, 0)) * move_mat; break;
+            case GLFW_KEY_W: cam_pos += cam_speed * cam_d; break;
+            case GLFW_KEY_S: cam_pos -= cam_speed * cam_d; break;
+            case GLFW_KEY_A: cam_pos += cam_speed * cross(vec3(0, 0, 1), cam_d); break;
+            case GLFW_KEY_D: cam_pos -= cam_speed * cross(vec3(0, 0, 1), cam_d); break;
         }
     }
+}
+
+static void cursor_pos_callback(GLFWwindow*, double posx, double posy) {
+    static double last_posx = posx, last_posy = posy;
+    float del_x = (float)(last_posx - posx) * rot_speed;
+    float del_y = (float)(posy - last_posy) * rot_speed;
+    last_posx = posx;
+    last_posy = posy;
+
+    static float yaw = 90, pitch = 90;
+    yaw = fmod(yaw + del_x, 360);
+    pitch = clamp(pitch + del_y, 1.f, 179.f);
+    cam_d = normalize(vec3(
+        sin(radians(pitch)) * cos(radians(yaw)),
+        sin(radians(pitch)) * sin(radians(yaw)),
+        cos(radians(pitch))
+    ));
 }
 
 static GLuint load_shaders(string vertex_file_path, string fragment_file_path) {
@@ -199,7 +220,7 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(1024, 768, "main", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(1280, 960, "main", NULL, NULL);
     if (!window) {
         _exit(1);
     }
@@ -213,6 +234,9 @@ int main() {
 
     glfwSetKeyCallback(window, key_callback);
 
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetCursorPosCallback(window, cursor_pos_callback);
+
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
 
@@ -223,9 +247,7 @@ int main() {
     GLuint program_ID = load_shaders("main.vertexshader", "main.fragmentshader");
 
     GLuint matrix_ID = glGetUniformLocation(program_ID, "MVP");
-    mat4 projection  = perspective(radians(45.), 4. / 3., 0.1, 100.);
-    mat4 view        = lookAt(vec3(0., -0.5, 0.2), vec3(0, 0, 0), vec3(0, 0, 1));
-    mat4 vp          = projection * view;
+    mat4 projection  = perspective(radians(45.), 4. / 3., 0.01, 100.);
 
     GLuint vertex_buffer;
     glGenBuffers(1, &vertex_buffer);
@@ -242,7 +264,8 @@ int main() {
 
         glUseProgram(program_ID);
 
-        mat4 mvp = vp * move_mat;
+        mat4 view = lookAt(cam_pos, cam_pos + cam_d, vec3(0, 0, 1));
+        mat4 mvp  = projection * view;
         glUniformMatrix4fv(matrix_ID, 1, GL_FALSE, &mvp[0][0]);
 
         glEnableVertexAttribArray(0);
