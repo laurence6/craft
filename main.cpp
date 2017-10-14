@@ -64,40 +64,6 @@ static void log_vector(ostream& o, vector<char> message) {
     o << endl;
 }
 
-vec3 cam_pos = vec3(0, -0.5, 0.05);
-vec3 cam_d   = vec3(0, 1, 0);
-const float cam_speed = 0.005;
-const float rot_speed = 0.25;
-
-static void key_callback(GLFWwindow* window, int key, int, int action, int) {
-    if (action == GLFW_PRESS || action == GLFW_REPEAT) {
-        switch (key) {
-            case GLFW_KEY_ESCAPE: glfwSetWindowShouldClose(window, GLFW_TRUE); break;
-            case GLFW_KEY_W: cam_pos += cam_speed * cam_d; break;
-            case GLFW_KEY_S: cam_pos -= cam_speed * cam_d; break;
-            case GLFW_KEY_A: cam_pos += cam_speed * cross(vec3(0, 0, 1), cam_d); break;
-            case GLFW_KEY_D: cam_pos -= cam_speed * cross(vec3(0, 0, 1), cam_d); break;
-        }
-    }
-}
-
-static void cursor_pos_callback(GLFWwindow*, double posx, double posy) {
-    static double last_posx = posx, last_posy = posy;
-    float del_x = (float)(last_posx - posx) * rot_speed;
-    float del_y = (float)(posy - last_posy) * rot_speed;
-    last_posx = posx;
-    last_posy = posy;
-
-    static float yaw = 90, pitch = 90;
-    yaw = fmod(yaw + del_x, 360);
-    pitch = clamp(pitch + del_y, 1.f, 179.f);
-    cam_d = normalize(vec3(
-        sin(radians(pitch)) * cos(radians(yaw)),
-        sin(radians(pitch)) * sin(radians(yaw)),
-        cos(radians(pitch))
-    ));
-}
-
 static GLuint load_shaders(string vertex_file_path, string fragment_file_path) {
     GLuint vertex_shader_ID   = glCreateShader(GL_VERTEX_SHADER);
     GLuint fragment_shader_ID = glCreateShader(GL_FRAGMENT_SHADER);
@@ -200,6 +166,40 @@ static vector<GLfloat> load_map(string map_path) {
         _exit(1);
     }
     return map_vertices;
+}
+
+vec3 cam_pos = vec3(0, -0.5, 0.05);
+vec3 cam_d   = vec3(0, 1, 0);
+const float cam_speed = 0.005;
+const float rot_speed = 0.25;
+
+static void key_callback(GLFWwindow* window, int key, int, int action, int) {
+    if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+        switch (key) {
+            case GLFW_KEY_ESCAPE: glfwSetWindowShouldClose(window, GLFW_TRUE); break;
+            case GLFW_KEY_W: cam_pos += cam_speed * cam_d; break;
+            case GLFW_KEY_S: cam_pos -= cam_speed * cam_d; break;
+            case GLFW_KEY_A: cam_pos += cam_speed * cross(vec3(0, 0, 1), cam_d); break;
+            case GLFW_KEY_D: cam_pos -= cam_speed * cross(vec3(0, 0, 1), cam_d); break;
+        }
+    }
+}
+
+static void cursor_pos_callback(GLFWwindow*, double posx, double posy) {
+    static double last_posx = posx, last_posy = posy;
+    float del_x = (float)(last_posx - posx) * rot_speed;
+    float del_y = (float)(posy - last_posy) * rot_speed;
+    last_posx = posx;
+    last_posy = posy;
+
+    static float yaw = 90, pitch = 90;
+    yaw = fmod(yaw + del_x, 360);
+    pitch = clamp(pitch + del_y, 1.f, 179.f);
+    cam_d = normalize(vec3(
+        sin(radians(pitch)) * cos(radians(yaw)),
+        sin(radians(pitch)) * sin(radians(yaw)),
+        cos(radians(pitch))
+    ));
 }
 
 int main() {
