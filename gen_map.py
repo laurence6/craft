@@ -90,7 +90,9 @@ with open(map_ppm_path) as f:
             hs.append(h)
 
 with open(map_vertices_path, "w") as vertices_file:
-    for _x in range(x):
-        for _y in range(y):
-            for _z in range(hs[_x * y + _y]):
+    for i in range(x):
+        for j in range(y):
+            for _z in range(hs[i * y + j]):
+                _x = j
+                _y = x - i - 1
                 gen_cube(vertices_file, _x - int(x/2), _y - int(y/2), _z)
