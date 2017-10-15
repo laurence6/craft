@@ -9,53 +9,53 @@ def calculate_height(r, g, b):
     return int(avg / 255 * 9 + 1)
 
 id_cube = (
-    0, 1, 1, # up
+    1, 0, 1, # up
     0, 0, 1,
-    1, 0, 1,
-
-    1, 1, 1, # up
     0, 1, 1,
-    1, 0, 1,
+
+    1, 0, 1, # up
+    1, 1, 1,
+    0, 1, 1,
 
     1, 0, 1, # front
-    0, 0, 0,
     1, 0, 0,
+    0, 0, 0,
 
     1, 0, 1, # front
     0, 0, 1,
     0, 0, 0,
 
-    0, 0, 0, # left
-    0, 0, 1,
-    0, 1, 1,
+    0, 0, 1, # left
+    0, 0, 0,
+    0, 1, 0,
 
-    0, 0, 0, # left
+    0, 0, 1, # left
     0, 1, 1,
     0, 1, 0,
 
-    1, 1, 1, # back
+    0, 1, 1, # back
+    0, 1, 0,
     1, 1, 0,
-    0, 1, 0,
 
-    1, 1, 1, # back
-    0, 1, 0,
-    0, 1, 1,
+    0, 1, 1, # back
+    1, 1, 1,
+    1, 1, 0,
 
     1, 1, 1, # right
-    1, 0, 0,
     1, 1, 0,
+    1, 0, 0,
 
-    1, 0, 0, # right
-    1, 1, 1,
+    1, 1, 1, # right
     1, 0, 1,
+    1, 0, 0,
 
-    1, 1, 0, # buttom
+    1, 0, 0, # bottom
     0, 0, 0,
     0, 1, 0,
 
-    1, 1, 0, # buttom
-    1, 0, 0,
-    0, 0, 0,
+    1, 0, 0, # bottom
+    1, 1, 0,
+    0, 1, 0,
 )
 
 uv = (
@@ -63,7 +63,7 @@ uv = (
 )
 
 def gen_cube(vertices_file, x, y, z):
-    for i in range(36):
+    for i in range(int(len(id_cube) / 3)):
         vertices_file.write("%s %s %s\n" % (
             (id_cube[i*3+0] + x) / 100,
             (id_cube[i*3+1] + y) / 100,
