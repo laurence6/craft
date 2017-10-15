@@ -1,8 +1,6 @@
-#include <cstdio>
-#include <cstdlib>
 #include <fstream>
-#include <iostream>
 #include <sstream>
+#include <string>
 #include <vector>
 
 #include <GL/glew.h>
@@ -11,70 +9,10 @@
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtx/transform.hpp>
 
+#include "util.cpp"
+
 using namespace std;
 using namespace glm;
-
-static const GLfloat uv_buffer_data[36*2] = {
-    1.0, 0.0,
-    0.5 + 0.01, 0.0,
-    0.5 + 0.01, 0.5 - 0.01,
-
-    1.0, 0.0,
-    1.0, 0.5 - 0.01,
-    0.5 + 0.01, 0.5 - 0.01,
-
-    0.5 - 0.01, 0.5 - 0.01,
-    0.5 - 0.01, 0.0,
-    0.0, 0.0,
-
-    0.5 - 0.01, 0.5 - 0.01,
-    0.0, 0.5 - 0.01,
-    0.0, 0.0,
-
-    0.5 - 0.01, 0.5 - 0.01,
-    0.5 - 0.01, 0.0,
-    0.0, 0.0,
-
-    0.5 - 0.01, 0.5 - 0.01,
-    0.0, 0.5 - 0.01,
-    0.0, 0.0,
-
-    0.5 - 0.01, 0.5 - 0.01,
-    0.5 - 0.01, 0.0,
-    0.0, 0.0,
-
-    0.5 - 0.01, 0.5 - 0.01,
-    0.0, 0.5 - 0.01,
-    0.0, 0.0,
-
-    0.5 - 0.01, 0.5 - 0.01,
-    0.5 - 0.01, 0.0,
-    0.0, 0.0,
-
-    0.5 - 0.01, 0.5 - 0.01,
-    0.0, 0.5 - 0.01,
-    0.0, 0.0,
-
-    0.5 - 0.01, 0.5 + 0.01,
-    0.0, 0.5 + 0.01,
-    0.0, 1.0,
-
-    0.5 - 0.01, 0.5 + 0.01,
-    0.5 - 0.01, 1.0,
-    0.0, 1.0,
-};
-
-static void _exit(int code) {
-    glfwTerminate();
-    exit(code);
-}
-
-static void log_vector(ostream& o, vector<char> message) {
-    for (const auto c : message) {
-        o << c;
-    }
-    o << endl;
-}
 
 static GLuint load_shaders(string vertex_shader_path, string fragment_shader_path) {
     GLuint vertex_shader_ID   = glCreateShader(GL_VERTEX_SHADER);
@@ -104,7 +42,6 @@ static GLuint load_shaders(string vertex_shader_path, string fragment_shader_pat
     GLint result = GL_FALSE;
     int info_log_length;
 
-    cout << "Compiling shader: " << vertex_shader_path << endl;
     char const* vertex_shader_p = vertex_shader_code.c_str();
     glShaderSource(vertex_shader_ID, 1, &vertex_shader_p, NULL);
     glCompileShader(vertex_shader_ID);
@@ -118,7 +55,6 @@ static GLuint load_shaders(string vertex_shader_path, string fragment_shader_pat
         _exit(1);
     }
 
-    cout << "Compiling shader: " << fragment_shader_path << endl;
     char const* fragment_shader_p = fragment_shader_code.c_str();
     glShaderSource(fragment_shader_ID, 1, &fragment_shader_p, NULL);
     glCompileShader(fragment_shader_ID);
@@ -157,27 +93,49 @@ static GLuint load_shaders(string vertex_shader_path, string fragment_shader_pat
     return program_ID;
 }
 
-static vector<GLfloat> load_map(string map_path) {
-    vector<GLfloat> map_vertices;
-    ifstream map_file(map_path);
-    if (map_file.is_open()) {
+static void load_map(string vertices_path, string uv_path, vector<GLfloat>& vertices, vector<GLfloat>& uv) {
+    ifstream vertices_file(vertices_path);
+    if (vertices_file.is_open()) {
         while (1) {
-            double v;
-            map_file >> v;
-            if (map_file.eof()) {
+            GLfloat v;
+            vertices_file >> v;
+            if (vertices_file.eof()) {
                 break;
             }
-            map_vertices.push_back(v);
+            vertices.push_back(v);
         }
     } else {
-        cerr << "Cannot open " << map_path << endl;
+        cerr << "Cannot open " << vertices_path << endl;
         _exit(1);
     }
-    if (map_vertices.size() % 3 != 0) {
-        cerr << "Incorrect number of vertices " << map_vertices.size() << endl;
+    if (vertices.size() % 3 != 0) {
+        cerr << "Incorrect number of vertices " << vertices.size() << endl;
         _exit(1);
     }
-    return map_vertices;
+
+    ifstream uv_file(uv_path);
+    if (uv_file.is_open()) {
+        while (1) {
+            GLfloat v;
+            uv_file >> v;
+            if (uv_file.eof()) {
+                break;
+            }
+            uv.push_back(v);
+        }
+    } else {
+        cerr << "Cannot open " << uv_path << endl;
+        _exit(1);
+    }
+    if (vertices.size() % 2 != 0) {
+        cerr << "Incorrect number of uv " << uv.size() << endl;
+        _exit(1);
+    }
+
+    if (vertices.size() / 3 != uv.size() / 2) {
+        cerr << "Incorrect number of vertices " << vertices.size() << " or number of uv " << uv.size() << endl;
+        _exit(1);
+    }
 }
 
 static vector<unsigned char> load_ppm_texture(string tex_path, unsigned int& w, unsigned int& h) {
@@ -263,13 +221,8 @@ static void cursor_pos_callback(GLFWwindow*, double posx, double posy) {
 }
 
 int main() {
-    vector<GLfloat> vertices = load_map("map.vertices");
-    vector<GLfloat> vertex_colors;
-    for (unsigned int i = 0; i < vertices.size() / (sizeof(uv_buffer_data) / sizeof(GLfloat)); i++) {
-        for (unsigned int j = 0; j < (sizeof(uv_buffer_data) / sizeof(GLfloat)); j++) {
-            vertex_colors.push_back(uv_buffer_data[j]);
-        }
-    }
+    vector<GLfloat> vertices, uv;
+    load_map("map.vertices", "map.uv", vertices, uv);
     unsigned int width, height;
     vector<unsigned char> texture_data = load_ppm_texture("texture.ppm", width, height);
 
@@ -316,7 +269,7 @@ int main() {
     GLuint uv_buffer;
     glGenBuffers(1, &uv_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, uv_buffer);
-    glBufferData(GL_ARRAY_BUFFER, vertex_colors.size() * sizeof(GLfloat), &vertex_colors.front(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, uv.size() * sizeof(GLfloat), &uv.front(), GL_STATIC_DRAW);
 
     GLuint matrix_ID = glGetUniformLocation(program_ID, "MVP");
 
@@ -335,7 +288,7 @@ int main() {
 
         glUseProgram(program_ID);
 
-        const mat4 projection  = perspective(radians(45.), 4. / 3., 0.01, 100.);
+        const mat4 projection  = perspective(radians(45.), 4. / 3., 0.001, 100.);
         mat4 view              = lookAt(cam_pos, cam_pos + cam_d, vec3(0, 0, 1));
         mat4 mvp               = projection * view;
         glUniformMatrix4fv(matrix_ID, 1, GL_FALSE, &mvp[0][0]);
