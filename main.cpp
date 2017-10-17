@@ -127,18 +127,20 @@ static void load_map(string vertices_path, string uv_path, vector<GLfloat>& vert
         cerr << "Cannot open " << uv_path << endl;
         _exit(1);
     }
-    if (vertices.size() % 2 != 0) {
+    if (vertices.size() % 3 != 0) {
         cerr << "Incorrect number of uv " << uv.size() << endl;
         _exit(1);
     }
 
-    if (vertices.size() / 3 != uv.size() / 2) {
+    if (vertices.size() / 3 != uv.size() / 3) {
         cerr << "Incorrect number of vertices " << vertices.size() << " or number of uv " << uv.size() << endl;
         _exit(1);
     }
 }
 
-static vector<unsigned char> load_ppm_texture(string tex_path, unsigned int& w, unsigned int& h) {
+const unsigned int sub_width = 64, sub_height = 64, n_tiles = 4;
+
+static vector<unsigned char> load_ppm_texture(string tex_path) {
     vector<unsigned char> data;
 
     ifstream tex_stream(tex_path);
@@ -158,23 +160,19 @@ static vector<unsigned char> load_ppm_texture(string tex_path, unsigned int& w, 
 
     while (getline(tex_stream, line) && line[0] == '#') {}
 
+    unsigned int w, h;
     {
         stringstream wh(line);
         wh >> w >> h;
     }
 
-    data.resize(h * w * 3);
-
     while (getline(tex_stream, line) && line[0] == '#') {}
 
     for (unsigned int i = 0; i < h; i++) {
         for (unsigned int j = 0; j < w; j++) {
-            unsigned char r = tex_stream.get();
-            unsigned char g = tex_stream.get();
-            unsigned char b = tex_stream.get();
-            data[((h-i-1)*w+j)*3+0] = r;
-            data[((h-i-1)*w+j)*3+1] = g;
-            data[((h-i-1)*w+j)*3+2] = b;
+            data.push_back(tex_stream.get());
+            data.push_back(tex_stream.get());
+            data.push_back(tex_stream.get());
         }
     }
 
@@ -183,8 +181,6 @@ static vector<unsigned char> load_ppm_texture(string tex_path, unsigned int& w, 
 
 vec3 cam_pos = vec3(0, -0.5, 0.05);
 vec3 cam_d   = vec3(0, 1, 0);
-//vec3 cam_pos = vec3(0, -0.05, 0.05);
-//vec3 cam_d   = normalize(vec3(0, 1, -1));
 
 static void key_callback(GLFWwindow* window, int key, int, int action, int) {
     const float cam_speed = 0.003;
@@ -210,7 +206,6 @@ static void cursor_pos_callback(GLFWwindow*, double posx, double posy) {
     last_posy = posy;
 
     static float yaw = 90, pitch = 90;
-    //static float yaw = 90, pitch = 135;
     yaw = fmod(yaw + del_x, 360);
     pitch = clamp(pitch + del_y, 1.f, 179.f);
     cam_d = normalize(vec3(
@@ -223,16 +218,15 @@ static void cursor_pos_callback(GLFWwindow*, double posx, double posy) {
 int main() {
     vector<GLfloat> vertices, uv;
     load_map("map.vertices", "map.uv", vertices, uv);
-    unsigned int width, height;
-    vector<unsigned char> texture_data = load_ppm_texture("texture.ppm", width, height);
+    vector<unsigned char> texture_data = load_ppm_texture("texture.ppm");
 
     if (!glfwInit()) {
         _exit(1);
     }
 
     glfwWindowHint(GLFW_SAMPLES, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     GLFWwindow* window = glfwCreateWindow(1280, 960, "main", NULL, NULL);
@@ -275,11 +269,13 @@ int main() {
 
     GLuint texture_ID;
     glGenTextures(1, &texture_ID);
-    glBindTexture(GL_TEXTURE_2D, texture_ID);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, &texture_data.front());
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-    glGenerateMipmap(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, texture_ID);
+    glTexStorage3D(GL_TEXTURE_2D_ARRAY, 4, GL_RGB8, sub_width, sub_height, n_tiles);
+    glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, sub_width, sub_height, n_tiles, GL_RGB, GL_UNSIGNED_BYTE, &texture_data.front());
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, n_tiles-1);
+    glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
 
     GLuint sampler_ID = glGetUniformLocation(program_ID, "sampler");
 
@@ -288,13 +284,13 @@ int main() {
 
         glUseProgram(program_ID);
 
-        const mat4 projection  = perspective(radians(45.), 4. / 3., 0.001, 100.);
-        mat4 view              = lookAt(cam_pos, cam_pos + cam_d, vec3(0, 0, 1));
-        mat4 mvp               = projection * view;
+        const mat4 projection = perspective(radians(45.), 4. / 3., 0.001, 100.);
+        mat4 view             = lookAt(cam_pos, cam_pos + cam_d, vec3(0, 0, 1));
+        mat4 mvp              = projection * view;
         glUniformMatrix4fv(matrix_ID, 1, GL_FALSE, &mvp[0][0]);
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture_ID);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, texture_ID);
         glUniform1i(sampler_ID, 0);
 
         glEnableVertexAttribArray(0);
@@ -303,7 +299,7 @@ int main() {
 
         glEnableVertexAttribArray(1);
         glBindBuffer(GL_ARRAY_BUFFER, uv_buffer);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
         glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 3);
 
