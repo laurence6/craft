@@ -14,6 +14,13 @@
 using namespace std;
 using namespace glm;
 
+const string VERTEX_SHADER_PATH = "vertexshader.glsl";
+const string FRAGMENT_SHADER_PATH = "fragmentshader.glsl";
+const string VERTICES_PATH = "map.vertices";
+const string UV_PATH = "map.uv";
+const string TEXTURE_PATH = "texture.ppm";
+const unsigned int SUB_TEX_WIDTH = 64, SUB_TEX_HEIGHT = 64, N_TILES = 4;
+
 static GLuint load_shaders(string vertex_shader_path, string fragment_shader_path) {
     GLuint vertex_shader_ID   = glCreateShader(GL_VERTEX_SHADER);
     GLuint fragment_shader_ID = glCreateShader(GL_FRAGMENT_SHADER);
@@ -138,8 +145,6 @@ static void load_map(string vertices_path, string uv_path, vector<GLfloat>& vert
     }
 }
 
-const unsigned int sub_width = 64, sub_height = 64, n_tiles = 4;
-
 static vector<unsigned char> load_ppm_texture(string tex_path) {
     vector<unsigned char> data;
 
@@ -217,8 +222,8 @@ static void cursor_pos_callback(GLFWwindow*, double posx, double posy) {
 
 int main() {
     vector<GLfloat> vertices, uv;
-    load_map("map.vertices", "map.uv", vertices, uv);
-    vector<unsigned char> texture_data = load_ppm_texture("texture.ppm");
+    load_map(VERTICES_PATH, UV_PATH, vertices, uv);
+    vector<unsigned char> texture_data = load_ppm_texture(TEXTURE_PATH);
 
     if (!glfwInit()) {
         _exit(1);
@@ -253,7 +258,7 @@ int main() {
     glGenVertexArrays(1, &vertex_array_ID);
     glBindVertexArray(vertex_array_ID);
 
-    GLuint program_ID = load_shaders("main.vertexshader", "main.fragmentshader");
+    GLuint program_ID = load_shaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
 
     GLuint vertex_buffer;
     glGenBuffers(1, &vertex_buffer);
@@ -270,11 +275,11 @@ int main() {
     GLuint texture_ID;
     glGenTextures(1, &texture_ID);
     glBindTexture(GL_TEXTURE_2D_ARRAY, texture_ID);
-    glTexStorage3D(GL_TEXTURE_2D_ARRAY, 4, GL_RGB8, sub_width, sub_height, n_tiles);
-    glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, sub_width, sub_height, n_tiles, GL_RGB, GL_UNSIGNED_BYTE, &texture_data.front());
+    glTexStorage3D(GL_TEXTURE_2D_ARRAY, 4, GL_RGB8, SUB_TEX_WIDTH, SUB_TEX_HEIGHT, N_TILES);
+    glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, SUB_TEX_WIDTH, SUB_TEX_HEIGHT, N_TILES, GL_RGB, GL_UNSIGNED_BYTE, &texture_data.front());
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, n_tiles-1);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, N_TILES-1);
     glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
 
     GLuint sampler_ID = glGetUniformLocation(program_ID, "sampler");
