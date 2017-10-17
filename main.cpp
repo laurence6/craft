@@ -25,68 +25,64 @@ static GLuint load_shaders(string vertex_shader_path, string fragment_shader_pat
     GLuint vertex_shader_ID   = glCreateShader(GL_VERTEX_SHADER);
     GLuint fragment_shader_ID = glCreateShader(GL_FRAGMENT_SHADER);
 
-    string vertex_shader_code;
+    string vertex_shader_code = "";
     ifstream vertex_shader_stream(vertex_shader_path);
     if (vertex_shader_stream.is_open()) {
-        string line = "";
+        string line;
         while (getline(vertex_shader_stream, line))
-            vertex_shader_code += "\n" + line;
-        vertex_shader_stream.close();
+            vertex_shader_code += line + "\n";
     } else {
         cerr << "Cannot open " << vertex_shader_path << endl;
         _exit(1);
     }
 
-    string fragment_shader_code;
+    string fragment_shader_code = "";
     ifstream fragment_shader_stream(fragment_shader_path);
     if (fragment_shader_stream.is_open()) {
-        string line = "";
+        string line;
         while (getline(fragment_shader_stream, line))
-            fragment_shader_code += "\n" + line;
-        fragment_shader_stream.close();
+            fragment_shader_code += line + "\n";
     }
 
     GLint result = GL_FALSE;
     int info_log_length;
 
     char const* vertex_shader_p = vertex_shader_code.c_str();
-    glShaderSource(vertex_shader_ID, 1, &vertex_shader_p, NULL);
+    glShaderSource(vertex_shader_ID, 1, &vertex_shader_p, nullptr);
     glCompileShader(vertex_shader_ID);
 
     glGetShaderiv(vertex_shader_ID, GL_COMPILE_STATUS, &result);
     glGetShaderiv(vertex_shader_ID, GL_INFO_LOG_LENGTH, &info_log_length);
     if (info_log_length > 0) {
         vector<char> vertex_shader_error_message(info_log_length + 1);
-        glGetShaderInfoLog(vertex_shader_ID, info_log_length, NULL, &vertex_shader_error_message[0]);
+        glGetShaderInfoLog(vertex_shader_ID, info_log_length, nullptr, &vertex_shader_error_message[0]);
         log_vector(cerr, vertex_shader_error_message);
         _exit(1);
     }
 
     char const* fragment_shader_p = fragment_shader_code.c_str();
-    glShaderSource(fragment_shader_ID, 1, &fragment_shader_p, NULL);
+    glShaderSource(fragment_shader_ID, 1, &fragment_shader_p, nullptr);
     glCompileShader(fragment_shader_ID);
 
     glGetShaderiv(fragment_shader_ID, GL_COMPILE_STATUS, &result);
     glGetShaderiv(fragment_shader_ID, GL_INFO_LOG_LENGTH, &info_log_length);
     if (info_log_length > 0) {
         vector<char> fragment_shader_error_message(info_log_length + 1);
-        glGetShaderInfoLog(fragment_shader_ID, info_log_length, NULL, &fragment_shader_error_message[0]);
+        glGetShaderInfoLog(fragment_shader_ID, info_log_length, nullptr, &fragment_shader_error_message[0]);
         log_vector(cerr, fragment_shader_error_message);
         _exit(1);
     }
-
 
     GLuint program_ID = glCreateProgram();
     glAttachShader(program_ID, vertex_shader_ID);
     glAttachShader(program_ID, fragment_shader_ID);
     glLinkProgram(program_ID);
 
-
     glGetProgramiv(program_ID, GL_LINK_STATUS, &result);
     glGetProgramiv(program_ID, GL_INFO_LOG_LENGTH, &info_log_length);
     if (info_log_length > 0) {
         vector<char> program_error_message(info_log_length + 1);
-        glGetProgramInfoLog(program_ID, info_log_length, NULL, &program_error_message[0]);
+        glGetProgramInfoLog(program_ID, info_log_length, nullptr, &program_error_message[0]);
         log_vector(cerr, program_error_message);
         _exit(1);
     }
@@ -184,34 +180,36 @@ static vector<unsigned char> load_ppm_texture(string tex_path) {
     return data;
 }
 
-vec3 cam_pos = vec3(0, -0.5, 0.05);
-vec3 cam_d   = vec3(0, 1, 0);
+vec3 cam_pos = vec3(0., -0.5, 0.05);
+vec3 cam_d   = vec3(0., 1., 0.);
 
 static void key_callback(GLFWwindow* window, int key, int, int action, int) {
-    const float cam_speed = 0.003;
+    const float cam_speed = 0.003f;
 
     if (action == GLFW_PRESS || action == GLFW_REPEAT) {
         switch (key) {
             case GLFW_KEY_ESCAPE: glfwSetWindowShouldClose(window, GLFW_TRUE); break;
             case GLFW_KEY_W: cam_pos += cam_speed * cam_d; break;
             case GLFW_KEY_S: cam_pos -= cam_speed * cam_d; break;
-            case GLFW_KEY_A: cam_pos += cam_speed * cross(vec3(0, 0, 1), cam_d); break;
-            case GLFW_KEY_D: cam_pos -= cam_speed * cross(vec3(0, 0, 1), cam_d); break;
+            case GLFW_KEY_A: cam_pos += cam_speed * cross(vec3(0., 0., 1.), cam_d); break;
+            case GLFW_KEY_D: cam_pos -= cam_speed * cross(vec3(0., 0., 1.), cam_d); break;
         }
     }
 }
 
 static void cursor_pos_callback(GLFWwindow*, double posx, double posy) {
-    const float rot_speed = 0.25;
+    const float rot_speed = 0.25f;
 
     static double last_posx = posx, last_posy = posy;
-    float del_x = (float)(last_posx - posx) * rot_speed;
-    float del_y = (float)(posy - last_posy) * rot_speed;
+
+    float del_x = static_cast<float>(last_posx - posx) * rot_speed;
+    float del_y = static_cast<float>(posy - last_posy) * rot_speed;
     last_posx = posx;
     last_posy = posy;
 
-    static float yaw = 90, pitch = 90;
-    yaw = fmod(yaw + del_x, 360);
+    static float yaw = 90.f, pitch = 90.f;
+
+    yaw = fmod(yaw + del_x, 360.f);
     pitch = clamp(pitch + del_y, 1.f, 179.f);
     cam_d = normalize(vec3(
         sin(radians(pitch)) * cos(radians(yaw)),
@@ -234,7 +232,7 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(1280, 960, "main", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(1280, 960, "main", nullptr, nullptr);
     if (!window) {
         _exit(1);
     }
@@ -258,8 +256,6 @@ int main() {
     glGenVertexArrays(1, &vertex_array_ID);
     glBindVertexArray(vertex_array_ID);
 
-    GLuint program_ID = load_shaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
-
     GLuint vertex_buffer;
     glGenBuffers(1, &vertex_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
@@ -269,6 +265,8 @@ int main() {
     glGenBuffers(1, &uv_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, uv_buffer);
     glBufferData(GL_ARRAY_BUFFER, uv.size() * sizeof(GLfloat), &uv.front(), GL_STATIC_DRAW);
+
+    GLuint program_ID = load_shaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
 
     GLuint matrix_ID = glGetUniformLocation(program_ID, "MVP");
 
@@ -290,7 +288,7 @@ int main() {
         glUseProgram(program_ID);
 
         const mat4 projection = perspective(radians(45.), 4. / 3., 0.001, 100.);
-        mat4 view             = lookAt(cam_pos, cam_pos + cam_d, vec3(0, 0, 1));
+        mat4 view             = lookAt(cam_pos, cam_pos + cam_d, vec3(0., 0., 1.));
         mat4 mvp              = projection * view;
         glUniformMatrix4fv(matrix_ID, 1, GL_FALSE, &mvp[0][0]);
 
@@ -300,11 +298,11 @@ int main() {
 
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
         glEnableVertexAttribArray(1);
         glBindBuffer(GL_ARRAY_BUFFER, uv_buffer);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
         glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 3);
 
