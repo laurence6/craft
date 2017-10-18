@@ -3,125 +3,11 @@
 
 map_ppm_path = "map.ppm"
 
-map_vertices_path = "map.vertices"
-map_uv_path = "map.uv"
+map_output_path = "map"
 
 def calculate_height(r, g, b):
     avg = (r+g+b)/3
-    return int(avg / 255 * 9 + 1)
-
-id_cube = (
-    1, 0, 1, # up
-    0, 0, 1,
-    0, 1, 1,
-
-    1, 0, 1, # up
-    1, 1, 1,
-    0, 1, 1,
-
-    1, 0, 1, # front
-    1, 0, 0,
-    0, 0, 0,
-
-    1, 0, 1, # front
-    0, 0, 1,
-    0, 0, 0,
-
-    0, 0, 1, # left
-    0, 0, 0,
-    0, 1, 0,
-
-    0, 0, 1, # left
-    0, 1, 1,
-    0, 1, 0,
-
-    0, 1, 1, # back
-    0, 1, 0,
-    1, 1, 0,
-
-    0, 1, 1, # back
-    1, 1, 1,
-    1, 1, 0,
-
-    1, 1, 1, # right
-    1, 1, 0,
-    1, 0, 0,
-
-    1, 1, 1, # right
-    1, 0, 1,
-    1, 0, 0,
-
-    1, 0, 0, # bottom
-    0, 0, 0,
-    0, 1, 0,
-
-    1, 0, 0, # bottom
-    1, 1, 0,
-    0, 1, 0,
-)
-
-cube_uv = (
-    1.0, 0.0, 0,
-    0.0, 0.0, 0,
-    0.0, 1.0, 0,
-
-    1.0, 0.0, 0,
-    1.0, 1.0, 0,
-    0.0, 1.0, 0,
-
-    1.0, 0.0, 1,
-    1.0, 1.0, 1,
-    0.0, 1.0, 1,
-
-    1.0, 0.0, 1,
-    0.0, 0.0, 1,
-    0.0, 1.0, 1,
-
-    1.0, 0.0, 1,
-    1.0, 1.0, 1,
-    0.0, 1.0, 1,
-
-    1.0, 0.0, 1,
-    0.0, 0.0, 1,
-    0.0, 1.0, 1,
-
-    1.0, 0.0, 1,
-    1.0, 1.0, 1,
-    0.0, 1.0, 1,
-
-    1.0, 0.0, 1,
-    0.0, 0.0, 1,
-    0.0, 1.0, 1,
-
-    1.0, 0.0, 1,
-    1.0, 1.0, 1,
-    0.0, 1.0, 1,
-
-    1.0, 0.0, 1,
-    0.0, 0.0, 1,
-    0.0, 1.0, 1,
-
-    1.0, 0.0, 2,
-    0.0, 0.0, 2,
-    0.0, 1.0, 2,
-
-    1.0, 0.0, 2,
-    1.0, 1.0, 2,
-    0.0, 1.0, 2,
-)
-
-def gen_cube(vertices_file, uv_file, x, y, z):
-    for i in range(int(len(id_cube) / 3)):
-        vertices_file.write("%s %s %s\n" % (
-            (id_cube[i*3+0] + x) / 100,
-            (id_cube[i*3+1] + y) / 100,
-            (id_cube[i*3+2] + z) / 100,
-        ))
-        uv_file.write("%s %s %s\n" % (
-            cube_uv[i*3+0],
-            cube_uv[i*3+1],
-            cube_uv[i*3+2],
-        ))
+    return int(avg / 255 * 9 + 0)
 
 x = 0
 y = 0
@@ -142,17 +28,14 @@ with open(map_ppm_path) as f:
             h = calculate_height(r, g, b)
             hs.append(h)
 
-with open(map_vertices_path, "w") as vertices_file:
-    with open(map_uv_path, "w") as uv_file:
-        for i in range(x):
-            for j in range(y):
-                for _z in range(hs[i * y + j]):
-                    _x = j
-                    _y = x - i - 1
-                    gen_cube(
-                        vertices_file,
-                        uv_file,
-                        _x - int(x/2),
-                        _y - int(y/2),
-                        _z,
-                    )
+with open(map_output_path, "w") as map_file:
+    for i in range(x):
+        for j in range(y):
+            for _z in range(hs[i * y + j]):
+                _x = j
+                _y = x - i - 1
+                map_file.write("%s %s %s\n" % (
+                    _x - int(x/2),
+                    _y - int(y/2),
+                    _z,
+                ))

@@ -6,20 +6,20 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-#include <glm/gtx/string_cast.hpp>
-#include <glm/gtx/transform.hpp>
 
-#include "util.cpp"
+#include "block.hpp"
+#include "camera.hpp"
+#include "scene.hpp"
+#include "util.hpp"
 
 using namespace std;
 using namespace glm;
 
 const string VERTEX_SHADER_PATH = "vertexshader.glsl";
 const string FRAGMENT_SHADER_PATH = "fragmentshader.glsl";
-const string VERTICES_PATH = "map.vertices";
-const string UV_PATH = "map.uv";
+const string MAP_PATH = "map";
 const string TEXTURE_PATH = "texture.ppm";
-const unsigned int SUB_TEX_WIDTH = 64, SUB_TEX_HEIGHT = 64, N_TILES = 4;
+constexpr uint32_t SUB_TEX_WIDTH = 64, SUB_TEX_HEIGHT = 64, N_TILES = 4;
 
 static GLuint load_shaders(string vertex_shader_path, string fragment_shader_path) {
     GLuint vertex_shader_ID   = glCreateShader(GL_VERTEX_SHADER);
@@ -96,49 +96,25 @@ static GLuint load_shaders(string vertex_shader_path, string fragment_shader_pat
     return program_ID;
 }
 
-static void load_map(string vertices_path, string uv_path, vector<GLfloat>& vertices, vector<GLfloat>& uv) {
-    ifstream vertices_file(vertices_path);
-    if (vertices_file.is_open()) {
-        while (1) {
-            GLfloat v;
-            vertices_file >> v;
-            if (vertices_file.eof()) {
-                break;
-            }
-            vertices.push_back(v);
-        }
-    } else {
-        cerr << "Cannot open " << vertices_path << endl;
-        _exit(1);
-    }
-    if (vertices.size() % 3 != 0) {
-        cerr << "Incorrect number of vertices " << vertices.size() << endl;
+static Scene load_map(string map_path) {
+    ifstream map_file(map_path);
+    if (!map_file.is_open()) {
+        cerr << "Cannot open " << map_path << endl;
         _exit(1);
     }
 
-    ifstream uv_file(uv_path);
-    if (uv_file.is_open()) {
-        while (1) {
-            GLfloat v;
-            uv_file >> v;
-            if (uv_file.eof()) {
-                break;
-            }
-            uv.push_back(v);
+    vector<Block> blocks;
+
+    int64_t x, y, z;
+    while (true) {
+        map_file >> x >> y >> z;
+        if (map_file.eof()) {
+            break;
         }
-    } else {
-        cerr << "Cannot open " << uv_path << endl;
-        _exit(1);
-    }
-    if (vertices.size() % 3 != 0) {
-        cerr << "Incorrect number of uv " << uv.size() << endl;
-        _exit(1);
+        blocks.push_back(GrassBlock(x, y, z));
     }
 
-    if (vertices.size() / 3 != uv.size() / 3) {
-        cerr << "Incorrect number of vertices " << vertices.size() << " or number of uv " << uv.size() << endl;
-        _exit(1);
-    }
+    return Scene(move(blocks));
 }
 
 static vector<unsigned char> load_ppm_texture(string tex_path) {
@@ -161,7 +137,7 @@ static vector<unsigned char> load_ppm_texture(string tex_path) {
 
     while (getline(tex_stream, line) && line[0] == '#') {}
 
-    unsigned int w, h;
+    uint32_t w, h;
     {
         stringstream wh(line);
         wh >> w >> h;
@@ -169,58 +145,53 @@ static vector<unsigned char> load_ppm_texture(string tex_path) {
 
     while (getline(tex_stream, line) && line[0] == '#') {}
 
-    for (unsigned int i = 0; i < h; i++) {
-        for (unsigned int j = 0; j < w; j++) {
-            data.push_back(tex_stream.get());
-            data.push_back(tex_stream.get());
-            data.push_back(tex_stream.get());
+    for (uint32_t i = 0; i < h; i++) {
+        for (uint32_t j = 0; j < w; j++) {
+            data.push_back(static_cast<unsigned char>(tex_stream.get()));
+            data.push_back(static_cast<unsigned char>(tex_stream.get()));
+            data.push_back(static_cast<unsigned char>(tex_stream.get()));
         }
     }
 
     return data;
 }
 
-vec3 cam_pos = vec3(0., -0.5, 0.05);
-vec3 cam_d   = vec3(0., 1., 0.);
+static Camera camera = Camera();
 
 static void key_callback(GLFWwindow* window, int key, int, int action, int) {
-    const float cam_speed = 0.003f;
-
-    if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+    if (action == GLFW_PRESS) {
         switch (key) {
             case GLFW_KEY_ESCAPE: glfwSetWindowShouldClose(window, GLFW_TRUE); break;
-            case GLFW_KEY_W: cam_pos += cam_speed * cam_d; break;
-            case GLFW_KEY_S: cam_pos -= cam_speed * cam_d; break;
-            case GLFW_KEY_A: cam_pos += cam_speed * cross(vec3(0., 0., 1.), cam_d); break;
-            case GLFW_KEY_D: cam_pos -= cam_speed * cross(vec3(0., 0., 1.), cam_d); break;
+            case GLFW_KEY_W: camera.start_move_forward(); break;
+            case GLFW_KEY_S: camera.start_move_backward(); break;
+            case GLFW_KEY_A: camera.start_move_left(); break;
+            case GLFW_KEY_D: camera.start_move_right(); break;
+        }
+    } else if (action == GLFW_RELEASE) {
+        switch (key) {
+            case GLFW_KEY_W: camera.stop_move_forward(); break;
+            case GLFW_KEY_S: camera.stop_move_backward(); break;
+            case GLFW_KEY_A: camera.stop_move_left(); break;
+            case GLFW_KEY_D: camera.stop_move_right(); break;
         }
     }
 }
 
 static void cursor_pos_callback(GLFWwindow*, double posx, double posy) {
-    const float rot_speed = 0.25f;
-
     static double last_posx = posx, last_posy = posy;
 
-    float del_x = static_cast<float>(last_posx - posx) * rot_speed;
-    float del_y = static_cast<float>(posy - last_posy) * rot_speed;
+    float del_x = static_cast<float>(last_posx - posx);
+    float del_y = static_cast<float>(posy - last_posy);
     last_posx = posx;
     last_posy = posy;
 
-    static float yaw = 90.f, pitch = 90.f;
-
-    yaw = fmod(yaw + del_x, 360.f);
-    pitch = clamp(pitch + del_y, 1.f, 179.f);
-    cam_d = normalize(vec3(
-        sin(radians(pitch)) * cos(radians(yaw)),
-        sin(radians(pitch)) * sin(radians(yaw)),
-        cos(radians(pitch))
-    ));
+    camera.rotate(del_x, del_y);
 }
 
 int main() {
-    vector<GLfloat> vertices, uv;
-    load_map(VERTICES_PATH, UV_PATH, vertices, uv);
+    Scene scene = load_map(MAP_PATH);
+    vector<GLfloat> vertices = scene.get_vertices();
+    vector<GLfloat> uv = scene.get_uv();
     vector<unsigned char> texture_data = load_ppm_texture(TEXTURE_PATH);
 
     if (!glfwInit()) {
@@ -275,26 +246,23 @@ int main() {
     glBindTexture(GL_TEXTURE_2D_ARRAY, texture_ID);
     glTexStorage3D(GL_TEXTURE_2D_ARRAY, 4, GL_RGB8, SUB_TEX_WIDTH, SUB_TEX_HEIGHT, N_TILES);
     glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, SUB_TEX_WIDTH, SUB_TEX_HEIGHT, N_TILES, GL_RGB, GL_UNSIGNED_BYTE, &texture_data.front());
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, N_TILES-1);
     glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
 
     GLuint sampler_ID = glGetUniformLocation(program_ID, "sampler");
 
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, texture_ID);
+    glUniform1i(sampler_ID, 0);
+
     while (!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glUseProgram(program_ID);
 
-        const mat4 projection = perspective(radians(45.), 4. / 3., 0.001, 100.);
-        mat4 view             = lookAt(cam_pos, cam_pos + cam_d, vec3(0., 0., 1.));
-        mat4 mvp              = projection * view;
-        glUniformMatrix4fv(matrix_ID, 1, GL_FALSE, &mvp[0][0]);
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, texture_ID);
-        glUniform1i(sampler_ID, 0);
+        glUniformMatrix4fv(matrix_ID, 1, GL_FALSE, &camera.get_mvp()[0][0]);
 
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
@@ -312,6 +280,8 @@ int main() {
         glfwSwapBuffers(window);
 
         glfwPollEvents();
+
+        camera.lerp_move();
     }
 
     _exit(0);

@@ -1,3 +1,6 @@
+#ifndef _UTIL_H
+#define _UTIL_H
+
 #include <cstdlib>
 #include <iostream>
 #include <vector>
@@ -18,3 +21,4 @@ void log_vector(ostream& o, vector<char> message) {
     o << endl;
 }
 
+#endif
