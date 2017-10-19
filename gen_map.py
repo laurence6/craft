@@ -31,9 +31,14 @@ with open(map_ppm_path) as f:
 with open(map_output_path, "w") as map_file:
     for i in range(x):
         for j in range(y):
-            for _z in range(hs[i * y + j]):
+            h = hs[i * y + j]
+            for _z in range(h):
                 _x = j
                 _y = x - i - 1
+                if (_z < h-1):
+                    map_file.write("dirt ")
+                else:
+                    map_file.write("grass ")
                 map_file.write("%s %s %s\n" % (
                     _x - int(x/2),
                     _y - int(y/2),

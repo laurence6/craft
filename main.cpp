@@ -105,13 +105,18 @@ static Scene load_map(string map_path) {
 
     vector<Block> blocks;
 
+    string t;
     int64_t x, y, z;
     while (true) {
-        map_file >> x >> y >> z;
+        map_file >> t >> x >> y >> z;
         if (map_file.eof()) {
             break;
         }
-        blocks.push_back(GrassBlock(x, y, z));
+        if (t == "dirt") {
+            blocks.push_back(DirtBlock(x, y, z));
+        } else if (t == "grass") {
+            blocks.push_back(GrassBlock(x, y, z));
+        }
     }
 
     return Scene(move(blocks));
