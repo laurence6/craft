@@ -1,5 +1,5 @@
+#include <cmath>
 #include <fstream>
-#include <sstream>
 #include <string>
 #include <vector>
 
@@ -10,6 +10,7 @@
 #include "block.hpp"
 #include "camera.hpp"
 #include "scene.hpp"
+#include "texture.hpp"
 #include "util.hpp"
 
 using namespace std;
@@ -18,8 +19,7 @@ using namespace glm;
 const string VERTEX_SHADER_PATH = "vertexshader.glsl";
 const string FRAGMENT_SHADER_PATH = "fragmentshader.glsl";
 const string MAP_PATH = "map";
-const string TEXTURE_PATH = "texture.ppm";
-constexpr uint32_t SUB_TEX_WIDTH = 64, SUB_TEX_HEIGHT = 64, N_TILES = 4;
+const string TEXTURE_FOLDER_PATH = "texture";
 
 static GLuint load_shaders(string vertex_shader_path, string fragment_shader_path) {
     GLuint vertex_shader_ID   = glCreateShader(GL_VERTEX_SHADER);
@@ -122,45 +122,6 @@ static Scene load_map(string map_path) {
     return Scene(move(blocks));
 }
 
-static vector<unsigned char> load_ppm_texture(string tex_path) {
-    vector<unsigned char> data;
-
-    ifstream tex_stream(tex_path);
-    if (!tex_stream.is_open()) {
-        cerr << "Cannot open " << tex_path << endl;
-        _exit(1);
-    }
-
-    string line;
-
-    tex_stream >> line;
-    if (line != "P6") {
-        cerr << "Incorrect ppm file" << endl;
-        _exit(1);
-    }
-    tex_stream.ignore(numeric_limits<streamsize>::max(), '\n');
-
-    while (getline(tex_stream, line) && line[0] == '#') {}
-
-    uint32_t w, h;
-    {
-        stringstream wh(line);
-        wh >> w >> h;
-    }
-
-    while (getline(tex_stream, line) && line[0] == '#') {}
-
-    for (uint32_t i = 0; i < h; i++) {
-        for (uint32_t j = 0; j < w; j++) {
-            data.push_back(static_cast<unsigned char>(tex_stream.get()));
-            data.push_back(static_cast<unsigned char>(tex_stream.get()));
-            data.push_back(static_cast<unsigned char>(tex_stream.get()));
-        }
-    }
-
-    return data;
-}
-
 static Camera camera = Camera();
 
 static void key_callback(GLFWwindow* window, int key, int, int action, int) {
@@ -197,7 +158,7 @@ int main() {
     Scene scene = load_map(MAP_PATH);
     vector<GLfloat> vertices = scene.get_vertices();
     vector<GLfloat> uv = scene.get_uv();
-    vector<unsigned char> texture_data = load_ppm_texture(TEXTURE_PATH);
+    auto texture_data = load_texture(TEXTURE_FOLDER_PATH);
 
     if (!glfwInit()) {
         _exit(1);
@@ -243,18 +204,22 @@ int main() {
     glBufferData(GL_ARRAY_BUFFER, uv.size() * sizeof(GLfloat), &uv.front(), GL_STATIC_DRAW);
 
     GLuint program_ID = load_shaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
+    glUseProgram(program_ID);
 
     GLuint matrix_ID = glGetUniformLocation(program_ID, "MVP");
 
     GLuint texture_ID;
     glGenTextures(1, &texture_ID);
     glBindTexture(GL_TEXTURE_2D_ARRAY, texture_ID);
-    glTexStorage3D(GL_TEXTURE_2D_ARRAY, 4, GL_RGB8, SUB_TEX_WIDTH, SUB_TEX_HEIGHT, N_TILES);
-    glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, SUB_TEX_WIDTH, SUB_TEX_HEIGHT, N_TILES, GL_RGB, GL_UNSIGNED_BYTE, &texture_data.front());
+    glTexStorage3D(GL_TEXTURE_2D_ARRAY, N_MIP_LEVEL, GL_RGB8, SUB_TEX_WIDTH, SUB_TEX_HEIGHT, N_TILES);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    for (uint8_t i = 0; i < N_MIP_LEVEL; i++) {
+        uint32_t w = SUB_TEX_WIDTH >> i;
+        uint32_t h = SUB_TEX_HEIGHT >> i;
+        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, i, 0, 0, 0, w, h, N_TILES, GL_RGB, GL_UNSIGNED_BYTE, &texture_data[i].front());
+    }
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, N_TILES-1);
-    glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
     GLuint sampler_ID = glGetUniformLocation(program_ID, "sampler");
 
@@ -264,8 +229,6 @@ int main() {
 
     while (!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        glUseProgram(program_ID);
 
         glUniformMatrix4fv(matrix_ID, 1, GL_FALSE, &camera.get_mvp()[0][0]);
 
