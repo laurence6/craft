@@ -116,6 +116,8 @@ static Scene load_map(string map_path) {
             blocks.push_back(DirtBlock(x, y, z));
         } else if (t == "grass") {
             blocks.push_back(GrassBlock(x, y, z));
+        } else if (t == "stone") {
+            blocks.push_back(StoneBlock(x, y, z));
         }
     }
 

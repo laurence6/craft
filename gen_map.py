@@ -35,11 +35,15 @@ with open(map_output_path, "w") as map_file:
             for _z in range(h):
                 _x = j
                 _y = x - i - 1
-                if (_z < h-1):
-                    map_file.write("dirt ")
+                t = ""
+                if _z < h-4:
+                    t = "stone"
+                elif _z < h-1:
+                    t = "dirt"
                 else:
-                    map_file.write("grass ")
-                map_file.write("%s %s %s\n" % (
+                    t = "grass"
+                map_file.write("%s %s %s %s\n" % (
+                    t,
                     _x - int(x/2),
                     _y - int(y/2),
                     _z,
