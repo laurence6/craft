@@ -55,18 +55,18 @@ public:
 
             vec3 del_p = v_forward * cam_d
                        + v_left * cross(vec3(0., 0., 1.), cam_d);
-            float len = length(del_p);
-            if (len > cam_speed) {
-                del_p = del_p / len * cam_speed;
-            }
-            del_p *= dt;
 
-            cam_pos += del_p;
+            float len = length(del_p);
+            if (len > 0.f) {
+                del_p /= len;
+                del_p *= cam_speed * dt;
+                cam_pos += del_p;
+
+                update_mvp();
+            }
 
             last_update = now;
         }
-
-        update_mvp();
     }
 
     void update_mvp() {
