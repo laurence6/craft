@@ -3,11 +3,9 @@
 
 #include <chrono>
 
-#include <glm/glm.hpp>
-#include <glm/gtx/transform.hpp>
+#include "math.hpp"
 
 using namespace std;
-using namespace glm;
 
 class Camera {
 public:

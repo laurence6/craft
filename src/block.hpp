@@ -10,7 +10,7 @@ using namespace std;
 using VerticesArray = array<GLfloat, 36 * 3>;
 using UVArray = array<GLfloat, 36 * 3>;
 
-VerticesArray calculate_block_vertices(int64_t x, int64_t y, int64_t z) {
+inline VerticesArray calculate_block_vertices(int64_t x, int64_t y, int64_t z) {
     VerticesArray id_block = {
         1, 0, 1, // up
         0, 0, 1,

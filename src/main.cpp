@@ -5,7 +5,6 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
 
 #include "block.hpp"
 #include "camera.hpp"
@@ -14,7 +13,6 @@
 #include "util.hpp"
 
 using namespace std;
-using namespace glm;
 
 const string VERTEX_SHADER_PATH = "shader/vertexshader.glsl";
 const string FRAGMENT_SHADER_PATH = "shader/fragmentshader.glsl";
