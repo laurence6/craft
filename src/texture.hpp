@@ -1,5 +1,5 @@
-#ifndef _TEXTURE_H
-#define _TEXTURE_H
+#ifndef TEXTURE_HPP
+#define TEXTURE_HPP
 
 #include <array>
 #include <vector>

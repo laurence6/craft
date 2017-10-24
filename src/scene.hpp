@@ -1,5 +1,5 @@
-#ifndef _SCENE_H
-#define _SCENE_H
+#ifndef SCENE_HPP
+#define SCENE_HPP
 
 #include <vector>
 

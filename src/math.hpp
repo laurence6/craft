@@ -1,3 +1,6 @@
+#ifndef MATH_HPP
+#define MATH_HPP
+
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 
@@ -10,3 +13,5 @@ using glm::radians;
 
 using glm::lookAt;
 using glm::perspective;
+
+#endif

@@ -1,5 +1,5 @@
-#ifndef _CAMERA_H
-#define _CAMERA_H
+#ifndef CAMERA_HPP
+#define CAMERA_HPP
 
 #include <chrono>
 
