@@ -16,10 +16,10 @@
 using namespace std;
 using namespace glm;
 
-const string VERTEX_SHADER_PATH = "vertexshader.glsl";
-const string FRAGMENT_SHADER_PATH = "fragmentshader.glsl";
-const string MAP_PATH = "map";
+const string VERTEX_SHADER_PATH = "shader/vertexshader.glsl";
+const string FRAGMENT_SHADER_PATH = "shader/fragmentshader.glsl";
 const string TEXTURE_FOLDER_PATH = "texture";
+const string MAP_PATH = "map";
 
 static GLuint load_shaders(string vertex_shader_path, string fragment_shader_path) {
     GLuint vertex_shader_ID   = glCreateShader(GL_VERTEX_SHADER);

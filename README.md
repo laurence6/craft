@@ -1,5 +1,15 @@
 # craft
 
+## Building
+
+```bash
+git clone https://github.com/laurence6/craft.git
+cd craft
+git submodule update --init --recursive
+cmake .
+make -j4
+```
+
 ## License
 
 Copyright (C) 2017-2017  Laurence Liu <liuxy6@gmail.com>

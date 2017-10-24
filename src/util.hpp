@@ -9,12 +9,12 @@
 
 using namespace std;
 
-void _exit(int code) {
+inline void _exit(int code) {
     glfwTerminate();
     exit(code);
 }
 
-void log_vector(ostream& o, vector<char> message) {
+inline void log_vector(ostream& o, vector<char> message) {
     for (const auto c : message) {
         o << c;
     }
