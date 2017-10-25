@@ -74,7 +74,7 @@ public:
     const UVArray& uv;
 
 protected:
-    Block(int64_t x, int64_t y, int64_t z, UVArray uv) : vertices(calculate_block_vertices(x, y, z)), uv(uv) {}
+    Block(int64_t x, int64_t y, int64_t z, const UVArray& uv) : vertices(calculate_block_vertices(x, y, z)), uv(uv) {}
 };
 
 constexpr UVArray dirt_block_uv = {
