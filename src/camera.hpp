@@ -48,7 +48,7 @@ public:
         auto now = system_clock::now();
         auto del_t = duration_cast<milliseconds>(now - last_update);
 
-        if (del_t > 16ms) {
+        if (del_t >= 16ms) {
             float dt = static_cast<float>(del_t.count());
 
             vec3 del_p = v_forward * cam_d

@@ -176,15 +176,15 @@ int main() {
 
     glfwMakeContextCurrent(window);
 
+    glfwSwapInterval(1); // vsync
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetKeyCallback(window, key_callback);
+    glfwSetCursorPosCallback(window, cursor_pos_callback);
+
     glewExperimental = true;
     if (glewInit() != GLEW_OK) {
         _exit(1);
     }
-
-    glfwSetKeyCallback(window, key_callback);
-
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    glfwSetCursorPosCallback(window, cursor_pos_callback);
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
@@ -220,6 +220,8 @@ int main() {
     }
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     GLuint sampler_ID = glGetUniformLocation(program_ID, "sampler");
 
