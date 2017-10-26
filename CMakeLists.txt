@@ -2,14 +2,17 @@ cmake_minimum_required ( VERSION 3.1 )
 
 project ( craft LANGUAGES CXX )
 
+set ( CMAKE_BUILD_TYPE Release )
+
 FILE ( GLOB craft_header src/*.hpp )
 FILE ( GLOB craft_source src/*.cpp )
 add_executable ( craft ${craft_header} ${craft_source} )
 
-set ( CMAKE_BUILD_TYPE RelWithDebInfo )
-
-set ( CMAKE_CXX_STANDARD 14 )
-set ( CMAKE_CXX_STANDARD_REQUIRED ON )
+set_target_properties ( craft PROPERTIES
+    CXX_STANDARD 14
+    CXX_STANDARD_REQUIRED ON
+    CXX_EXTENSIONS OFF
+)
 
 if ( ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" )
     target_compile_options ( craft PRIVATE -Wall -Wextra )
