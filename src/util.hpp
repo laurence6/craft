@@ -3,6 +3,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <string>
 #include <vector>
 
 #include <GLFW/glfw3.h>
@@ -20,5 +21,7 @@ inline void log_vector(ostream& o, vector<char> message) {
     }
     o << endl;
 }
+
+GLuint load_shaders(string vertex_shader_path, string fragment_shader_path);
 
 #endif
