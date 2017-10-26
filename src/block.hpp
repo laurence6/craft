@@ -1,17 +1,16 @@
 #ifndef BLOCK_HPP
 #define BLOCK_HPP
 
-#include <array>
+#include <vector>
 
 #include <GL/glew.h>
 
+#include "object.hpp"
+
 using namespace std;
 
-using VerticesArray = array<GLfloat, 36 * 3>;
-using UVArray = array<GLfloat, 36 * 3>;
-
-inline VerticesArray calculate_block_vertices(int64_t x, int64_t y, int64_t z) {
-    VerticesArray id_block = {
+inline vector<GLfloat> block_vertices(int64_t x, int64_t y, int64_t z) {
+    vector<GLfloat> id_block = {
         1, 0, 1, // up
         0, 0, 1,
         0, 1, 1,
@@ -68,16 +67,15 @@ inline VerticesArray calculate_block_vertices(int64_t x, int64_t y, int64_t z) {
     return id_block;
 }
 
-class Block {
-public:
-    const VerticesArray vertices;
-    const UVArray& uv;
-
+class Block : public Object {
 protected:
-    Block(int64_t x, int64_t y, int64_t z, const UVArray& uv) : vertices(calculate_block_vertices(x, y, z)), uv(uv) {}
+    Block(int64_t x, int64_t y, int64_t z, vector<GLfloat> _uv) {
+        vertices = block_vertices(x, y, z);
+        uv = _uv;
+    }
 };
 
-constexpr UVArray dirt_block_uv = {
+static vector<GLfloat> dirt_block_uv = {
     1.0, 0.0, 2,
     0.0, 0.0, 2,
     0.0, 1.0, 2,
@@ -131,7 +129,7 @@ public:
     DirtBlock(int64_t x, int64_t y, int64_t z) : Block(x, y, z, dirt_block_uv) {}
 };
 
-constexpr UVArray grass_block_uv = {
+static vector<GLfloat> grass_block_uv = {
     1.0, 0.0, 0,
     0.0, 0.0, 0,
     0.0, 1.0, 0,
@@ -185,7 +183,7 @@ public:
     GrassBlock(int64_t x, int64_t y, int64_t z) : Block(x, y, z, grass_block_uv) {}
 };
 
-constexpr UVArray stone_block_uv = {
+static vector<GLfloat> stone_block_uv = {
     1.0, 0.0, 3,
     0.0, 0.0, 3,
     0.0, 1.0, 3,

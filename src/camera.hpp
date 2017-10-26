@@ -1,95 +1,75 @@
 #ifndef CAMERA_HPP
 #define CAMERA_HPP
 
-#include <chrono>
-
 #include "math.hpp"
+#include "object.hpp"
 
 using namespace std;
 
-class Camera {
+class Camera : public Object {
 public:
     Camera() {
-        update_mvp();
+        is_static = false;
+
+        pos = vec3(0., -0.5, 0.05);
+        rot = 90.f;
     }
 
-    void start_move_forward()  { v_forward = clamp(v_forward + cam_speed, -cam_speed, cam_speed); }
+    void start_move_forward()  { v_forward = clamp(v_forward + cam_speed, -cam_speed, cam_speed); update_velocity(); }
 
-    void stop_move_forward()   { v_forward = clamp(v_forward - cam_speed, -cam_speed, cam_speed); }
+    void stop_move_forward()   { v_forward = clamp(v_forward - cam_speed, -cam_speed, cam_speed); update_velocity(); }
 
-    void start_move_backward() { v_forward = clamp(v_forward - cam_speed, -cam_speed, cam_speed); }
+    void start_move_backward() { v_forward = clamp(v_forward - cam_speed, -cam_speed, cam_speed); update_velocity(); }
 
-    void stop_move_backward()  { v_forward = clamp(v_forward + cam_speed, -cam_speed, cam_speed); }
+    void stop_move_backward()  { v_forward = clamp(v_forward + cam_speed, -cam_speed, cam_speed); update_velocity(); }
 
-    void start_move_left()  { v_left = clamp(v_left + cam_speed, -cam_speed, cam_speed); }
+    void start_move_left()  { v_left = clamp(v_left + cam_speed, -cam_speed, cam_speed); update_velocity(); }
 
-    void stop_move_left()   { v_left = clamp(v_left - cam_speed, -cam_speed, cam_speed); }
+    void stop_move_left()   { v_left = clamp(v_left - cam_speed, -cam_speed, cam_speed); update_velocity(); }
 
-    void start_move_right() { v_left = clamp(v_left - cam_speed, -cam_speed, cam_speed); }
+    void start_move_right() { v_left = clamp(v_left - cam_speed, -cam_speed, cam_speed); update_velocity(); }
 
-    void stop_move_right()  { v_left = clamp(v_left + cam_speed, -cam_speed, cam_speed); }
+    void stop_move_right()  { v_left = clamp(v_left + cam_speed, -cam_speed, cam_speed); update_velocity(); }
 
     void rotate(float del_x, float del_y) {
-        yaw = fmod(yaw + del_x * rot_speed, 360.f);
+        rot = fmod(rot + del_x * rot_speed, 360.f);
         pitch = clamp(pitch + del_y * rot_speed, 1.f, 179.f);
         cam_d = normalize(vec3(
-            sin(radians(pitch)) * cos(radians(yaw)),
-            sin(radians(pitch)) * sin(radians(yaw)),
+            sin(radians(pitch)) * cos(radians(rot)),
+            sin(radians(pitch)) * sin(radians(rot)),
             cos(radians(pitch))
         ));
-        update_mvp();
+        cam_l = cross(vec3(0., 0., 1.), cam_d);
+
+        update_velocity();
     }
 
-    void lerp_move() {
-        using namespace chrono;
-
-        static auto last_update = system_clock::now();
-
-        auto now = system_clock::now();
-        auto del_t = duration_cast<milliseconds>(now - last_update);
-
-        if (del_t >= 16ms) {
-            float dt = static_cast<float>(del_t.count());
-
-            vec3 del_p = v_forward * cam_d
-                       + v_left * cross(vec3(0., 0., 1.), cam_d);
-
-            float len = length(del_p);
-            if (len > 0.f) {
-                del_p /= len;
-                del_p *= cam_speed * dt;
-                cam_pos += del_p;
-
-                update_mvp();
-            }
-
-            last_update = now;
-        }
-    }
-
-    void update_mvp() {
+    const mat4 get_mvp() const {
         const mat4 projection = perspective(radians(45.), 4. / 3., 0.001, 100.);
-        mat4 view = lookAt(cam_pos, cam_pos + cam_d, vec3(0., 0., 1.));
-        mvp = projection * view;
-    }
-
-    mat4 const& get_mvp() const {
+        mat4 view = lookAt(pos, pos + cam_d, vec3(0., 0., 1.));
+        mat4 mvp = projection * view;
         return mvp;
     }
 
 private:
-    float cam_speed = 0.0001f;
+    void update_velocity() {
+        velocity = cam_d * v_forward + cam_l * v_left;
+        float len = length(velocity);
+        if (len > 0.f) {
+            velocity /= len;
+            velocity *= cam_speed;
+        }
+    }
+
+    float cam_speed = 0.0002f;
     float rot_speed = 0.25f;
 
-    vec3 cam_pos = vec3(0., -0.5, 0.05);
     vec3 cam_d   = vec3(0., 1., 0.);
+    vec3 cam_l   = vec3(-1., 0., 0.);
     float v_forward = 0;
     float v_left = 0;
 
-    float yaw = 90.f;
     float pitch = 90.f;
-
-    mat4 mvp;
 };
 
 #endif

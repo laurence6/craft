@@ -1,5 +1,6 @@
 #include <cmath>
 #include <fstream>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -26,7 +27,7 @@ static Scene load_map(string map_path) {
         _exit(1);
     }
 
-    vector<Block> blocks;
+    vector<shared_ptr<Object>> blocks;
 
     string t;
     int64_t x, y, z;
@@ -36,34 +37,34 @@ static Scene load_map(string map_path) {
             break;
         }
         if (t == "dirt") {
-            blocks.push_back(DirtBlock(x, y, z));
+            blocks.push_back(shared_ptr<Object>(new DirtBlock(x, y, z)));
         } else if (t == "grass") {
-            blocks.push_back(GrassBlock(x, y, z));
+            blocks.push_back(shared_ptr<Object>(new GrassBlock(x, y, z)));
         } else if (t == "stone") {
-            blocks.push_back(StoneBlock(x, y, z));
+            blocks.push_back(shared_ptr<Object>(new StoneBlock(x, y, z)));
         }
     }
 
     return Scene(move(blocks));
 }
 
-static Camera camera = Camera();
+static shared_ptr<Camera> camera = shared_ptr<Camera>(new Camera());
 
 static void key_callback(GLFWwindow* window, int key, int, int action, int) {
     if (action == GLFW_PRESS) {
         switch (key) {
             case GLFW_KEY_ESCAPE: glfwSetWindowShouldClose(window, GLFW_TRUE); break;
-            case GLFW_KEY_W: camera.start_move_forward(); break;
-            case GLFW_KEY_S: camera.start_move_backward(); break;
-            case GLFW_KEY_A: camera.start_move_left(); break;
-            case GLFW_KEY_D: camera.start_move_right(); break;
+            case GLFW_KEY_W: camera->start_move_forward(); break;
+            case GLFW_KEY_S: camera->start_move_backward(); break;
+            case GLFW_KEY_A: camera->start_move_left(); break;
+            case GLFW_KEY_D: camera->start_move_right(); break;
         }
     } else if (action == GLFW_RELEASE) {
         switch (key) {
-            case GLFW_KEY_W: camera.stop_move_forward(); break;
-            case GLFW_KEY_S: camera.stop_move_backward(); break;
-            case GLFW_KEY_A: camera.stop_move_left(); break;
-            case GLFW_KEY_D: camera.stop_move_right(); break;
+            case GLFW_KEY_W: camera->stop_move_forward(); break;
+            case GLFW_KEY_S: camera->stop_move_backward(); break;
+            case GLFW_KEY_A: camera->stop_move_left(); break;
+            case GLFW_KEY_D: camera->stop_move_right(); break;
         }
     }
 }
@@ -76,7 +77,7 @@ static void cursor_pos_callback(GLFWwindow*, double posx, double posy) {
     last_posx = posx;
     last_posy = posy;
 
-    camera.rotate(del_x, del_y);
+    camera->rotate(del_x, del_y);
 }
 
 int main() {
@@ -84,6 +85,7 @@ int main() {
     vector<GLfloat> vertices = scene.get_vertices();
     vector<GLfloat> uv = scene.get_uv();
     auto texture_data = load_texture(TEXTURE_FOLDER_PATH);
+    scene.add_object(camera);
 
     if (!glfwInit()) {
         _exit(1);
@@ -157,7 +159,7 @@ int main() {
     while (!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glUniformMatrix4fv(matrix_ID, 1, GL_FALSE, &camera.get_mvp()[0][0]);
+        glUniformMatrix4fv(matrix_ID, 1, GL_FALSE, &camera->get_mvp()[0][0]);
 
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
@@ -176,7 +178,7 @@ int main() {
 
         glfwPollEvents();
 
-        camera.lerp_move();
+        scene.move_objects();
     }
 
     _exit(0);

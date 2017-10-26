@@ -2,16 +2,20 @@
 #define MATH_HPP
 
 #include <glm/glm.hpp>
+#include <glm/gtx/string_cast.hpp>
 #include <glm/gtx/transform.hpp>
 
-using glm::vec3;
-using glm::mat4;
-using glm::clamp;
-using glm::cross;
-using glm::length;
-using glm::radians;
+namespace glmath = glm;
 
-using glm::lookAt;
-using glm::perspective;
+using glmath::vec3;
+using glmath::mat4;
+
+using glmath::clamp;
+using glmath::cross;
+using glmath::length;
+using glmath::radians;
+
+using glmath::lookAt;
+using glmath::perspective;
 
 #endif
