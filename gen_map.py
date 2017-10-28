@@ -7,7 +7,7 @@ map_output_path = "map"
 
 def calculate_height(r, g, b):
     avg = (r+g+b)/3
-    return int(avg / 255 * 9 + 0)
+    return int(avg / 255 * 32 + 0)
 
 x = 0
 y = 0
@@ -29,12 +29,10 @@ with open(map_ppm_path) as f:
             hs.append(h)
 
 with open(map_output_path, "w") as map_file:
-    for i in range(x):
-        for j in range(y):
-            h = hs[i * y + j]
+    for _y in range(y):
+        for _x in range(x):
+            h = hs[_y * x + _x]
             for _z in range(h):
-                _x = j
-                _y = x - i - 1
                 t = ""
                 if _z < h-4:
                     t = "stone"
@@ -45,6 +43,6 @@ with open(map_output_path, "w") as map_file:
                 map_file.write("%s %s %s %s\n" % (
                     t,
                     _x - int(x/2),
-                    _y - int(y/2),
+                    int(y/2) - _y,
                     _z,
                 ))
