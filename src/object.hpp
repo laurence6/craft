@@ -1,6 +1,7 @@
 #ifndef OBJECT_HPP
 #define OBJECT_HPP
 
+#include <memory>
 #include <vector>
 
 #include <GL/glew.h>
@@ -11,8 +12,8 @@ using namespace std;
 
 class Object {
 public:
-    vector<GLfloat> vertices;
-    vector<GLfloat> uv;
+    shared_ptr<vector<GLfloat>> vertices;
+    shared_ptr<vector<GLfloat>> uv;
 
     bool is_static = true;
 

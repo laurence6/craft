@@ -1,240 +1,76 @@
 #ifndef BLOCK_HPP
 #define BLOCK_HPP
 
+#include <array>
+#include <limits>
+#include <tuple>
 #include <vector>
 
 #include <GL/glew.h>
 
-#include "object.hpp"
+#include "util.hpp"
 
 using namespace std;
 
-inline vector<GLfloat> block_vertices(int64_t x, int64_t y, int64_t z) {
-    vector<GLfloat> id_block = {
-        1, 0, 1, // up
-        0, 0, 1,
-        0, 1, 1,
+using BlockCoord = tuple<int64_t, int64_t, uint8_t>;
 
-        1, 0, 1, // up
-        1, 1, 1,
-        0, 1, 1,
+// int64:
+// ----------------------------------------------------------------
+// |28 x                       |28 y                       |8 z
+//
+// int32:
+// --------------------------------
+// |12 x       |12 y       |8 z
+struct BlockCoordHasher {
+    inline size_t operator()(const BlockCoord& block_coord) const noexcept {
+        constexpr size_t sizet_width = numeric_limits<size_t>::digits;
 
-        1, 0, 1, // front
-        1, 0, 0,
-        0, 0, 0,
+        int64_t x = get<0>(block_coord);
+        int64_t y = get<1>(block_coord);
+        uint8_t z = get<2>(block_coord);
 
-        1, 0, 1, // front
-        0, 0, 1,
-        0, 0, 0,
+        size_t h = 0;
+        if (sizet_width == 64) {
+            h += (x & 0xfff'ffff) << 36;
+            h += (y & 0xfff'ffff) << 8;
+            h += z;
+        } else if (sizet_width == 32) {
+            h += (x & 0xfff) << 20;
+            h += (y & 0xfff) << 8;
+            h += z;
+        } else {
+            _exit(1);
+        }
 
-        0, 0, 1, // left
-        0, 0, 0,
-        0, 1, 0,
-
-        0, 0, 1, // left
-        0, 1, 1,
-        0, 1, 0,
-
-        0, 1, 1, // back
-        0, 1, 0,
-        1, 1, 0,
-
-        0, 1, 1, // back
-        1, 1, 1,
-        1, 1, 0,
-
-        1, 1, 1, // right
-        1, 1, 0,
-        1, 0, 0,
-
-        1, 1, 1, // right
-        1, 0, 1,
-        1, 0, 0,
-
-        1, 0, 0, // bottom
-        0, 0, 0,
-        0, 1, 0,
-
-        1, 0, 0, // bottom
-        1, 1, 0,
-        0, 1, 0,
-    };
-    for (uintptr_t i = 0; i < 36*3; i += 3) {
-        id_block[i+0] = (id_block[i+0] + static_cast<GLfloat>(x)) / 100.f;
-        id_block[i+1] = (id_block[i+1] + static_cast<GLfloat>(y)) / 100.f;
-        id_block[i+2] = (id_block[i+2] + static_cast<GLfloat>(z)) / 100.f;
+        return h;
     }
-    return id_block;
-}
+};
 
-class Block : public Object {
+class Block {
+public:
+    const BlockCoord coord;
+    const array<GLfloat, 6> tex;
+
 protected:
-    Block(int64_t x, int64_t y, int64_t z, vector<GLfloat> _uv) {
-        vertices = block_vertices(x, y, z);
-        uv = _uv;
-    }
+    Block(int64_t x, int64_t y, uint8_t z, array<GLfloat, 6> tex) : coord(make_tuple(x, y, z)), tex(tex) {}
 };
 
-static vector<GLfloat> dirt_block_uv = {
-    1.0, 0.0, 2,
-    0.0, 0.0, 2,
-    0.0, 1.0, 2,
-
-    1.0, 0.0, 2,
-    1.0, 1.0, 2,
-    0.0, 1.0, 2,
-
-    1.0, 0.0, 2,
-    1.0, 1.0, 2,
-    0.0, 1.0, 2,
-
-    1.0, 0.0, 2,
-    0.0, 0.0, 2,
-    0.0, 1.0, 2,
-
-    1.0, 0.0, 2,
-    1.0, 1.0, 2,
-    0.0, 1.0, 2,
-
-    1.0, 0.0, 2,
-    0.0, 0.0, 2,
-    0.0, 1.0, 2,
-
-    1.0, 0.0, 2,
-    1.0, 1.0, 2,
-    0.0, 1.0, 2,
-
-    1.0, 0.0, 2,
-    0.0, 0.0, 2,
-    0.0, 1.0, 2,
-
-    1.0, 0.0, 2,
-    1.0, 1.0, 2,
-    0.0, 1.0, 2,
-
-    1.0, 0.0, 2,
-    0.0, 0.0, 2,
-    0.0, 1.0, 2,
-
-    1.0, 0.0, 2,
-    0.0, 0.0, 2,
-    0.0, 1.0, 2,
-
-    1.0, 0.0, 2,
-    1.0, 1.0, 2,
-    0.0, 1.0, 2,
-};
+static const array<GLfloat, 6> dirt_block_tex = { 2, 2, 2, 2, 2, 2 };
 class DirtBlock : public Block {
 public:
-    DirtBlock(int64_t x, int64_t y, int64_t z) : Block(x, y, z, dirt_block_uv) {}
+    DirtBlock(int64_t x, int64_t y, uint8_t z) : Block(x, y, z, dirt_block_tex) {}
 };
 
-static vector<GLfloat> grass_block_uv = {
-    1.0, 0.0, 0,
-    0.0, 0.0, 0,
-    0.0, 1.0, 0,
-
-    1.0, 0.0, 0,
-    1.0, 1.0, 0,
-    0.0, 1.0, 0,
-
-    1.0, 0.0, 1,
-    1.0, 1.0, 1,
-    0.0, 1.0, 1,
-
-    1.0, 0.0, 1,
-    0.0, 0.0, 1,
-    0.0, 1.0, 1,
-
-    1.0, 0.0, 1,
-    1.0, 1.0, 1,
-    0.0, 1.0, 1,
-
-    1.0, 0.0, 1,
-    0.0, 0.0, 1,
-    0.0, 1.0, 1,
-
-    1.0, 0.0, 1,
-    1.0, 1.0, 1,
-    0.0, 1.0, 1,
-
-    1.0, 0.0, 1,
-    0.0, 0.0, 1,
-    0.0, 1.0, 1,
-
-    1.0, 0.0, 1,
-    1.0, 1.0, 1,
-    0.0, 1.0, 1,
-
-    1.0, 0.0, 1,
-    0.0, 0.0, 1,
-    0.0, 1.0, 1,
-
-    1.0, 0.0, 2,
-    0.0, 0.0, 2,
-    0.0, 1.0, 2,
-
-    1.0, 0.0, 2,
-    1.0, 1.0, 2,
-    0.0, 1.0, 2,
-};
+static const array<GLfloat, 6> grass_block_tex = { 0, 1, 1, 1, 1, 2 };
 class GrassBlock : public Block {
 public:
-    GrassBlock(int64_t x, int64_t y, int64_t z) : Block(x, y, z, grass_block_uv) {}
+    GrassBlock(int64_t x, int64_t y, uint8_t z) : Block(x, y, z, grass_block_tex) {}
 };
 
-static vector<GLfloat> stone_block_uv = {
-    1.0, 0.0, 3,
-    0.0, 0.0, 3,
-    0.0, 1.0, 3,
-
-    1.0, 0.0, 3,
-    1.0, 1.0, 3,
-    0.0, 1.0, 3,
-
-    1.0, 0.0, 3,
-    1.0, 1.0, 3,
-    0.0, 1.0, 3,
-
-    1.0, 0.0, 3,
-    0.0, 0.0, 3,
-    0.0, 1.0, 3,
-
-    1.0, 0.0, 3,
-    1.0, 1.0, 3,
-    0.0, 1.0, 3,
-
-    1.0, 0.0, 3,
-    0.0, 0.0, 3,
-    0.0, 1.0, 3,
-
-    1.0, 0.0, 3,
-    1.0, 1.0, 3,
-    0.0, 1.0, 3,
-
-    1.0, 0.0, 3,
-    0.0, 0.0, 3,
-    0.0, 1.0, 3,
-
-    1.0, 0.0, 3,
-    1.0, 1.0, 3,
-    0.0, 1.0, 3,
-
-    1.0, 0.0, 3,
-    0.0, 0.0, 3,
-    0.0, 1.0, 3,
-
-    1.0, 0.0, 3,
-    0.0, 0.0, 3,
-    0.0, 1.0, 3,
-
-    1.0, 0.0, 3,
-    1.0, 1.0, 3,
-    0.0, 1.0, 3,
-};
+static const array<GLfloat, 6> stone_block_tex = { 3, 3, 3, 3, 3, 3 };
 class StoneBlock : public Block {
 public:
-    StoneBlock(int64_t x, int64_t y, int64_t z) : Block(x, y, z, stone_block_uv) {}
+    StoneBlock(int64_t x, int64_t y, uint8_t z) : Block(x, y, z, stone_block_tex) {}
 };
 
 #endif

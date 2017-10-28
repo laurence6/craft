@@ -27,25 +27,25 @@ static Scene load_map(string map_path) {
         _exit(1);
     }
 
-    vector<shared_ptr<Object>> blocks;
+    vector<shared_ptr<Block>> blocks;
 
     string t;
-    int64_t x, y, z;
+    long x, y; unsigned int z;
     while (true) {
         map_file >> t >> x >> y >> z;
         if (map_file.eof()) {
             break;
         }
         if (t == "dirt") {
-            blocks.push_back(shared_ptr<Object>(new DirtBlock(x, y, z)));
+            blocks.push_back(shared_ptr<Block>(new DirtBlock(x, y, z)));
         } else if (t == "grass") {
-            blocks.push_back(shared_ptr<Object>(new GrassBlock(x, y, z)));
+            blocks.push_back(shared_ptr<Block>(new GrassBlock(x, y, z)));
         } else if (t == "stone") {
-            blocks.push_back(shared_ptr<Object>(new StoneBlock(x, y, z)));
+            blocks.push_back(shared_ptr<Block>(new StoneBlock(x, y, z)));
         }
     }
 
-    return Scene(move(blocks));
+    return Scene(move(blocks), vector<shared_ptr<Object>> {});
 }
 
 static shared_ptr<Camera> camera = shared_ptr<Camera>(new Camera());
