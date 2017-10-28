@@ -137,6 +137,10 @@ public:
  *  16 * 16 * 256
  */
 
+static constexpr uint64_t CHUNK_WIDTH = 16;
+static constexpr uint64_t BLOCK_INDEX_MASK = CHUNK_WIDTH - 1;
+static constexpr uint64_t CHUNK_ID_MASK = 0xffff'ffff ^ BLOCK_INDEX_MASK;
+
 class BlockChunk {
 public:
     inline void add_block(Block* block) {
@@ -149,10 +153,10 @@ public:
 
 private:
     inline Block*& block(int32_t x, int32_t y, uint8_t z) {
-        return blocks[z][x & 0xf][y & 0xf];
+        return blocks[z][x & BLOCK_INDEX_MASK][y & BLOCK_INDEX_MASK];
     }
 
-    array<array<array<Block*, 16>, 16>, 256> blocks;
+    array<array<array<Block*, CHUNK_WIDTH>, CHUNK_WIDTH>, 256> blocks;
 };
 
 class BlockManager {
@@ -182,8 +186,8 @@ public:
 private:
     static inline uint64_t block_chunk_id(int32_t x, int32_t y) {
         uint64_t id = 0;
-        id += (static_cast<uint64_t>(x) & 0xfffffff0) << 32;
-        id += (static_cast<uint64_t>(y) & 0xfffffff0);
+        id += (static_cast<uint64_t>(x) & CHUNK_ID_MASK) << 32;
+        id += (static_cast<uint64_t>(y) & CHUNK_ID_MASK);
         return id;
     }
 
