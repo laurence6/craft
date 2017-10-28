@@ -83,34 +83,11 @@ static const array<GLfloat, 3*2*2> face_uv = {{
     0.0, 1.0,
 }};
 
-// 0-------1-------2-------3-------4-------5-------6-------7-------
-// |8 z    |28 x mod 0xfffffff         |28 y mod 0xfffffff
-inline int64_t hash_block_coord(int64_t x, int64_t y, uint8_t z) noexcept {
-    int64_t h = 0;
-    h += static_cast<uint64_t>(z) << 56;
-    h += (x & 0xfff'ffff) << 28;
-    h += (y & 0xfff'ffff) <<  0;
-    return h;
-}
+class BlockManager;
 
 class Block {
 public:
-    inline int64_t hash_coord() const noexcept {
-        return hash_block_coord(x, y, z);
-    }
-
-    inline void update_vertices_uv(const unordered_map<int64_t, Block*>& blocks) {
-        vertices.clear();
-        uv.clear();
-        if (blocks.count(hash_block_coord(x-1, y, z)) == 0) insert_face_vertices_uv(2);
-        if (blocks.count(hash_block_coord(x+1, y, z)) == 0) insert_face_vertices_uv(4);
-        if (blocks.count(hash_block_coord(x, y-1, z)) == 0) insert_face_vertices_uv(1);
-        if (blocks.count(hash_block_coord(x, y+1, z)) == 0) insert_face_vertices_uv(3);
-        if (z == numeric_limits<uint8_t>::max() ||
-                blocks.count(hash_block_coord(x, y, z+1)) == 0) insert_face_vertices_uv(0);
-        if (z == numeric_limits<uint8_t>::min() ||
-                blocks.count(hash_block_coord(x, y, z-1)) == 0) insert_face_vertices_uv(5);
-    }
+    inline void update_vertices_uv(BlockManager& blocks);
 
     inline void insert_face_vertices_uv(const uint8_t f) {
         for (uint8_t i = 0; i < 6; i++) {
@@ -125,8 +102,8 @@ public:
         }
     }
 
-    const int64_t x;
-    const int64_t y;
+    const int32_t x;
+    const int32_t y;
     const uint8_t z;
     const array<GLfloat, 6> tex;
 
@@ -134,25 +111,96 @@ public:
     vector<GLfloat> uv;
 
 protected:
-    Block(int64_t x, int64_t y, uint8_t z, array<GLfloat, 6> tex) : x(x), y(y), z(z), tex(tex) {}
+    Block(int32_t x, int32_t y, uint8_t z, array<GLfloat, 6> tex) : x(x), y(y), z(z), tex(tex) {}
 };
 
-static const array<GLfloat, 6> dirt_block_tex = { 2, 2, 2, 2, 2, 2 };
+static const array<GLfloat, 6> dirt_block_tex = {{ 2, 2, 2, 2, 2, 2 }};
 class DirtBlock : public Block {
 public:
-    DirtBlock(int64_t x, int64_t y, uint8_t z) : Block(x, y, z, dirt_block_tex) {}
+    DirtBlock(int32_t x, int32_t y, uint8_t z) : Block(x, y, z, dirt_block_tex) {}
 };
 
-static const array<GLfloat, 6> grass_block_tex = { 0, 1, 1, 1, 1, 2 };
+static const array<GLfloat, 6> grass_block_tex = {{ 0, 1, 1, 1, 1, 2 }};
 class GrassBlock : public Block {
 public:
-    GrassBlock(int64_t x, int64_t y, uint8_t z) : Block(x, y, z, grass_block_tex) {}
+    GrassBlock(int32_t x, int32_t y, uint8_t z) : Block(x, y, z, grass_block_tex) {}
 };
 
-static const array<GLfloat, 6> stone_block_tex = { 3, 3, 3, 3, 3, 3 };
+static const array<GLfloat, 6> stone_block_tex = {{ 3, 3, 3, 3, 3, 3 }};
 class StoneBlock : public Block {
 public:
-    StoneBlock(int64_t x, int64_t y, uint8_t z) : Block(x, y, z, stone_block_tex) {}
+    StoneBlock(int32_t x, int32_t y, uint8_t z) : Block(x, y, z, stone_block_tex) {}
 };
+
+/*
+ * Chunk:
+ *  16 * 16 * 256
+ */
+
+class BlockChunk {
+public:
+    inline void add_block(Block* block) {
+        this->block(block->x, block->y, block->z) = block;
+    }
+
+    inline Block* get_block(int32_t x, int32_t y, uint8_t z) {
+        return block(x, y, z);
+    }
+
+private:
+    inline Block*& block(int32_t x, int32_t y, uint8_t z) {
+        return blocks[z][x & 0xf][y & 0xf];
+    }
+
+    array<array<array<Block*, 16>, 16>, 256> blocks;
+};
+
+class BlockManager {
+public:
+    inline void add_block(Block* block) {
+        uint64_t chunk_id = block_chunk_id(block->x, block->y);
+        auto chunk = chunks.find(chunk_id);
+        if (chunk != chunks.end()) {
+            chunk->second.add_block(block);
+        } else {
+            BlockChunk chunk = BlockChunk();
+            chunk.add_block(block);
+            chunks[chunk_id] = move(chunk);
+        }
+    }
+
+    inline Block* get_block(int32_t x, int32_t y, uint8_t z) {
+        uint64_t chunk_id = block_chunk_id(x, y);
+        auto chunk = chunks.find(chunk_id);
+        if (chunk != chunks.end()) {
+            return chunk->second.get_block(x, y, z);
+        } else {
+            return nullptr;
+        }
+    }
+
+private:
+    static inline uint64_t block_chunk_id(int32_t x, int32_t y) {
+        uint64_t id = 0;
+        id += (static_cast<uint64_t>(x) & 0xfffffff0) << 32;
+        id += (static_cast<uint64_t>(y) & 0xfffffff0);
+        return id;
+    }
+
+    unordered_map<uint64_t, BlockChunk> chunks;
+};
+
+inline void Block::update_vertices_uv(BlockManager& blocks) {
+    vertices.clear();
+    uv.clear();
+    if (blocks.get_block(x-1, y, z) == nullptr) insert_face_vertices_uv(2);
+    if (blocks.get_block(x+1, y, z) == nullptr) insert_face_vertices_uv(4);
+    if (blocks.get_block(x, y-1, z) == nullptr) insert_face_vertices_uv(1);
+    if (blocks.get_block(x, y+1, z) == nullptr) insert_face_vertices_uv(3);
+    if (z == numeric_limits<uint8_t>::max() ||
+            blocks.get_block(x, y, z+1) == nullptr) insert_face_vertices_uv(0);
+    if (z == numeric_limits<uint8_t>::min() ||
+            blocks.get_block(x, y, z-1) == nullptr) insert_face_vertices_uv(5);
+}
 
 #endif

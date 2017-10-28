@@ -2,7 +2,6 @@
 #define SCENE_HPP
 
 #include <chrono>
-#include <unordered_map>
 #include <vector>
 
 #include <GL/glew.h>
@@ -16,13 +15,13 @@ class Scene {
 public:
     Scene(vector<Block*>&& _blocks, vector<Object*>&& _objects) : objects(_objects) {
         for (const auto block : _blocks) {
-            blocks[block->hash_coord()] = block;
+            blocks.add_block(block);
         }
-        for (const auto& block : _blocks) {
+        for (const auto block : _blocks) {
             block->update_vertices_uv(blocks);
             insert_vertices_uv(block);
         }
-        for (const auto& object : objects) {
+        for (const auto object : objects) {
             insert_vertices_uv(object);
         }
     }
@@ -84,7 +83,7 @@ private:
             uv.insert(uv.end(), obj->uv->begin(), obj->uv->end());
     }
 
-    unordered_map<int64_t, Block*> blocks;
+    BlockManager blocks;
     vector<Object*> objects;
 
     vector<GLfloat> vertices;
