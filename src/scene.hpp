@@ -17,7 +17,11 @@ class Scene {
 public:
     Scene(vector<shared_ptr<Block>>&& _blocks, vector<shared_ptr<Object>>&& _objects) : objects(_objects) {
         for (const auto& block : _blocks) {
-            blocks[block->coord] = block;
+            blocks[block->hash_coord()] = block;
+        }
+        for (auto& block : _blocks) {
+            block->update_vertices_uv(blocks);
+            insert_vertices_uv(block);
         }
         for (const auto& object : objects) {
             insert_vertices_uv(object);
@@ -81,7 +85,7 @@ private:
             uv.insert(uv.end(), obj->uv->begin(), obj->uv->end());
     }
 
-    unordered_map<BlockCoord, shared_ptr<Block>, BlockCoordHasher> blocks;
+    unordered_map<int64_t, shared_ptr<Block>> blocks;
     vector<shared_ptr<Object>> objects;
 
     vector<GLfloat> vertices;
