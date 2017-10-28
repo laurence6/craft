@@ -78,6 +78,11 @@ public:
     }
 
 private:
+    void insert_vertices_uv(const shared_ptr<Block>& block) {
+        vertices.insert(vertices.end(), block->vertices.begin(), block->vertices.end());
+        uv.insert(uv.end(), block->uv.begin(), block->uv.end());
+    }
+
     void insert_vertices_uv(const shared_ptr<Object>& obj) {
         if (obj->vertices != nullptr)
             vertices.insert(vertices.end(), obj->vertices->begin(), obj->vertices->end());
