@@ -13,7 +13,7 @@ using namespace std;
 
 class Scene {
 public:
-    Scene(vector<Block*>&& _blocks, vector<Object*>&& _objects) : objects(_objects) {
+    Scene(vector<Block*> _blocks, vector<Object*> _objects) : objects(_objects) {
         for (const auto block : _blocks) {
             blocks.add_block(block);
         }
