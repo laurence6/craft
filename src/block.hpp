@@ -99,7 +99,7 @@ public:
         return hash_block_coord(x, y, z);
     }
 
-    inline void update_vertices_uv(const unordered_map<int64_t, Block*> blocks) {
+    inline void update_vertices_uv(const unordered_map<int64_t, Block*>& blocks) {
         vertices.clear();
         uv.clear();
         if (blocks.count(hash_block_coord(x-1, y, z)) == 0) insert_face_vertices_uv(2);
