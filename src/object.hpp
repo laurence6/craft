@@ -12,12 +12,12 @@ using namespace std;
 
 class Object {
 public:
-    shared_ptr<vector<GLfloat>> vertices;
-    shared_ptr<vector<GLfloat>> uv;
+    shared_ptr<vector<GLfloat>> vertices = nullptr;
+    shared_ptr<vector<GLfloat>> uv       = nullptr;
 
     bool is_static = true;
 
-    vec3 pos = vec3(0.f, 0.f, 0.f);
+    vec3 pos;
     float rot = 0.f; // rotation around z axis / yaw
     vec3 velocity = vec3(0.f, 0.f, 0.f);
 };

@@ -74,13 +74,13 @@ static const array<array<GLfloat, 3*3*2>, 6> id_block_vertices = {{
 }};
 
 static const array<GLfloat, 3*2*2> face_uv = {{
-    1.0, 0.0,
-    0.0, 0.0,
-    0.0, 1.0,
+    1.f, 0.f,
+    0.f, 0.f,
+    0.f, 1.f,
 
-    1.0, 0.0,
-    1.0, 1.0,
-    0.0, 1.0,
+    1.f, 0.f,
+    1.f, 1.f,
+    0.f, 1.f,
 }};
 
 class BlockManager;
@@ -107,8 +107,8 @@ public:
     const uint8_t z;
     const array<GLfloat, 6> tex;
 
-    vector<GLfloat> vertices;
-    vector<GLfloat> uv;
+    vector<GLfloat> vertices = {};
+    vector<GLfloat> uv       = {};
 
 protected:
     Block(int32_t x, int32_t y, uint8_t z, array<GLfloat, 6> tex) : x(x), y(y), z(z), tex(tex) {}
@@ -157,7 +157,7 @@ private:
         return blocks[z][x & BLOCK_INDEX_MASK][y & BLOCK_INDEX_MASK];
     }
 
-    array<array<array<Block*, CHUNK_WIDTH>, CHUNK_WIDTH>, 256> blocks;
+    array<array<array<Block*, CHUNK_WIDTH>, CHUNK_WIDTH>, 256> blocks = {};
 };
 
 class BlockManager {
@@ -192,7 +192,7 @@ private:
         return id;
     }
 
-    unordered_map<uint64_t, BlockChunk> chunks;
+    unordered_map<uint64_t, BlockChunk> chunks = {};
 };
 
 inline void Block::update_vertices_uv(BlockManager& blocks) {

@@ -11,7 +11,7 @@ public:
     Camera() {
         is_static = false;
 
-        pos = vec3(0., -0.5, 0.05);
+        pos = vec3(0.f, -0.5f, 0.05f);
         rot = 90.f;
     }
 
@@ -39,14 +39,14 @@ public:
             sin(radians(pitch)) * sin(radians(rot)),
             cos(radians(pitch))
         ));
-        cam_l = cross(vec3(0., 0., 1.), cam_d);
+        cam_l = cross(vec3(0.f, 0.f, 1.f), cam_d);
 
         update_velocity();
     }
 
     const mat4 get_mvp() const {
-        const mat4 projection = perspective(radians(45.), 4. / 3., 0.001, 100.);
-        mat4 view = lookAt(pos, pos + cam_d, vec3(0., 0., 1.));
+        const mat4 projection = perspective(radians(45.f), 4.f / 3.f, 0.001f, 100.f);
+        mat4 view = lookAt(pos, pos + cam_d, vec3(0.f, 0.f, 1.f));
         mat4 mvp = projection * view;
         return mvp;
     }
@@ -64,10 +64,10 @@ private:
     float cam_speed = 0.0002f;
     float rot_speed = 0.25f;
 
-    vec3 cam_d   = vec3(0., 1., 0.);
-    vec3 cam_l   = vec3(-1., 0., 0.);
-    float v_forward = 0;
-    float v_left = 0;
+    vec3 cam_d = vec3(0.f, 1.f, 0.f);
+    vec3 cam_l = vec3(-1.f, 0.f, 0.f);
+    float v_forward = 0.f;
+    float v_left    = 0.f;
 
     float pitch = 90.f;
 };
