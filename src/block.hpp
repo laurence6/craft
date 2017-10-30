@@ -142,25 +142,26 @@ static constexpr uint64_t CHUNK_WIDTH = 1 << CHUNK_WIDTH_DIGITS;
 static constexpr uint64_t BLOCK_INDEX_MASK = CHUNK_WIDTH - 1;
 static constexpr uint64_t CHUNK_ID_MASK = 0xffff'ffff ^ BLOCK_INDEX_MASK;
 
-class BlockChunk {
-public:
-    inline void add_block(Block* block) {
-        this->block(block->x, block->y, block->z) = block;
-    }
-
-    inline Block* get_block(int32_t x, int32_t y, uint8_t z) {
-        return block(x, y, z);
-    }
-
-private:
-    inline Block*& block(int32_t x, int32_t y, uint8_t z) {
-        return blocks[z][x & BLOCK_INDEX_MASK][y & BLOCK_INDEX_MASK];
-    }
-
-    array<array<array<Block*, CHUNK_WIDTH>, CHUNK_WIDTH>, 256> blocks = {};
-};
-
 class BlockManager {
+private:
+    class BlockChunk {
+    public:
+        inline void add_block(Block* block) {
+            this->block(block->x, block->y, block->z) = block;
+        }
+
+        inline Block* get_block(int32_t x, int32_t y, uint8_t z) {
+            return block(x, y, z);
+        }
+
+    private:
+        inline Block*& block(int32_t x, int32_t y, uint8_t z) {
+            return blocks[z][x & BLOCK_INDEX_MASK][y & BLOCK_INDEX_MASK];
+        }
+
+        array<array<array<Block*, CHUNK_WIDTH>, CHUNK_WIDTH>, 256> blocks = {};
+    };
+
 public:
     inline void add_block(Block* block) {
         uint64_t chunk_id = block_chunk_id(block->x, block->y);
