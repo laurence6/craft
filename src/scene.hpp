@@ -13,7 +13,18 @@ using namespace std;
 
 class Scene {
 public:
-    Scene(vector<Block*> _blocks, vector<Object*> _objects) : objects(_objects) {
+    static Scene& instance() {
+        static Scene ins;
+        return ins;
+    }
+
+    void init(vector<Block*> _blocks, vector<Object*> _objects) {
+        static bool initialized = false;
+        if (initialized) {
+            return;
+        }
+        initialized = true;
+
         for (const auto block : _blocks) {
             blocks.add_block(block);
         }
@@ -21,6 +32,8 @@ public:
             block->update_vertices_uv(blocks);
             insert_vertices_uv(block);
         }
+
+        objects = move(_objects);
         for (const auto object : objects) {
             insert_vertices_uv(object);
         }
@@ -71,6 +84,16 @@ public:
     }
 
 private:
+    Scene() {}
+
+    Scene(const Scene&) = delete;
+    Scene(Scene&&)      = delete;
+
+    ~Scene() {}
+
+    Scene& operator=(const Scene&) = delete;
+    Scene& operator=(Scene&&)      = delete;
+
     void insert_vertices_uv(const Block* block) {
         vertices.insert(vertices.end(), block->vertices.begin(), block->vertices.end());
         uv.insert(uv.end(), block->uv.begin(), block->uv.end());
@@ -83,11 +106,11 @@ private:
             uv.insert(uv.end(), obj->uv->begin(), obj->uv->end());
     }
 
-    BlockManager blocks;
-    vector<Object*> objects;
+    BlockManager blocks     = BlockManager();
+    vector<Object*> objects = {};
 
-    vector<GLfloat> vertices;
-    vector<GLfloat> uv;
+    vector<GLfloat> vertices = {};
+    vector<GLfloat> uv       = {};
 };
 
 #endif

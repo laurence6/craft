@@ -19,7 +19,7 @@ const string FRAGMENT_SHADER_PATH = "shader/fragmentshader.glsl";
 const string TEXTURE_FOLDER_PATH = "texture";
 const string MAP_PATH = "map";
 
-static Scene load_map(string map_path) {
+static void load_map(string map_path) {
     ifstream map_file(map_path);
     if (!map_file.is_open()) {
         cerr << "Cannot open " << map_path << endl;
@@ -44,7 +44,7 @@ static Scene load_map(string map_path) {
         }
     }
 
-    return Scene(move(blocks), vector<Object*> {});
+    Scene::instance().init(move(blocks), vector<Object*> {});
 }
 
 static Camera* camera = new Camera();
@@ -80,11 +80,11 @@ static void cursor_pos_callback(GLFWwindow*, double posx, double posy) {
 }
 
 int main() {
-    Scene scene = load_map(MAP_PATH);
-    vector<GLfloat> vertices = scene.get_vertices();
-    vector<GLfloat> uv = scene.get_uv();
+    load_map(MAP_PATH);
+    vector<GLfloat> vertices = Scene::instance().get_vertices();
+    vector<GLfloat> uv = Scene::instance().get_uv();
     auto texture_data = load_texture(TEXTURE_FOLDER_PATH);
-    scene.add_object(camera);
+    Scene::instance().add_object(camera);
 
     if (!glfwInit()) {
         _exit(1);
@@ -177,7 +177,7 @@ int main() {
 
         glfwPollEvents();
 
-        scene.move_objects();
+        Scene::instance().move_objects();
     }
 
     _exit(0);
