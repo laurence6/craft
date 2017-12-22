@@ -11,67 +11,71 @@
 
 using namespace std;
 
-static constexpr array<array<GLfloat, 3*3*2>, 6> id_block_vertices = {{
-    {{ // top
-        0.01f, 0.00f, 0.01f,
-        0.00f, 0.00f, 0.01f,
-        0.00f, 0.01f, 0.01f,
+constexpr array<array<GLfloat, 2*3*3>, 6> gen_id_block_vertices() {
+    constexpr GLfloat _min = 0.00f, _max = 0.01f;
+    return {{
+        {{ // top
+            _max, _min, _max,
+            _min, _min, _max,
+            _min, _max, _max,
 
-        0.01f, 0.00f, 0.01f,
-        0.01f, 0.01f, 0.01f,
-        0.00f, 0.01f, 0.01f,
-    }},
+            _max, _min, _max,
+            _max, _max, _max,
+            _min, _max, _max,
+        }},
 
-    {{ // front
-        0.01f, 0.00f, 0.01f,
-        0.00f, 0.00f, 0.01f,
-        0.00f, 0.00f, 0.00f,
+        {{ // front
+            _max, _min, _max,
+            _min, _min, _max,
+            _min, _min, _min,
 
-        0.01f, 0.00f, 0.01f,
-        0.01f, 0.00f, 0.00f,
-        0.00f, 0.00f, 0.00f,
-    }},
+            _max, _min, _max,
+            _max, _min, _min,
+            _min, _min, _min,
+        }},
 
-    {{ // left
-        0.00f, 0.00f, 0.01f,
-        0.00f, 0.01f, 0.01f,
-        0.00f, 0.01f, 0.00f,
+        {{ // left
+            _min, _min, _max,
+            _min, _max, _max,
+            _min, _max, _min,
 
-        0.00f, 0.00f, 0.01f,
-        0.00f, 0.00f, 0.00f,
-        0.00f, 0.01f, 0.00f,
-    }},
+            _min, _min, _max,
+            _min, _min, _min,
+            _min, _max, _min,
+        }},
 
-    {{ // back
-        0.00f, 0.01f, 0.01f,
-        0.01f, 0.01f, 0.01f,
-        0.01f, 0.01f, 0.00f,
+        {{ // back
+            _min, _max, _max,
+            _max, _max, _max,
+            _max, _max, _min,
 
-        0.00f, 0.01f, 0.01f,
-        0.00f, 0.01f, 0.00f,
-        0.01f, 0.01f, 0.00f,
-    }},
+            _min, _max, _max,
+            _min, _max, _min,
+            _max, _max, _min,
+        }},
 
-    {{ // right
-        0.01f, 0.01f, 0.01f,
-        0.01f, 0.00f, 0.01f,
-        0.01f, 0.00f, 0.00f,
+        {{ // right
+            _max, _max, _max,
+            _max, _min, _max,
+            _max, _min, _min,
 
-        0.01f, 0.01f, 0.01f,
-        0.01f, 0.01f, 0.00f,
-        0.01f, 0.00f, 0.00f,
-    }},
+            _max, _max, _max,
+            _max, _max, _min,
+            _max, _min, _min,
+        }},
 
-    {{ // bottom
-        0.01f, 0.00f, 0.00f,
-        0.00f, 0.00f, 0.00f,
-        0.00f, 0.01f, 0.00f,
+        {{ // bottom
+            _max, _min, _min,
+            _min, _min, _min,
+            _min, _max, _min,
 
-        0.01f, 0.00f, 0.00f,
-        0.01f, 0.01f, 0.00f,
-        0.00f, 0.01f, 0.00f,
-    }},
-}};
+            _max, _min, _min,
+            _max, _max, _min,
+            _min, _max, _min,
+        }},
+    }};
+}
+static constexpr array<array<GLfloat, 2*3*3>, 6> id_block_vertices = gen_id_block_vertices();
 
 static constexpr array<GLfloat, 3*2*2> face_uv = {{
     1.f, 0.f,
