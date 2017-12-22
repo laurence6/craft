@@ -94,7 +94,7 @@ public:
     template<bool update_neighbors>
     inline void update_vertices_uv(BlockManager* bm);
 
-    void insert_face_vertices_uv(const uint8_t f) {
+    virtual void insert_face_vertices_uv(const uint8_t f) {
         for (uint8_t i = 0; i < 6; i++) {
             vertices.push_back(id_block_vertices[f][i*3+0] + static_cast<GLfloat>(x) / 100.f);
             vertices.push_back(id_block_vertices[f][i*3+1] + static_cast<GLfloat>(y) / 100.f);
@@ -131,6 +131,8 @@ protected:
 class VoidBlock : public Block {
 public:
     VoidBlock() : Block(0, 0, 0, {{ 0, 0, 0, 0, 0, 0 }}) {}
+
+    void insert_face_vertices_uv(const uint8_t) override {}
 };
 
 static constexpr array<GLfloat, 6> dirt_block_tex = {{ 2, 2, 2, 2, 2, 2 }};
