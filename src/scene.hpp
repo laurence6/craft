@@ -18,30 +18,23 @@ public:
         return ins;
     }
 
-    void init(vector<Block*> _blocks, vector<Object*> _objects) {
-        static bool initialized = false;
-        if (initialized) {
-            return;
-        }
-        initialized = true;
-
-        for (const auto block : _blocks) {
-            blocks.add_block(block);
-        }
-        for (const auto block : _blocks) {
-            block->update_vertices_uv(blocks);
-            insert_vertices_uv(block);
-        }
-
-        objects = move(_objects);
-        for (const auto object : objects) {
-            insert_vertices_uv(object);
-        }
+    void add_block(Block* block) {
+        blocks.add_block(block);
     }
 
     void add_object(Object* obj) {
-        insert_vertices_uv(obj);
         objects.push_back(obj);
+    }
+
+    void update_vertices_uv() {
+        vertices.clear();
+        uv.clear();
+        for (const Block* block : blocks.get_blocks()) {
+            insert_vertices_uv(block);
+        }
+        for (Object* obj : objects) {
+            insert_vertices_uv(obj);
+        }
     }
 
     const vector<GLfloat>& get_vertices() {
@@ -95,18 +88,22 @@ private:
     Scene& operator=(Scene&&)      = delete;
 
     void insert_vertices_uv(const Block* block) {
-        vertices.insert(vertices.end(), block->vertices.begin(), block->vertices.end());
-        uv.insert(uv.end(), block->uv.begin(), block->uv.end());
+        vertices.insert(vertices.end(), block->get_vertices().begin(), block->get_vertices().end());
+        uv.insert(uv.end(), block->get_uv().begin(), block->get_uv().end());
     }
 
-    void insert_vertices_uv(const Object* obj) {
-        if (obj->vertices != nullptr)
-            vertices.insert(vertices.end(), obj->vertices->begin(), obj->vertices->end());
-        if (obj->uv != nullptr)
-            uv.insert(uv.end(), obj->uv->begin(), obj->uv->end());
+    void insert_vertices_uv(Object* obj) {
+        const vector<GLfloat>* _vertices = obj->get_vertices();
+        if (_vertices != nullptr) {
+            vertices.insert(vertices.end(), _vertices->begin(), _vertices->end());
+        }
+        const vector<GLfloat>* _uv = obj->get_uv();
+        if (_uv != nullptr) {
+            uv.insert(uv.end(), _uv->begin(), _uv->end());
+        }
     }
 
-    BlockManager blocks     = BlockManager();
+    BlockManager    blocks  = BlockManager();
     vector<Object*> objects = {};
 
     vector<GLfloat> vertices = {};

@@ -12,8 +12,13 @@ using namespace std;
 
 class Object {
 public:
-    shared_ptr<vector<GLfloat>> vertices = nullptr;
-    shared_ptr<vector<GLfloat>> uv       = nullptr;
+    virtual const vector<GLfloat>* get_vertices() {
+        return nullptr;
+    }
+
+    virtual const vector<GLfloat>* get_uv() {
+        return nullptr;
+    }
 
     bool is_static = true;
 

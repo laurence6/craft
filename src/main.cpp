@@ -26,25 +26,26 @@ static void load_map(string map_path) {
         _exit(1);
     }
 
-    vector<Block*> blocks;
-
-    string t;
-    long x, y; unsigned int z;
     while (true) {
+        string t; long x, y; unsigned int z;
         map_file >> t >> x >> y >> z;
         if (map_file.eof()) {
             break;
         }
+        Block* block = nullptr;
         if (t == "dirt") {
-            blocks.push_back(new DirtBlock(x, y, z));
+            block = new DirtBlock(x, y, z);
         } else if (t == "grass") {
-            blocks.push_back(new GrassBlock(x, y, z));
+            block = new GrassBlock(x, y, z);
         } else if (t == "stone") {
-            blocks.push_back(new StoneBlock(x, y, z));
+            block = new StoneBlock(x, y, z);
+        }
+        if (block != nullptr) {
+            Scene::instance().add_block(block);
         }
     }
 
-    Scene::instance().init(move(blocks), vector<Object*> {});
+    Scene::instance().update_vertices_uv();
 }
 
 static Camera* camera = new Camera();
