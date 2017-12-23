@@ -1,6 +1,7 @@
 #ifndef SCENE_HPP
 #define SCENE_HPP
 
+#include <algorithm>
 #include <chrono>
 #include <vector>
 
@@ -8,6 +9,7 @@
 
 #include "block.hpp"
 #include "object.hpp"
+#include "util.hpp"
 
 using namespace std;
 
@@ -60,7 +62,7 @@ public:
         float dt = static_cast<float>(del_t.count());
 
         for (Object* object : objects) {
-            if (object->is_static) {
+            if (object->status == Status::Fixed) {
                 continue;
             }
 
@@ -70,6 +72,39 @@ public:
             if (len > 0.f) {
                 object->pos += del_p;
             }
+            if (object->collider != nullptr) {
+                auto c = object->collider->collide(object->pos, blocks);
+                cout << to_string(object->pos) << endl;
+                switch (object->status) {
+                    case Status::Normal:
+                        if (!c.grounded) {
+                            object->status = Status::Falling;
+                        } else if (c.found) {
+                            object->pos.x -= del_p.x;
+                            object->pos.y -= del_p.y;
+                        }
+                        break;
+                    case Status::Jumping:
+                        if (c.found) {
+                            // FIXME
+                        } else {
+                            object->velocity.z = jump_speed;
+                            object->status = Status::Falling;
+                        }
+                        break;
+                    case Status::Falling:
+                        if (c.grounded) {
+                            object->status = Status::Normal;
+                            object->velocity.z = 0.f;
+                        } else {
+                            object->velocity.z = max(-fall_speed, object->velocity.z - gravity_acc);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+
             // TODO: move vertices
         }
 

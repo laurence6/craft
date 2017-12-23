@@ -1,6 +1,7 @@
 #ifndef CAMERA_HPP
 #define CAMERA_HPP
 
+#include "collider.hpp"
 #include "math.hpp"
 #include "object.hpp"
 
@@ -9,10 +10,10 @@ using namespace std;
 class Camera : public Object {
 public:
     Camera() {
-        is_static = false;
-
         pos = vec3(0.f, 0.f, 0.5f);
         rot = 90.f;
+
+        collider = new Collider(0.0048f, 0.001f, 0.018f);
     }
 
     void start_move_forward()  { v_forward = clamp(v_forward + cam_speed, -cam_speed, cam_speed); update_velocity(); }

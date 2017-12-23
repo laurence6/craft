@@ -1,14 +1,21 @@
 #ifndef OBJECT_HPP
 #define OBJECT_HPP
 
-#include <memory>
 #include <vector>
 
 #include <GL/glew.h>
 
+#include "collider.hpp"
 #include "math.hpp"
 
 using namespace std;
+
+enum Status {
+    Fixed,
+    Normal,
+    Jumping,
+    Falling,
+};
 
 class Object {
 public:
@@ -20,11 +27,13 @@ public:
         return nullptr;
     }
 
-    bool is_static = true;
+    Status status = Status::Normal;
 
     vec3 pos;
     float rot = 0.f; // rotation around z axis / yaw
     vec3 velocity = vec3(0.f, 0.f, 0.f);
+
+    Collider* collider = nullptr;
 };
 
 #endif
