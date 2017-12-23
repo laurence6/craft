@@ -19,6 +19,13 @@ enum Status {
 
 class Object {
 public:
+    void jump() {
+        if (status == Status::Normal) {
+            status = Status::Jumping;
+            velocity.z = 0.005f / 1000.f * 16.f;
+        }
+    }
+
     virtual const vector<GLfloat>* get_vertices() {
         return nullptr;
     }

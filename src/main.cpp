@@ -58,6 +58,7 @@ static void key_callback(GLFWwindow* window, int key, int, int action, int) {
             case GLFW_KEY_S: camera->start_move_backward(); break;
             case GLFW_KEY_A: camera->start_move_left(); break;
             case GLFW_KEY_D: camera->start_move_right(); break;
+            case GLFW_KEY_SPACE: camera->jump(); break;
         }
     } else if (action == GLFW_RELEASE) {
         switch (key) {
