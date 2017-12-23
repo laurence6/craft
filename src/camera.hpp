@@ -39,7 +39,9 @@ public:
             sin(radians(pitch)) * sin(radians(rot)),
             cos(radians(pitch))
         ));
-        cam_l = cross(vec3(0.f, 0.f, 1.f), cam_d);
+
+        player_f = normalize(vec3(cos(radians(rot)), sin(radians(rot)), 0));
+        player_l = cross(vec3(0.f, 0.f, 1.f), player_f);
 
         update_velocity();
     }
@@ -53,19 +55,24 @@ public:
 
 private:
     void update_velocity() {
-        velocity = cam_d * v_forward + cam_l * v_left;
-        float len = length(velocity);
+        vec3 new_v = player_f * v_forward + player_l * v_left;
+        new_v.z = 0.f;
+        float len = length(new_v);
         if (len > 0.f) {
-            velocity /= len;
-            velocity *= cam_speed;
+            new_v /= len;
+            new_v *= cam_speed;
         }
+
+        velocity.x = new_v.x;
+        velocity.y = new_v.y;
     }
 
-    float cam_speed = 0.0002f;
+    float cam_speed = 0.0001f;
     float rot_speed = 0.25f;
 
     vec3 cam_d = vec3(0.f, 1.f, 0.f);
-    vec3 cam_l = vec3(-1.f, 0.f, 0.f);
+    vec3 player_f = vec3(0.f, 1.f, 0.f);
+    vec3 player_l = vec3(-1.f, 0.f, 0.f);
     float v_forward = 0.f;
     float v_left    = 0.f;
 
