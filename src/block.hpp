@@ -12,7 +12,7 @@
 using namespace std;
 
 constexpr array<array<GLfloat, 2*3*3>, 6> gen_id_block_vertices() {
-    constexpr GLfloat _min = 0.00f, _max = 0.01f;
+    constexpr GLfloat _min = -0.005f, _max = 0.005f;
     return {{
         {{ // top
             _max, _min, _max,
