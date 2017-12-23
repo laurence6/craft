@@ -11,7 +11,7 @@ public:
     Camera() {
         is_static = false;
 
-        pos = vec3(0.f, -0.5f, 0.05f);
+        pos = vec3(0.f, 0.f, 0.5f);
         rot = 90.f;
     }
 
