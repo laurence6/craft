@@ -55,10 +55,6 @@ public:
         auto now = system_clock::now();
         float del_t = static_cast<float>(duration_cast<milliseconds>(now - last_update).count());
 
-        if (del_t < 16.f) {
-            return;
-        }
-
         for (Object* object : objects) {
             if (object->status == Status::Fixed) {
                 continue;
