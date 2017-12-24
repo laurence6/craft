@@ -53,20 +53,18 @@ public:
         static auto last_update = system_clock::now();
 
         auto now = system_clock::now();
-        auto del_t = duration_cast<milliseconds>(now - last_update);
+        float del_t = static_cast<float>(duration_cast<milliseconds>(now - last_update).count());
 
-        if (del_t < 16ms) {
+        if (del_t < 16.f) {
             return;
         }
-
-        float dt = static_cast<float>(del_t.count());
 
         for (Object* object : objects) {
             if (object->status == Status::Fixed) {
                 continue;
             }
 
-            vec3 del_p = object->velocity * dt;
+            vec3 del_p = object->velocity * del_t;
 
             float len = length(del_p);
             if (len > 0.f) {

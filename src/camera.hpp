@@ -68,7 +68,7 @@ private:
         velocity.y = new_v.y;
     }
 
-    float cam_speed = 0.0001f;
+    float cam_speed = 0.045f / 1000.f;
     float rot_speed = 0.25f;
 
     vec3 cam_d = vec3(0.f, 1.f, 0.f);
