@@ -26,50 +26,50 @@ static constexpr array<array<GLfloat, 2*3*3>, 6> gen_id_block_vertices() {
             _min, _max, _max,
             _min, _max, _min,
 
-            _min, _min, _max,
-            _min, _min, _min,
             _min, _max, _min,
+            _min, _min, _min,
+            _min, _min, _max,
         }},
         [block_face_right] = {{
             _max, _max, _max,
             _max, _min, _max,
             _max, _min, _min,
 
-            _max, _max, _max,
-            _max, _max, _min,
             _max, _min, _min,
+            _max, _max, _min,
+            _max, _max, _max,
         }},
         [block_face_front] = {{
             _max, _min, _max,
             _min, _min, _max,
             _min, _min, _min,
 
-            _max, _min, _max,
-            _max, _min, _min,
             _min, _min, _min,
+            _max, _min, _min,
+            _max, _min, _max,
         }},
         [block_face_back] = {{
             _min, _max, _max,
             _max, _max, _max,
             _max, _max, _min,
 
-            _min, _max, _max,
-            _min, _max, _min,
             _max, _max, _min,
+            _min, _max, _min,
+            _min, _max, _max,
         }},
         [block_face_bottom] = {{
             _max, _min, _min,
             _min, _min, _min,
             _min, _max, _min,
 
-            _max, _min, _min,
-            _max, _max, _min,
             _min, _max, _min,
+            _max, _max, _min,
+            _max, _min, _min,
         }},
         [block_face_top] = {{
-            _max, _min, _max,
-            _min, _min, _max,
             _min, _max, _max,
+            _min, _min, _max,
+            _max, _min, _max,
 
             _max, _min, _max,
             _max, _max, _max,
@@ -84,9 +84,9 @@ static constexpr array<GLfloat, 3*2*2> face_uv = {{
     0.f, 0.f,
     0.f, 1.f,
 
-    1.f, 0.f,
-    1.f, 1.f,
     0.f, 1.f,
+    1.f, 1.f,
+    1.f, 0.f,
 }};
 
 class Block {

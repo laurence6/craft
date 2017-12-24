@@ -114,6 +114,7 @@ int main() {
         _exit(1);
     }
 
+    glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
 
