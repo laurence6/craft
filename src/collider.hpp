@@ -10,10 +10,14 @@ using namespace std;
 
 class Collision {
 public:
-    Collision(bool _found, bool _grounded) : found(_found), grounded(_grounded) {}
+    Collision(bool _found, float _grounded) : found(_found), grounded(_grounded) {}
+
+    bool is_grounded() const {
+        return !isnan(grounded);
+    }
 
     const bool found;
-    const bool grounded;
+    const float grounded;
 };
 
 // Cylinder collider.
@@ -29,15 +33,15 @@ public:
         uint8_t min_z = static_cast<uint8_t>(round((pos.z - height_l) * 100.f));
         uint8_t max_z = static_cast<uint8_t>(round((pos.z + height_u) * 100.f));
 
-        bool found    = false;
-        bool grounded = false;
+        bool found = false;
+        float grounded = NAN;
         for (uint8_t z = min_z; z <= max_z; z++) {
             for (int32_t x = min_x; x <= max_x; x++) {
                 for (int32_t y = min_y; y <= max_y; y++) {
                     Block* b = blocks.get_block(x, y, z);
                     if (b != nullptr) {
                         if (z == min_z) {
-                            grounded = true;
+                            grounded = static_cast<float>(z) / 100.f + 0.005f + height_l;
                         } else {
                             found = true;
                         }

@@ -75,7 +75,7 @@ public:
                 cout << to_string(object->pos) << endl;
                 switch (object->status) {
                     case Status::Normal:
-                        if (!c.grounded) {
+                        if (!c.is_grounded()) {
                             object->status = Status::Falling;
                         } else if (c.found) {
                             object->pos.x -= del_p.x;
@@ -91,8 +91,9 @@ public:
                         }
                         break;
                     case Status::Falling:
-                        if (c.grounded) {
+                        if (c.is_grounded()) {
                             object->status = Status::Normal;
+                            object->pos.z = c.grounded;
                             object->velocity.z = 0.f;
                         } else {
                             object->velocity.z = max(-fall_speed, object->velocity.z - gravity_acc);
