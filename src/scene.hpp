@@ -21,7 +21,7 @@ public:
     }
 
     void add_block(Block* block) {
-        blocks.add_block(block);
+        block_manager.add_block(block);
     }
 
     void add_object(Object* obj) {
@@ -31,8 +31,9 @@ public:
     void update_vertices_uv() {
         vertices.clear();
         uv.clear();
-        for (const Block* block : blocks.get_blocks()) {
-            insert_vertices_uv(block);
+        block_manager.update_vertices_uv();
+        for (const pair<uint64_t, BlockChunk>& chunk : block_manager.get_chunks()) {
+            insert_vertices_uv(chunk.second);
         }
         for (Object* obj : objects) {
             insert_vertices_uv(obj);
@@ -67,7 +68,7 @@ public:
                 object->pos += del_p;
             }
             if (object->collider != nullptr) {
-                auto c = object->collider->collide(object->pos, blocks);
+                auto c = object->collider->collide(object->pos, block_manager);
                 cout << to_string(object->pos) << endl;
                 switch (object->status) {
                     case Status::Normal:
@@ -117,12 +118,12 @@ private:
     Scene& operator=(const Scene&) = delete;
     Scene& operator=(Scene&&)      = delete;
 
-    void insert_vertices_uv(const Block* block) {
-        vertices.insert(vertices.end(), block->get_vertices().begin(), block->get_vertices().end());
-        uv.insert(uv.end(), block->get_uv().begin(), block->get_uv().end());
+    void insert_vertices_uv(const BlockChunk& chunk) {
+        vertices.insert(vertices.end(), chunk.get_vertices().begin(), chunk.get_vertices().end());
+        uv.insert(uv.end(), chunk.get_uv().begin(), chunk.get_uv().end());
     }
 
-    void insert_vertices_uv(Object* obj) {
+    void insert_vertices_uv(const Object* obj) {
         const vector<GLfloat>* _vertices = obj->get_vertices();
         if (_vertices != nullptr) {
             vertices.insert(vertices.end(), _vertices->begin(), _vertices->end());
@@ -133,8 +134,8 @@ private:
         }
     }
 
-    BlockManager    blocks  = BlockManager();
-    vector<Object*> objects = {};
+    BlockManager    block_manager = BlockManager();
+    vector<Object*> objects       = {};
 
     vector<GLfloat> vertices = {};
     vector<GLfloat> uv       = {};

@@ -26,11 +26,11 @@ public:
         }
     }
 
-    virtual const vector<GLfloat>* get_vertices() {
+    virtual const vector<GLfloat>* get_vertices() const {
         return nullptr;
     }
 
-    virtual const vector<GLfloat>* get_uv() {
+    virtual const vector<GLfloat>* get_uv() const {
         return nullptr;
     }
 
