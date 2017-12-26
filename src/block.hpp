@@ -19,7 +19,7 @@ static constexpr uint8_t
     block_face_bottom = 4,
     block_face_top    = 5;
 static constexpr array<array<GLfloat, 2*3*3>, 6> gen_id_block_vertices() {
-    constexpr GLfloat _min = -0.005f, _max = 0.005f;
+    constexpr GLfloat _min = 0.00f, _max = 0.01f;
     return {{
         [block_face_left] = {{
             _min, _min, _max,
