@@ -2,7 +2,6 @@
 #define SCENE_HPP
 
 #include <algorithm>
-#include <chrono>
 #include <vector>
 
 #include <GL/glew.h>
@@ -56,12 +55,10 @@ public:
     }
 
     void move_objects() {
-        using namespace chrono;
+        static uint64_t last_update = time_now();
 
-        static auto last_update = system_clock::now();
-
-        auto now = system_clock::now();
-        float del_t = static_cast<float>(duration_cast<milliseconds>(now - last_update).count());
+        uint64_t now = time_now();
+        float del_t = static_cast<float>(now - last_update);
 
         for (Object* object : objects) {
             if (object->status == Status::Fixed) {
