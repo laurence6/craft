@@ -97,6 +97,9 @@ public:
     const int32_t y;
     const uint8_t z;
 
+private:
+    const array<GLfloat, 6> tex;
+
 protected:
     Block(int32_t x, int32_t y, uint8_t z, array<GLfloat, 6> tex) : x(x), y(y), z(z), tex(tex) {}
 
@@ -114,8 +117,6 @@ private:
             uv.push_back(tex[f]);
         }
     }
-
-    const array<GLfloat, 6> tex;
 };
 
 static constexpr array<GLfloat, 6> dirt_block_tex = {{ 2, 2, 2, 2, 2, 2 }};
@@ -148,6 +149,12 @@ static constexpr uint64_t CHUNK_ID_MASK = 0xffff'ffff ^ BLOCK_INDEX_MASK;
 
 class BlockChunk {
     friend class BlockManager;
+
+private:
+    array<array<array<Block*, CHUNK_WIDTH>, CHUNK_WIDTH>, 256> blocks = {};
+
+    vector<GLfloat> vertices = {};
+    vector<GLfloat> uv       = {};
 
 public:
     const vector<GLfloat>& get_vertices() const {
@@ -190,14 +197,13 @@ private:
     Block*& _get_block(int32_t x, int32_t y, uint8_t z) {
         return blocks[z][x & BLOCK_INDEX_MASK][y & BLOCK_INDEX_MASK];
     }
-
-    array<array<array<Block*, CHUNK_WIDTH>, CHUNK_WIDTH>, 256> blocks = {};
-
-    vector<GLfloat> vertices = {};
-    vector<GLfloat> uv       = {};
 };
 
 class BlockManager {
+private:
+    unordered_map<uint64_t, BlockChunk> chunks = {};
+    unordered_set<uint64_t> chunks_need_update = {};
+
 public:
     void add_block(Block* block) {
         uint64_t chunk_id = block_chunk_id(block->x, block->y);
@@ -240,9 +246,6 @@ private:
         id += ((static_cast<int64_t>(y) - numeric_limits<int32_t>::min()) & CHUNK_ID_MASK);
         return id;
     }
-
-    unordered_map<uint64_t, BlockChunk> chunks = {};
-    unordered_set<uint64_t> chunks_need_update = {};
 };
 
 #endif

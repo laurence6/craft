@@ -14,6 +14,13 @@
 using namespace std;
 
 class Scene {
+private:
+    BlockManager    block_manager = BlockManager();
+    vector<Object*> objects       = {};
+
+    vector<GLfloat> vertices = {};
+    vector<GLfloat> uv       = {};
+
 public:
     static Scene& instance() {
         static Scene ins;
@@ -69,7 +76,6 @@ public:
             }
             if (object->collider != nullptr) {
                 auto c = object->collider->collide(object->pos, block_manager);
-                cout << to_string(object->pos) << endl;
                 switch (object->status) {
                     case Status::Normal:
                         if (!c.is_grounded()) {
@@ -133,12 +139,6 @@ private:
             uv.insert(uv.end(), _uv->begin(), _uv->end());
         }
     }
-
-    BlockManager    block_manager = BlockManager();
-    vector<Object*> objects       = {};
-
-    vector<GLfloat> vertices = {};
-    vector<GLfloat> uv       = {};
 };
 
 #endif

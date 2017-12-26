@@ -19,6 +19,15 @@ enum Status {
 
 class Object {
 public:
+    Status status = Status::Normal;
+
+    vec3 pos;
+    float rot = 0.f; // rotation around z axis / yaw
+    vec3 velocity = vec3(0.f, 0.f, 0.f);
+
+    Collider* collider = nullptr;
+
+public:
     void jump() {
         if (status == Status::Normal) {
             status = Status::Jumping;
@@ -33,14 +42,6 @@ public:
     virtual const vector<GLfloat>* get_uv() const {
         return nullptr;
     }
-
-    Status status = Status::Normal;
-
-    vec3 pos;
-    float rot = 0.f; // rotation around z axis / yaw
-    vec3 velocity = vec3(0.f, 0.f, 0.f);
-
-    Collider* collider = nullptr;
 };
 
 #endif

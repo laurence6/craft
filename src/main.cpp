@@ -1,4 +1,3 @@
-#include <cmath>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -159,6 +158,10 @@ int main() {
     glUniform1i(sampler_ID, 0);
 
     while (!glfwWindowShouldClose(window)) {
+        glfwPollEvents();
+
+        Scene::instance().move_objects();
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glUniformMatrix4fv(matrix_ID, 1, GL_FALSE, &camera->get_mvp()[0][0]);
@@ -177,10 +180,6 @@ int main() {
         glDisableVertexAttribArray(1);
 
         glfwSwapBuffers(window);
-
-        glfwPollEvents();
-
-        Scene::instance().move_objects();
     }
 
     _exit(0);

@@ -8,6 +8,18 @@
 using namespace std;
 
 class Camera : public Object {
+private:
+    float cam_speed = 0.045f / 1000.f;
+    float rot_speed = 0.25f;
+
+    vec3 cam_d = vec3(0.f, 1.f, 0.f);
+    vec3 player_f = vec3(0.f, 1.f, 0.f);
+    vec3 player_l = vec3(-1.f, 0.f, 0.f);
+    float v_forward = 0.f;
+    float v_left    = 0.f;
+
+    float pitch = 90.f;
+
 public:
     Camera() {
         pos = vec3(0.f, 0.f, 0.5f);
@@ -67,17 +79,6 @@ private:
         velocity.x = new_v.x;
         velocity.y = new_v.y;
     }
-
-    float cam_speed = 0.045f / 1000.f;
-    float rot_speed = 0.25f;
-
-    vec3 cam_d = vec3(0.f, 1.f, 0.f);
-    vec3 player_f = vec3(0.f, 1.f, 0.f);
-    vec3 player_l = vec3(-1.f, 0.f, 0.f);
-    float v_forward = 0.f;
-    float v_left    = 0.f;
-
-    float pitch = 90.f;
 };
 
 #endif
