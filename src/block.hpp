@@ -228,11 +228,15 @@ public:
         }
     }
 
-    void update_vertices_uv() {
+    bool update_vertices_uv() {
+        if (chunks_need_update.size() == 0) {
+            return false;
+        }
         for (uint64_t chunk_id : chunks_need_update) {
             chunks.at(chunk_id).update_vertices_uv();
         }
         chunks_need_update.clear();
+        return true;
     }
 
     const unordered_map<uint64_t, BlockChunk>& get_chunks() const {

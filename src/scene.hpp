@@ -35,14 +35,23 @@ public:
     }
 
     void update_vertices_uv() {
-        vertices.clear();
-        uv.clear();
-        block_manager.update_vertices_uv();
-        for (const pair<uint64_t, BlockChunk>& chunk : block_manager.get_chunks()) {
-            insert_vertices_uv(chunk.second);
+        static uint64_t obj_vertices = 0;
+        if (block_manager.update_vertices_uv()) {
+            vertices.clear();
+            uv.clear();
+            obj_vertices = 0;
+            for (const pair<uint64_t, BlockChunk>& chunk : block_manager.get_chunks()) {
+                insert_vertices_uv(chunk.second);
+            }
         }
-        for (Object* obj : objects) {
-            insert_vertices_uv(obj);
+        {
+            vertices.erase(vertices.end()-obj_vertices, vertices.end());
+            uv.erase(uv.end()-obj_vertices, uv.end());
+            uint64_t size = vertices.size();
+            for (Object* obj : objects) {
+                insert_vertices_uv(obj);
+            }
+            obj_vertices = vertices.size() - size;
         }
     }
 
