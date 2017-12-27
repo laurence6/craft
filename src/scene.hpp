@@ -15,8 +15,8 @@ using namespace std;
 
 class Scene {
 private:
-    BlockManager    block_manager = BlockManager();
-    vector<Object*> objects       = {};
+    BlockManager  block_manager  = BlockManager();
+    ObjectManager object_manager = ObjectManager();
 
     vector<GLfloat> vertices = {};
     vector<GLfloat> uv       = {};
@@ -34,17 +34,12 @@ public:
     }
 
     void add_object(Object* obj) {
-        objects.push_back(obj);
+        object_manager.add_object(obj);
     }
 
     void update_vertices_uv() {
         block_manager.update_vertices_uv();
-
-        vertices.clear();
-        uv.clear();
-        for (Object* obj : objects) {
-            insert_vertices_uv(obj);
-        }
+        object_manager.update_vertices_uv();
     }
 
     void render() {
@@ -60,7 +55,7 @@ public:
         uint64_t now = time_now();
         float del_t = static_cast<float>(now - last_update);
 
-        for (Object* object : objects) {
+        for (Object* object : object_manager.get_objects()) {
             if (object->status == Status::Fixed) {
                 continue;
             }
@@ -120,17 +115,6 @@ private:
 
     Scene& operator=(const Scene&) = delete;
     Scene& operator=(Scene&&)      = delete;
-
-    void insert_vertices_uv(const Object* obj) {
-        const vector<GLfloat>* _vertices = obj->get_vertices();
-        if (_vertices != nullptr) {
-            vertices.insert(vertices.end(), _vertices->begin(), _vertices->end());
-        }
-        const vector<GLfloat>* _uv = obj->get_uv();
-        if (_uv != nullptr) {
-            uv.insert(uv.end(), _uv->begin(), _uv->end());
-        }
-    }
 };
 
 #endif

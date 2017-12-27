@@ -44,4 +44,44 @@ public:
     }
 };
 
+class ObjectManager {
+private:
+    vector<Object*> objects = {};
+
+    vector<GLfloat> vertices = {};
+    vector<GLfloat> uv       = {};
+
+public:
+    void add_object(Object* obj) {
+        objects.push_back(obj);
+    }
+
+    void update_vertices_uv() {
+        vertices.clear();
+        uv.clear();
+        for (Object* obj : objects) {
+            const vector<GLfloat>* _vertices = obj->get_vertices();
+            if (_vertices != nullptr) {
+                vertices.insert(vertices.end(), _vertices->begin(), _vertices->end());
+            }
+            const vector<GLfloat>* _uv = obj->get_uv();
+            if (_uv != nullptr) {
+                uv.insert(uv.end(), _uv->begin(), _uv->end());
+            }
+        }
+    }
+
+    const vector<Object*>& get_objects() {
+        return objects;
+    }
+
+    const vector<GLfloat>& get_vertices() const {
+        return vertices;
+    }
+
+    const vector<GLfloat>& get_uv() const {
+        return uv;
+    }
+};
+
 #endif
