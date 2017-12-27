@@ -82,8 +82,6 @@ static void cursor_pos_callback(GLFWwindow*, double posx, double posy) {
 
 int main() {
     load_map(MAP_PATH);
-    vector<GLfloat> vertices = Scene::instance().get_vertices();
-    vector<GLfloat> uv = Scene::instance().get_uv();
     auto texture_data = load_texture(TEXTURE_FOLDER_PATH);
     Scene::instance().add_object(camera);
 
@@ -121,16 +119,6 @@ int main() {
     glGenVertexArrays(1, &vertex_array_ID);
     glBindVertexArray(vertex_array_ID);
 
-    GLuint vertex_buffer;
-    glGenBuffers(1, &vertex_buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), &vertices.front(), GL_STATIC_DRAW);
-
-    GLuint uv_buffer;
-    glGenBuffers(1, &uv_buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, uv_buffer);
-    glBufferData(GL_ARRAY_BUFFER, uv.size() * sizeof(GLfloat), &uv.front(), GL_STATIC_DRAW);
-
     GLuint program_ID = load_shaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
     glUseProgram(program_ID);
 
@@ -157,6 +145,9 @@ int main() {
     glBindTexture(GL_TEXTURE_2D_ARRAY, texture_ID);
     glUniform1i(sampler_ID, 0);
 
+    RenderManager::instance().init();
+    Scene::instance().init();
+
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
@@ -166,18 +157,7 @@ int main() {
 
         glUniformMatrix4fv(matrix_ID, 1, GL_FALSE, &camera->get_mvp()[0][0]);
 
-        glEnableVertexAttribArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-        glEnableVertexAttribArray(1);
-        glBindBuffer(GL_ARRAY_BUFFER, uv_buffer);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-        glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 3);
-
-        glDisableVertexAttribArray(0);
-        glDisableVertexAttribArray(1);
+        Scene::instance().render();
 
         glfwSwapBuffers(window);
     }

@@ -8,6 +8,7 @@
 
 #include "block.hpp"
 #include "object.hpp"
+#include "render.hpp"
 #include "util.hpp"
 
 using namespace std;
@@ -26,6 +27,8 @@ public:
         return ins;
     }
 
+    void init() {}
+
     void add_block(Block* block) {
         block_manager.add_block(block);
     }
@@ -35,32 +38,20 @@ public:
     }
 
     void update_vertices_uv() {
-        static uint64_t obj_vertices = 0;
-        if (block_manager.update_vertices_uv()) {
-            vertices.clear();
-            uv.clear();
-            obj_vertices = 0;
-            for (const pair<uint64_t, BlockChunk>& chunk : block_manager.get_chunks()) {
-                insert_vertices_uv(chunk.second);
-            }
-        }
-        {
-            vertices.erase(vertices.end()-obj_vertices, vertices.end());
-            uv.erase(uv.end()-obj_vertices, uv.end());
-            uint64_t size = vertices.size();
-            for (Object* obj : objects) {
-                insert_vertices_uv(obj);
-            }
-            obj_vertices = vertices.size() - size;
+        block_manager.update_vertices_uv();
+
+        vertices.clear();
+        uv.clear();
+        for (Object* obj : objects) {
+            insert_vertices_uv(obj);
         }
     }
 
-    const vector<GLfloat>& get_vertices() {
-        return vertices;
-    }
-
-    const vector<GLfloat>& get_uv() {
-        return uv;
+    void render() {
+        for (const pair<uint64_t, BlockChunk>& chunk : block_manager.get_chunks()) {
+            RenderManager::instance().render(chunk.second.get_vertices(), chunk.second.get_uv());
+        }
+        RenderManager::instance().render(vertices, uv);
     }
 
     void move_objects() {
@@ -129,11 +120,6 @@ private:
 
     Scene& operator=(const Scene&) = delete;
     Scene& operator=(Scene&&)      = delete;
-
-    void insert_vertices_uv(const BlockChunk& chunk) {
-        vertices.insert(vertices.end(), chunk.get_vertices().begin(), chunk.get_vertices().end());
-        uv.insert(uv.end(), chunk.get_uv().begin(), chunk.get_uv().end());
-    }
 
     void insert_vertices_uv(const Object* obj) {
         const vector<GLfloat>* _vertices = obj->get_vertices();
