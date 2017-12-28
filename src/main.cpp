@@ -50,22 +50,35 @@ static void load_map(string map_path) {
 
 static Camera* camera = new Camera();
 
+static bool window_exclusive = false;
+
 static void key_callback(GLFWwindow* window, int key, int, int action, int) {
-    if (action == GLFW_PRESS) {
-        switch (key) {
-            case GLFW_KEY_ESCAPE: glfwSetWindowShouldClose(window, GLFW_TRUE); break;
-            case GLFW_KEY_W: camera->start_move_forward(); break;
-            case GLFW_KEY_S: camera->start_move_backward(); break;
-            case GLFW_KEY_A: camera->start_move_left(); break;
-            case GLFW_KEY_D: camera->start_move_right(); break;
-            case GLFW_KEY_SPACE: camera->jump(); break;
+    if (window_exclusive) {
+        if (action == GLFW_PRESS) {
+            switch (key) {
+                case GLFW_KEY_ESCAPE:
+                    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                    window_exclusive = false;
+                    break;
+                case GLFW_KEY_W: camera->start_move_forward(); break;
+                case GLFW_KEY_S: camera->start_move_backward(); break;
+                case GLFW_KEY_A: camera->start_move_left(); break;
+                case GLFW_KEY_D: camera->start_move_right(); break;
+                case GLFW_KEY_SPACE: camera->jump(); break;
+            }
+        } else if (action == GLFW_RELEASE) {
+            switch (key) {
+                case GLFW_KEY_W: camera->stop_move_forward(); break;
+                case GLFW_KEY_S: camera->stop_move_backward(); break;
+                case GLFW_KEY_A: camera->stop_move_left(); break;
+                case GLFW_KEY_D: camera->stop_move_right(); break;
+            }
         }
-    } else if (action == GLFW_RELEASE) {
-        switch (key) {
-            case GLFW_KEY_W: camera->stop_move_forward(); break;
-            case GLFW_KEY_S: camera->stop_move_backward(); break;
-            case GLFW_KEY_A: camera->stop_move_left(); break;
-            case GLFW_KEY_D: camera->stop_move_right(); break;
+    } else {
+        if (action == GLFW_PRESS) {
+            switch (key) {
+                case GLFW_KEY_ESCAPE: glfwSetWindowShouldClose(window, GLFW_TRUE); break;
+            }
         }
     }
 }
@@ -78,7 +91,23 @@ static void cursor_pos_callback(GLFWwindow*, double posx, double posy) {
     last_posx = posx;
     last_posy = posy;
 
-    camera->rotate(del_x, del_y);
+    if (window_exclusive) {
+        camera->rotate(del_x, del_y);
+    }
+}
+
+static void mouse_button_callback(GLFWwindow* window, int button, int action, int) {
+    if (window_exclusive) {
+    } else {
+        if (action == GLFW_RELEASE) {
+            switch (button) {
+                case GLFW_MOUSE_BUTTON_LEFT:
+                    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                    window_exclusive = true;
+                    break;
+            }
+        }
+    }
 }
 
 int main() {
@@ -98,15 +127,16 @@ int main() {
 
     glfwMakeContextCurrent(window);
 
-    glfwSwapInterval(1); // vsync
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetKeyCallback(window, key_callback);
     glfwSetCursorPosCallback(window, cursor_pos_callback);
+    glfwSetMouseButtonCallback(window, mouse_button_callback);
 
     glewExperimental = true;
     if (glewInit() != GLEW_OK) {
         _exit(1);
     }
+
+    glfwSwapInterval(1); // vsync
 
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
