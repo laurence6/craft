@@ -9,7 +9,7 @@ using namespace std;
 
 class Camera : public Object {
 private:
-    float cam_speed = 0.045f / 1000.f;
+    float cam_speed = 0.05f / 1000.f;
     float rot_speed = 0.25f;
 
     vec3 cam_d = vec3(0.f, 1.f, 0.f);
@@ -25,7 +25,7 @@ public:
         pos = vec3(0.f, 0.f, 0.5f);
         rot = 90.f;
 
-        collider = new Collider(0.003f, 0.001f, 0.018f);
+        collider = new Collider(0.003f, 0.000f, 0.0195f);
     }
 
     void start_move_forward()  { v_forward = clamp(v_forward + cam_speed, -cam_speed, cam_speed); update_velocity(); }
@@ -60,7 +60,7 @@ public:
     }
 
     const mat4 get_mvp() const {
-        const mat4 projection = perspective(radians(45.f), 4.f / 3.f, 0.001f, 100.f);
+        const mat4 projection = perspective(radians(60.f), 4.f / 3.f, 0.001f, 100.f);
         mat4 view = lookAt(pos, pos + cam_d, vec3(0.f, 0.f, 1.f));
         mat4 mvp = projection * view;
         return mvp;
