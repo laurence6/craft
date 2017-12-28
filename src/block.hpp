@@ -106,17 +106,14 @@ protected:
     Block(int32_t x, int32_t y, uint8_t z, array<GLfloat, 6> tex) : x(x), y(y), z(z), tex(tex) {}
 
 private:
-    template<uint8_t f>
-    void insert_face_vertices_uv(vector<GLfloat>& vertices, vector<GLfloat>& uv) {
+    void insert_face_vertices(vector<GLfloat>& vertices, uint8_t f) {
         for (uint8_t i = 0; i < 6; i++) {
             vertices.push_back(id_block_vertices[f][i*3+0] + static_cast<GLfloat>(x) / 100.f);
             vertices.push_back(id_block_vertices[f][i*3+1] + static_cast<GLfloat>(y) / 100.f);
             vertices.push_back(id_block_vertices[f][i*3+2] + static_cast<GLfloat>(z) / 100.f);
-        }
-        for (uint8_t i = 0; i < 6; i++) {
-            uv.push_back(face_uv[i*2+0]);
-            uv.push_back(face_uv[i*2+1]);
-            uv.push_back(tex[f]);
+            vertices.push_back(face_uv[i*2+0]);
+            vertices.push_back(face_uv[i*2+1]);
+            vertices.push_back(tex[f]);
         }
     }
 };
@@ -156,15 +153,10 @@ private:
     array<array<array<Block*, CHUNK_WIDTH>, CHUNK_WIDTH>, 256> blocks = {};
 
     vector<GLfloat> vertices = {};
-    vector<GLfloat> uv       = {};
 
 public:
     const vector<GLfloat>& get_vertices() const {
         return vertices;
-    }
-
-    const vector<GLfloat>& get_uv() const {
-        return uv;
     }
 
 private:
@@ -176,26 +168,25 @@ private:
         return _get_block(x, y, z);
     }
 
-    void update_vertices_uv(const uint64_t chunk_id) {
+    void update_vertices(const uint64_t chunk_id) {
         vertices.clear();
-        uv.clear();
         for (uint8_t z = 255; ; z--) {
             for (uint64_t x = 0; x < CHUNK_WIDTH; x++) {
                 for (uint64_t y = 0; y < CHUNK_WIDTH; y++) {
                     Block* block = blocks[z][x][y];
                     if (block == nullptr) continue;
-                    if (x == 0             || blocks[z][x-1][y] == nullptr) block->insert_face_vertices_uv<block_face_left  >(vertices, uv);
-                    if (x == CHUNK_WIDTH-1 || blocks[z][x+1][y] == nullptr) block->insert_face_vertices_uv<block_face_right >(vertices, uv);
-                    if (y == 0             || blocks[z][x][y-1] == nullptr) block->insert_face_vertices_uv<block_face_front >(vertices, uv);
-                    if (y == CHUNK_WIDTH-1 || blocks[z][x][y+1] == nullptr) block->insert_face_vertices_uv<block_face_back  >(vertices, uv);
-                    if (z == 0             || blocks[z-1][x][y] == nullptr) block->insert_face_vertices_uv<block_face_bottom>(vertices, uv);
-                    if (z == 255           || blocks[z+1][x][y] == nullptr) block->insert_face_vertices_uv<block_face_top   >(vertices, uv);
+                    if (x == 0             || blocks[z][x-1][y] == nullptr) block->insert_face_vertices(vertices, block_face_left  );
+                    if (x == CHUNK_WIDTH-1 || blocks[z][x+1][y] == nullptr) block->insert_face_vertices(vertices, block_face_right );
+                    if (y == 0             || blocks[z][x][y-1] == nullptr) block->insert_face_vertices(vertices, block_face_front );
+                    if (y == CHUNK_WIDTH-1 || blocks[z][x][y+1] == nullptr) block->insert_face_vertices(vertices, block_face_back  );
+                    if (z == 0             || blocks[z-1][x][y] == nullptr) block->insert_face_vertices(vertices, block_face_bottom);
+                    if (z == 255           || blocks[z+1][x][y] == nullptr) block->insert_face_vertices(vertices, block_face_top   );
                 }
             }
             if (z == 0) break;
         }
 
-        RenderManager::instance().upload_data_chunk(chunk_id, vertices, uv, GL_TRIANGLES);
+        RenderManager::instance().upload_data_chunk(chunk_id, vertices, GL_TRIANGLES, vertices.size()/6);
     }
 
     Block*& _get_block(int32_t x, int32_t y, uint8_t z) {
@@ -233,10 +224,10 @@ public:
         }
     }
 
-    void update_vertices_uv() {
+    void update_vertices() {
         if (!chunks_need_update.empty()) {
             for (uint64_t chunk_id : chunks_need_update) {
-                chunks.at(chunk_id).update_vertices_uv(chunk_id);
+                chunks.at(chunk_id).update_vertices(chunk_id);
             }
             chunks_need_update.clear();
         }

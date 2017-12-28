@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
 using namespace std;
@@ -28,16 +29,15 @@ inline void log_vector(ostream& o, vector<char> message) {
     o << endl;
 }
 
-inline uint64_t time_now() {
+inline uint64_t time_now() noexcept {
     using namespace chrono;
     return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 }
 
-template<uint32_t n>
-array<GLuint, n> gen_buffers() {
-    array<GLuint, n> buffers;
-    glGenBuffers(n, &buffers[0]);
-    return buffers;
+inline GLuint gen_buffer() noexcept {
+    GLuint buffer;
+    glGenBuffers(1, &buffer);
+    return buffer;
 }
 
 GLuint load_shaders(string vertex_shader_path, string fragment_shader_path);

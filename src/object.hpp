@@ -39,10 +39,6 @@ public:
     virtual const vector<GLfloat>* get_vertices() const {
         return nullptr;
     }
-
-    virtual const vector<GLfloat>* get_uv() const {
-        return nullptr;
-    }
 };
 
 class ObjectManager {
@@ -50,25 +46,22 @@ private:
     vector<Object*> objects = {};
 
     vector<GLfloat> vertices = {};
-    vector<GLfloat> uv       = {};
 
 public:
     void add_object(Object* obj) {
         objects.push_back(obj);
     }
 
-    void update_vertices_uv() {
+    void update_vertices() {
         vertices.clear();
-        uv.clear();
         for (const Object* obj : objects) {
             const vector<GLfloat>* _vertices = obj->get_vertices();
             if (_vertices != nullptr) {
                 vertices.insert(vertices.end(), _vertices->begin(), _vertices->end());
-                uv.insert(uv.end(), obj->get_uv()->begin(), obj->get_uv()->end());
             }
         }
 
-        RenderManager::instance().upload_data_objects(vertices, uv, GL_TRIANGLES);
+        RenderManager::instance().upload_data_objects(vertices, GL_TRIANGLES, vertices.size()/6);
     }
 
     const vector<Object*>& get_objects() {
@@ -77,10 +70,6 @@ public:
 
     const vector<GLfloat>& get_vertices() const {
         return vertices;
-    }
-
-    const vector<GLfloat>& get_uv() const {
-        return uv;
     }
 };
 

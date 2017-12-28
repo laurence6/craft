@@ -18,9 +18,6 @@ private:
     BlockManager  block_manager  = BlockManager();
     ObjectManager object_manager = ObjectManager();
 
-    vector<GLfloat> vertices = {};
-    vector<GLfloat> uv       = {};
-
 public:
     static Scene& instance() {
         static Scene ins;
@@ -37,9 +34,9 @@ public:
         object_manager.add_object(obj);
     }
 
-    void update_vertices_uv() {
-        block_manager.update_vertices_uv();
-        object_manager.update_vertices_uv();
+    void update_vertices() {
+        block_manager.update_vertices();
+        object_manager.update_vertices();
     }
 
     void move_objects() {
@@ -95,7 +92,7 @@ public:
 
         last_update = now;
 
-        update_vertices_uv();
+        update_vertices();
     }
 
 private:
