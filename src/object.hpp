@@ -64,10 +64,7 @@ public:
             const vector<GLfloat>* _vertices = obj->get_vertices();
             if (_vertices != nullptr) {
                 vertices.insert(vertices.end(), _vertices->begin(), _vertices->end());
-            }
-            const vector<GLfloat>* _uv = obj->get_uv();
-            if (_uv != nullptr) {
-                uv.insert(uv.end(), _uv->begin(), _uv->end());
+                uv.insert(uv.end(), obj->get_uv()->begin(), obj->get_uv()->end());
             }
         }
 

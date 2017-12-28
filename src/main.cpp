@@ -44,8 +44,6 @@ static void load_map(string map_path) {
             Scene::instance().add_block(block);
         }
     }
-
-    Scene::instance().update_vertices_uv();
 }
 
 static Camera* camera = new Camera();

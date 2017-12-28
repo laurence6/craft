@@ -91,11 +91,11 @@ public:
                         break;
                 }
             }
-
-            // TODO: move vertices
         }
 
         last_update = now;
+
+        update_vertices_uv();
     }
 
 private:

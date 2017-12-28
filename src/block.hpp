@@ -234,10 +234,12 @@ public:
     }
 
     void update_vertices_uv() {
-        for (uint64_t chunk_id : chunks_need_update) {
-            chunks.at(chunk_id).update_vertices_uv(chunk_id);
+        if (!chunks_need_update.empty()) {
+            for (uint64_t chunk_id : chunks_need_update) {
+                chunks.at(chunk_id).update_vertices_uv(chunk_id);
+            }
+            chunks_need_update.clear();
         }
-        chunks_need_update.clear();
     }
 
 private:
