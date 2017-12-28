@@ -25,7 +25,7 @@ public:
         pos = vec3(0.f, 0.f, 0.5f);
         rot = 90.f;
 
-        collider = new Collider(0.0048f, 0.001f, 0.018f);
+        collider = new Collider(0.003f, 0.001f, 0.018f);
     }
 
     void start_move_forward()  { v_forward = clamp(v_forward + cam_speed, -cam_speed, cam_speed); update_velocity(); }
