@@ -195,7 +195,7 @@ private:
             if (z == 0) break;
         }
 
-        RenderManager::instance().upload_data_chunk(chunk_id, vertices, uv);
+        RenderManager::instance().upload_data_chunk(chunk_id, vertices, uv, GL_TRIANGLES);
     }
 
     Block*& _get_block(int32_t x, int32_t y, uint8_t z) {

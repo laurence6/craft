@@ -71,7 +71,7 @@ public:
             }
         }
 
-        RenderManager::instance().upload_data_objects(vertices, uv);
+        RenderManager::instance().upload_data_objects(vertices, uv, GL_TRIANGLES);
     }
 
     const vector<Object*>& get_objects() {
