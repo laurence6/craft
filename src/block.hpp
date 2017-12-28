@@ -9,6 +9,8 @@
 
 #include <GL/glew.h>
 
+#include "render.hpp"
+
 using namespace std;
 
 static constexpr uint8_t
@@ -174,7 +176,7 @@ private:
         return _get_block(x, y, z);
     }
 
-    void update_vertices_uv() {
+    void update_vertices_uv(const uint64_t chunk_id) {
         vertices.clear();
         uv.clear();
         for (uint8_t z = 255; ; z--) {
@@ -192,6 +194,8 @@ private:
             }
             if (z == 0) break;
         }
+
+        RenderManager::instance().upload_data_chunk(chunk_id, vertices, uv);
     }
 
     Block*& _get_block(int32_t x, int32_t y, uint8_t z) {
@@ -213,6 +217,7 @@ public:
         } else {
             chunks.insert(make_pair(chunk_id, BlockChunk()));
             chunks.at(chunk_id).add_block(block);
+            RenderManager::instance().add_chunk(chunk_id);
         }
 
         chunks_need_update.insert(chunk_id);
@@ -230,13 +235,9 @@ public:
 
     void update_vertices_uv() {
         for (uint64_t chunk_id : chunks_need_update) {
-            chunks.at(chunk_id).update_vertices_uv();
+            chunks.at(chunk_id).update_vertices_uv(chunk_id);
         }
         chunks_need_update.clear();
-    }
-
-    const unordered_map<uint64_t, BlockChunk>& get_chunks() const {
-        return chunks;
     }
 
 private:

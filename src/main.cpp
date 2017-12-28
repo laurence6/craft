@@ -7,6 +7,7 @@
 
 #include "block.hpp"
 #include "camera.hpp"
+#include "render.hpp"
 #include "scene.hpp"
 #include "texture.hpp"
 #include "util.hpp"
@@ -81,10 +82,6 @@ static void cursor_pos_callback(GLFWwindow*, double posx, double posy) {
 }
 
 int main() {
-    load_map(MAP_PATH);
-    auto texture_data = load_texture(TEXTURE_FOLDER_PATH);
-    Scene::instance().add_object(camera);
-
     if (!glfwInit()) {
         _exit(1);
     }
@@ -125,19 +122,23 @@ int main() {
     GLuint matrix_ID = glGetUniformLocation(program_ID, "MVP");
 
     GLuint texture_ID;
-    glGenTextures(1, &texture_ID);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, texture_ID);
-    glTexStorage3D(GL_TEXTURE_2D_ARRAY, N_MIP_LEVEL, GL_RGB8, SUB_TEX_WIDTH, SUB_TEX_HEIGHT, N_TILES);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    for (uint8_t i = 0; i < N_MIP_LEVEL; i++) {
-        uint32_t w = SUB_TEX_WIDTH >> i;
-        uint32_t h = SUB_TEX_HEIGHT >> i;
-        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, i, 0, 0, 0, w, h, N_TILES, GL_RGB, GL_UNSIGNED_BYTE, &texture_data[i].front());
+    {
+        auto texture_data = load_texture(TEXTURE_FOLDER_PATH);
+
+        glGenTextures(1, &texture_ID);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, texture_ID);
+        glTexStorage3D(GL_TEXTURE_2D_ARRAY, N_MIP_LEVEL, GL_RGB8, SUB_TEX_WIDTH, SUB_TEX_HEIGHT, N_TILES);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        for (uint8_t i = 0; i < N_MIP_LEVEL; i++) {
+            uint32_t w = SUB_TEX_WIDTH >> i;
+            uint32_t h = SUB_TEX_HEIGHT >> i;
+            glTexSubImage3D(GL_TEXTURE_2D_ARRAY, i, 0, 0, 0, w, h, N_TILES, GL_RGB, GL_UNSIGNED_BYTE, &texture_data[i].front());
+        }
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     }
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     GLuint sampler_ID = glGetUniformLocation(program_ID, "sampler");
 
@@ -148,6 +149,9 @@ int main() {
     RenderManager::instance().init();
     Scene::instance().init();
 
+    load_map(MAP_PATH);
+    Scene::instance().add_object(camera);
+
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
@@ -157,7 +161,7 @@ int main() {
 
         glUniformMatrix4fv(matrix_ID, 1, GL_FALSE, &camera->get_mvp()[0][0]);
 
-        Scene::instance().render();
+        RenderManager::instance().render();
 
         glfwSwapBuffers(window);
     }

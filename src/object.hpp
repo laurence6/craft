@@ -7,6 +7,7 @@
 
 #include "collider.hpp"
 #include "math.hpp"
+#include "render.hpp"
 
 using namespace std;
 
@@ -59,7 +60,7 @@ public:
     void update_vertices_uv() {
         vertices.clear();
         uv.clear();
-        for (Object* obj : objects) {
+        for (const Object* obj : objects) {
             const vector<GLfloat>* _vertices = obj->get_vertices();
             if (_vertices != nullptr) {
                 vertices.insert(vertices.end(), _vertices->begin(), _vertices->end());
@@ -69,6 +70,8 @@ public:
                 uv.insert(uv.end(), _uv->begin(), _uv->end());
             }
         }
+
+        RenderManager::instance().upload_data_objects(vertices, uv);
     }
 
     const vector<Object*>& get_objects() {

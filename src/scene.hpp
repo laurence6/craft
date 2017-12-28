@@ -42,13 +42,6 @@ public:
         object_manager.update_vertices_uv();
     }
 
-    void render() {
-        for (const pair<uint64_t, BlockChunk>& chunk : block_manager.get_chunks()) {
-            RenderManager::instance().render(chunk.second.get_vertices(), chunk.second.get_uv());
-        }
-        RenderManager::instance().render(vertices, uv);
-    }
-
     void move_objects() {
         static uint64_t last_update = time_now();
 
