@@ -36,3 +36,5 @@ target_include_directories ( craft PRIVATE third_party/glfw/include )
 target_link_libraries ( craft glfw )
 
 target_include_directories ( craft PRIVATE third_party/glm )
+
+target_include_directories ( craft PRIVATE third_party/stb )
