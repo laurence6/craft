@@ -151,7 +151,7 @@ int main() {
 
     GLuint texture_ID;
     {
-        auto texture_data = load_texture(TEXTURE_FOLDER_PATH);
+        const array<vector<uint8_t>, N_MIP_LEVEL> texture_data = load_texture(TEXTURE_FOLDER_PATH, 3);
 
         glGenTextures(1, &texture_ID);
         glBindTexture(GL_TEXTURE_2D_ARRAY, texture_ID);
