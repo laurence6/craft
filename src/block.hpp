@@ -9,21 +9,14 @@
 
 #include <GL/glew.h>
 
+#include "config.hpp"
 #include "render.hpp"
 
 using namespace std;
-
-static constexpr uint8_t
-    block_face_left   = 0,
-    block_face_right  = 1,
-    block_face_front  = 2,
-    block_face_back   = 3,
-    block_face_bottom = 4,
-    block_face_top    = 5;
 static constexpr array<array<GLfloat, 2*3*3>, 6> gen_id_block_vertices() {
     constexpr GLfloat _min = 0.00f, _max = 0.01f;
     return {{
-        [block_face_left] = {{
+        [BLOCK_FACE_LEFT] = {{
             _min, _min, _max,
             _min, _max, _max,
             _min, _max, _min,
@@ -32,7 +25,7 @@ static constexpr array<array<GLfloat, 2*3*3>, 6> gen_id_block_vertices() {
             _min, _min, _min,
             _min, _min, _max,
         }},
-        [block_face_right] = {{
+        [BLOCK_FACE_RIGHT] = {{
             _max, _max, _max,
             _max, _min, _max,
             _max, _min, _min,
@@ -41,7 +34,7 @@ static constexpr array<array<GLfloat, 2*3*3>, 6> gen_id_block_vertices() {
             _max, _max, _min,
             _max, _max, _max,
         }},
-        [block_face_front] = {{
+        [BLOCK_FACE_FRONT] = {{
             _max, _min, _max,
             _min, _min, _max,
             _min, _min, _min,
@@ -50,7 +43,7 @@ static constexpr array<array<GLfloat, 2*3*3>, 6> gen_id_block_vertices() {
             _max, _min, _min,
             _max, _min, _max,
         }},
-        [block_face_back] = {{
+        [BLOCK_FACE_BACK] = {{
             _min, _max, _max,
             _max, _max, _max,
             _max, _max, _min,
@@ -59,7 +52,7 @@ static constexpr array<array<GLfloat, 2*3*3>, 6> gen_id_block_vertices() {
             _min, _max, _min,
             _min, _max, _max,
         }},
-        [block_face_bottom] = {{
+        [BLOCK_FACE_BOTTOM] = {{
             _max, _min, _min,
             _min, _min, _min,
             _min, _max, _min,
@@ -68,7 +61,7 @@ static constexpr array<array<GLfloat, 2*3*3>, 6> gen_id_block_vertices() {
             _max, _max, _min,
             _max, _min, _min,
         }},
-        [block_face_top] = {{
+        [BLOCK_FACE_TOP] = {{
             _min, _max, _max,
             _min, _min, _max,
             _max, _min, _max,
@@ -118,19 +111,16 @@ private:
     }
 };
 
-static constexpr array<GLfloat, 6> dirt_block_tex = {{ 2, 2, 2, 2, 2, 2 }};
 class DirtBlock : public Block {
 public:
     DirtBlock(int32_t x, int32_t y, uint8_t z) : Block(x, y, z, dirt_block_tex) {}
 };
 
-static constexpr array<GLfloat, 6> grass_block_tex = {{ 1, 1, 1, 1, 2, 0 }};
 class GrassBlock : public Block {
 public:
     GrassBlock(int32_t x, int32_t y, uint8_t z) : Block(x, y, z, grass_block_tex) {}
 };
 
-static constexpr array<GLfloat, 6> stone_block_tex = {{ 3, 3, 3, 3, 3, 3 }};
 class StoneBlock : public Block {
 public:
     StoneBlock(int32_t x, int32_t y, uint8_t z) : Block(x, y, z, stone_block_tex) {}
@@ -175,12 +165,12 @@ private:
                 for (uint64_t y = 0; y < CHUNK_WIDTH; y++) {
                     Block* block = blocks[z][x][y];
                     if (block == nullptr) continue;
-                    if (x == 0             || blocks[z][x-1][y] == nullptr) block->insert_face_vertices(vertices, block_face_left  );
-                    if (x == CHUNK_WIDTH-1 || blocks[z][x+1][y] == nullptr) block->insert_face_vertices(vertices, block_face_right );
-                    if (y == 0             || blocks[z][x][y-1] == nullptr) block->insert_face_vertices(vertices, block_face_front );
-                    if (y == CHUNK_WIDTH-1 || blocks[z][x][y+1] == nullptr) block->insert_face_vertices(vertices, block_face_back  );
-                    if (z == 0             || blocks[z-1][x][y] == nullptr) block->insert_face_vertices(vertices, block_face_bottom);
-                    if (z == 255           || blocks[z+1][x][y] == nullptr) block->insert_face_vertices(vertices, block_face_top   );
+                    if (x == 0             || blocks[z][x-1][y] == nullptr) block->insert_face_vertices(vertices, BLOCK_FACE_LEFT  );
+                    if (x == CHUNK_WIDTH-1 || blocks[z][x+1][y] == nullptr) block->insert_face_vertices(vertices, BLOCK_FACE_RIGHT );
+                    if (y == 0             || blocks[z][x][y-1] == nullptr) block->insert_face_vertices(vertices, BLOCK_FACE_FRONT );
+                    if (y == CHUNK_WIDTH-1 || blocks[z][x][y+1] == nullptr) block->insert_face_vertices(vertices, BLOCK_FACE_BACK  );
+                    if (z == 0             || blocks[z-1][x][y] == nullptr) block->insert_face_vertices(vertices, BLOCK_FACE_BOTTOM);
+                    if (z == 255           || blocks[z+1][x][y] == nullptr) block->insert_face_vertices(vertices, BLOCK_FACE_TOP   );
                 }
             }
             if (z == 0) break;

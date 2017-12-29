@@ -14,11 +14,6 @@
 
 using namespace std;
 
-const string VERTEX_SHADER_PATH = "shader/vertexshader.glsl";
-const string FRAGMENT_SHADER_PATH = "shader/fragmentshader.glsl";
-const string TEXTURE_FOLDER_PATH = "texture";
-const string MAP_PATH = "map";
-
 static void load_map(string map_path) {
     ifstream map_file(map_path);
     if (!map_file.is_open()) {
@@ -118,7 +113,7 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(1280, 960, "main", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, nullptr, nullptr);
     if (!window) {
         _exit(1);
     }
@@ -146,7 +141,7 @@ int main() {
     glGenVertexArrays(1, &vertex_array_ID);
     glBindVertexArray(vertex_array_ID);
 
-    GLuint program_ID = load_shaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
+    GLuint program_ID = load_shaders(SHADER_BLOCK_VERTEX_PATH, SHADER_BLOCK_FRAGMENT_PATH);
     glUseProgram(program_ID);
 
     GLuint matrix_ID = glGetUniformLocation(program_ID, "MVP");

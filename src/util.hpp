@@ -13,10 +13,6 @@
 
 using namespace std;
 
-constexpr float gravity_acc = 0.015f / 1000.f;
-constexpr float fall_speed = 0.3f / 1000.f;
-constexpr float jump_speed = 0.2f / 1000.f;
-
 inline void _exit(int code) {
     glfwTerminate();
     exit(code);

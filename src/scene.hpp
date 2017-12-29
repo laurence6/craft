@@ -7,9 +7,9 @@
 #include <GL/glew.h>
 
 #include "block.hpp"
+#include "config.hpp"
 #include "object.hpp"
 #include "render.hpp"
-#include "util.hpp"
 
 using namespace std;
 
