@@ -139,6 +139,8 @@ int main() {
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     GLuint vertex_array_ID;
     glGenVertexArrays(1, &vertex_array_ID);
@@ -151,16 +153,16 @@ int main() {
 
     GLuint texture_ID;
     {
-        const array<vector<uint8_t>, N_MIP_LEVEL> texture_data = load_texture(TEXTURE_FOLDER_PATH, 3);
+        const array<vector<uint8_t>, N_MIP_LEVEL> texture_data = load_texture(TEXTURE_FOLDER_PATH, 4);
 
         glGenTextures(1, &texture_ID);
         glBindTexture(GL_TEXTURE_2D_ARRAY, texture_ID);
-        glTexStorage3D(GL_TEXTURE_2D_ARRAY, N_MIP_LEVEL, GL_RGB8, SUB_TEX_WIDTH, SUB_TEX_HEIGHT, N_TILES);
+        glTexStorage3D(GL_TEXTURE_2D_ARRAY, N_MIP_LEVEL, GL_RGBA8, SUB_TEX_WIDTH, SUB_TEX_HEIGHT, N_TILES);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         for (uint8_t i = 0; i < N_MIP_LEVEL; i++) {
             uint32_t w = SUB_TEX_WIDTH >> i;
             uint32_t h = SUB_TEX_HEIGHT >> i;
-            glTexSubImage3D(GL_TEXTURE_2D_ARRAY, i, 0, 0, 0, w, h, N_TILES, GL_RGB, GL_UNSIGNED_BYTE, &texture_data[i].front());
+            glTexSubImage3D(GL_TEXTURE_2D_ARRAY, i, 0, 0, 0, w, h, N_TILES, GL_RGBA, GL_UNSIGNED_BYTE, &texture_data[i].front());
         }
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);

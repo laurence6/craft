@@ -2,10 +2,10 @@
 
 in vec3 uv;
 
-out vec3 color;
+out vec4 color;
 
 uniform sampler2DArray sampler;
 
 void main() {
-    color = texture(sampler, uv).rgb;
+    color = texture(sampler, uv);
 }
