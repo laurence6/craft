@@ -20,8 +20,8 @@ public:
     static GLuint sampler_ID;
 
     const GLuint vertices_buffer;
-    GLuint mode = 0;
-    GLuint n_triangles = 0;
+    GLenum mode = 0;
+    GLsizei n_triangles = 0;
 
 public:
     RenderElement(GLuint _vertices_buffer) : vertices_buffer(_vertices_buffer) {}
@@ -67,11 +67,11 @@ public:
         objects = new RenderElement(gen_buffer());
     }
 
-    void add_chunk(const uint64_t chunk_id) {
+    void add_chunk(uint64_t chunk_id) {
         chunks.emplace(make_pair(chunk_id, RenderElement(gen_buffer())));
     }
 
-    void upload_data_chunk(const uint64_t chunk_id, const vector<GLfloat>& vertices, GLuint mode, GLuint n_triangles) {
+    void upload_data_chunk(uint64_t chunk_id, const vector<GLfloat>& vertices, GLuint mode, GLuint n_triangles) {
         RenderElement& chunk = chunks.at(chunk_id);
         upload_data(chunk, vertices, mode, n_triangles);
     }
