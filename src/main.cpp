@@ -41,8 +41,6 @@ static void load_map(string map_path) {
     }
 }
 
-static Camera* camera = new Camera();
-
 static bool window_exclusive = false;
 
 static void key_callback(GLFWwindow* window, int key, int, int action, int) {
@@ -53,18 +51,18 @@ static void key_callback(GLFWwindow* window, int key, int, int action, int) {
                     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
                     window_exclusive = false;
                     break;
-                case GLFW_KEY_W: camera->start_move_forward(); break;
-                case GLFW_KEY_S: camera->start_move_backward(); break;
-                case GLFW_KEY_A: camera->start_move_left(); break;
-                case GLFW_KEY_D: camera->start_move_right(); break;
-                case GLFW_KEY_SPACE: camera->jump(); break;
+                case GLFW_KEY_W: Camera::instance().start_move_forward(); break;
+                case GLFW_KEY_S: Camera::instance().start_move_backward(); break;
+                case GLFW_KEY_A: Camera::instance().start_move_left(); break;
+                case GLFW_KEY_D: Camera::instance().start_move_right(); break;
+                case GLFW_KEY_SPACE: Camera::instance().jump(); break;
             }
         } else if (action == GLFW_RELEASE) {
             switch (key) {
-                case GLFW_KEY_W: camera->stop_move_forward(); break;
-                case GLFW_KEY_S: camera->stop_move_backward(); break;
-                case GLFW_KEY_A: camera->stop_move_left(); break;
-                case GLFW_KEY_D: camera->stop_move_right(); break;
+                case GLFW_KEY_W: Camera::instance().stop_move_forward(); break;
+                case GLFW_KEY_S: Camera::instance().stop_move_backward(); break;
+                case GLFW_KEY_A: Camera::instance().stop_move_left(); break;
+                case GLFW_KEY_D: Camera::instance().stop_move_right(); break;
             }
         }
     } else {
@@ -85,7 +83,7 @@ static void cursor_pos_callback(GLFWwindow*, double posx, double posy) {
     last_posy = posy;
 
     if (window_exclusive) {
-        camera->rotate(del_x, del_y);
+        Camera::instance().rotate(del_x, del_y);
     }
 }
 
@@ -141,41 +139,12 @@ int main() {
     glGenVertexArrays(1, &vertex_array_ID);
     glBindVertexArray(vertex_array_ID);
 
-    GLuint program_ID = load_shaders(SHADER_BLOCK_VERTEX_PATH, SHADER_BLOCK_FRAGMENT_PATH);
-    glUseProgram(program_ID);
-
-    GLuint matrix_ID = glGetUniformLocation(program_ID, "MVP");
-
-    GLuint texture_ID;
-    {
-        const array<vector<uint8_t>, N_MIP_LEVEL> texture_data = load_texture(TEXTURE_FOLDER_PATH, 4);
-
-        glGenTextures(1, &texture_ID);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, texture_ID);
-        glTexStorage3D(GL_TEXTURE_2D_ARRAY, N_MIP_LEVEL, GL_RGBA8, SUB_TEX_WIDTH, SUB_TEX_HEIGHT, N_TILES);
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        for (uint8_t i = 0; i < N_MIP_LEVEL; i++) {
-            uint32_t w = SUB_TEX_WIDTH >> i;
-            uint32_t h = SUB_TEX_HEIGHT >> i;
-            glTexSubImage3D(GL_TEXTURE_2D_ARRAY, i, 0, 0, 0, w, h, N_TILES, GL_RGBA, GL_UNSIGNED_BYTE, &texture_data[i].front());
-        }
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    }
-
-    GLuint sampler_ID = glGetUniformLocation(program_ID, "sampler");
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, texture_ID);
-    glUniform1i(sampler_ID, 0);
-
     RenderManager::instance().init();
     Scene::instance().init();
+    Camera::instance().init();
 
     load_map(MAP_PATH);
-    Scene::instance().add_object(camera);
+    Scene::instance().add_object(&Camera::instance());
 
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
@@ -183,8 +152,6 @@ int main() {
         Scene::instance().move_objects();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        glUniformMatrix4fv(matrix_ID, 1, GL_FALSE, &camera->get_mvp()[0][0]);
 
         RenderManager::instance().render();
 

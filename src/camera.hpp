@@ -21,7 +21,12 @@ private:
     float pitch = 90.f;
 
 public:
-    Camera() {
+    static Camera& instance() {
+        static Camera ins;
+        return ins;
+    }
+
+    void init() {
         pos = vec3(0.f, 0.f, 0.5f);
 
         collider = new Collider(0.003f, 0.000f, 0.0195f);
@@ -66,6 +71,16 @@ public:
     }
 
 private:
+    Camera() {}
+
+    Camera(const Camera&) = delete;
+    Camera(Camera&&)      = delete;
+
+    ~Camera() {}
+
+    Camera& operator=(const Camera&) = delete;
+    Camera& operator=(Camera&&)      = delete;
+
     void update_velocity() {
         vec3 new_v = player_f * v_forward + player_l * v_left;
         new_v.z = 0.f;
