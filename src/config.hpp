@@ -22,7 +22,7 @@ constexpr float FOVY = radians(60.f);
 constexpr float ASPECT = 1280.f / 960.f;
 constexpr float Z_NEAR = 0.001f, Z_FAR = 100.f;
 
-constexpr uint32_t SUB_TEX_WIDTH = 64, SUB_TEX_HEIGHT = 64, N_TILES = 4;
+constexpr uint32_t SUB_TEX_WIDTH = 64, SUB_TEX_HEIGHT = 64, N_TILES = 5;
 constexpr uint8_t N_MIP_LEVEL = 7;
 
 constexpr uint8_t
@@ -36,6 +36,7 @@ constexpr uint8_t
 constexpr array<GLfloat, 6> dirt_block_tex  = {{ 2, 2, 2, 2, 2, 2 }};
 constexpr array<GLfloat, 6> grass_block_tex = {{ 1, 1, 1, 1, 2, 0 }};
 constexpr array<GLfloat, 6> stone_block_tex = {{ 3, 3, 3, 3, 3, 3 }};
+constexpr GLfloat           grass_tex = 4;
 
 constexpr float player_speed = 0.05f  / 1000.f;
 constexpr float gravity_acc  = 0.015f / 1000.f;

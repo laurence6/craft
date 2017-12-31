@@ -13,66 +13,81 @@
 #include "render.hpp"
 
 using namespace std;
-static constexpr array<array<GLfloat, 2*3*3>, 6> gen_id_block_vertices() {
-    constexpr GLfloat _min = 0.00f, _max = 0.01f;
-    return {{
-        [BLOCK_FACE_LEFT] = {{
-            _min, _min, _max,
-            _min, _max, _max,
-            _min, _max, _min,
 
-            _min, _max, _min,
-            _min, _min, _min,
-            _min, _min, _max,
-        }},
-        [BLOCK_FACE_RIGHT] = {{
-            _max, _max, _max,
-            _max, _min, _max,
-            _max, _min, _min,
+static constexpr GLfloat _min = 0.00f, _max = 0.01f;
+static constexpr array<array<GLfloat, 2*3*3>, 6> id_block_vertices = {{
+    [BLOCK_FACE_LEFT] = {{
+        _min, _min, _max,
+        _min, _max, _max,
+        _min, _max, _min,
 
-            _max, _min, _min,
-            _max, _max, _min,
-            _max, _max, _max,
-        }},
-        [BLOCK_FACE_FRONT] = {{
-            _max, _min, _max,
-            _min, _min, _max,
-            _min, _min, _min,
+        _min, _max, _min,
+        _min, _min, _min,
+        _min, _min, _max,
+    }},
+    [BLOCK_FACE_RIGHT] = {{
+        _max, _max, _max,
+        _max, _min, _max,
+        _max, _min, _min,
 
-            _min, _min, _min,
-            _max, _min, _min,
-            _max, _min, _max,
-        }},
-        [BLOCK_FACE_BACK] = {{
-            _min, _max, _max,
-            _max, _max, _max,
-            _max, _max, _min,
+        _max, _min, _min,
+        _max, _max, _min,
+        _max, _max, _max,
+    }},
+    [BLOCK_FACE_FRONT] = {{
+        _max, _min, _max,
+        _min, _min, _max,
+        _min, _min, _min,
 
-            _max, _max, _min,
-            _min, _max, _min,
-            _min, _max, _max,
-        }},
-        [BLOCK_FACE_BOTTOM] = {{
-            _max, _min, _min,
-            _min, _min, _min,
-            _min, _max, _min,
+        _min, _min, _min,
+        _max, _min, _min,
+        _max, _min, _max,
+    }},
+    [BLOCK_FACE_BACK] = {{
+        _min, _max, _max,
+        _max, _max, _max,
+        _max, _max, _min,
 
-            _min, _max, _min,
-            _max, _max, _min,
-            _max, _min, _min,
-        }},
-        [BLOCK_FACE_TOP] = {{
-            _min, _max, _max,
-            _min, _min, _max,
-            _max, _min, _max,
+        _max, _max, _min,
+        _min, _max, _min,
+        _min, _max, _max,
+    }},
+    [BLOCK_FACE_BOTTOM] = {{
+        _max, _min, _min,
+        _min, _min, _min,
+        _min, _max, _min,
 
-            _max, _min, _max,
-            _max, _max, _max,
-            _min, _max, _max,
-        }},
-    }};
-}
-static constexpr array<array<GLfloat, 2*3*3>, 6> id_block_vertices = gen_id_block_vertices();
+        _min, _max, _min,
+        _max, _max, _min,
+        _max, _min, _min,
+    }},
+    [BLOCK_FACE_TOP] = {{
+        _min, _max, _max,
+        _min, _min, _max,
+        _max, _min, _max,
+
+        _max, _min, _max,
+        _max, _max, _max,
+        _min, _max, _max,
+    }},
+}};
+static constexpr array<GLfloat, 2*2*3*3> tf_block_vertices = {{
+    _max, _min, _max,
+    _min, _max, _max,
+    _min, _max, _min,
+
+    _min, _max, _min,
+    _max, _min, _min,
+    _max, _min, _max,
+
+    _max, _max, _max,
+    _min, _min, _max,
+    _min, _min, _min,
+
+    _min, _min, _min,
+    _max, _max, _min,
+    _max, _max, _max,
+}};
 
 static constexpr array<GLfloat, 3*2*2> face_uv = {{
     1.f, 0.f,
@@ -92,19 +107,40 @@ public:
     const int32_t y;
     const uint8_t z;
 
+public:
+    static bool is_opaque(const Block* block) {
+        return block != nullptr && block->is_opaque();
+    }
+
+    virtual bool is_opaque() const = 0;
+
+protected:
+    Block(int32_t x, int32_t y, uint8_t z) : x(x), y(y), z(z) {}
+
+private:
+    virtual bool six_faces() const = 0;
+
+    virtual void insert_face_vertices(vector<GLfloat>&, uint8_t) const {}
+    virtual void insert_face_vertices(vector<GLfloat>&) const {}
+};
+
+class OpaqueBlock : public Block {
 private:
     const array<GLfloat, 6> tex;
 
 public:
-    static bool is_opaque(const Block* block) {
-        return block != nullptr;
+    OpaqueBlock(int32_t x, int32_t y, int32_t z, array<GLfloat, 6> tex) : Block(x, y, z), tex(tex) {}
+
+    bool is_opaque() const override {
+        return true;
     }
 
-protected:
-    Block(int32_t x, int32_t y, uint8_t z, array<GLfloat, 6> tex) : x(x), y(y), z(z), tex(tex) {}
-
 private:
-    void insert_face_vertices(vector<GLfloat>& vertices, uint8_t f) const {
+    bool six_faces() const override {
+        return true;
+    }
+
+    void insert_face_vertices(vector<GLfloat>& vertices, uint8_t f) const override {
         for (uint8_t i = 0; i < 6; i++) {
             vertices.push_back(id_block_vertices[f][i*3+0] + static_cast<GLfloat>(x) / 100.f);
             vertices.push_back(id_block_vertices[f][i*3+1] + static_cast<GLfloat>(y) / 100.f);
@@ -116,19 +152,34 @@ private:
     }
 };
 
-class DirtBlock : public Block {
-public:
-    DirtBlock(int32_t x, int32_t y, uint8_t z) : Block(x, y, z, dirt_block_tex) {}
-};
-
 class GrassBlock : public Block {
-public:
-    GrassBlock(int32_t x, int32_t y, uint8_t z) : Block(x, y, z, grass_block_tex) {}
-};
+private:
+    const GLfloat tex;
 
-class StoneBlock : public Block {
 public:
-    StoneBlock(int32_t x, int32_t y, uint8_t z) : Block(x, y, z, stone_block_tex) {}
+    GrassBlock(int32_t x, int32_t y, uint8_t z, GLfloat tex) : Block(x, y, z), tex(tex) {}
+
+    bool is_opaque() const override {
+        return false;
+    }
+
+private:
+    bool six_faces() const override {
+        return false;
+    }
+
+    void insert_face_vertices(vector<GLfloat>& vertices) const override {
+        for (uint8_t f = 0; f < 2; f++) {
+            for (uint8_t i = 0; i < 6; i++) {
+                vertices.push_back(tf_block_vertices[f*18+i*3+0] + static_cast<GLfloat>(x) / 100.f);
+                vertices.push_back(tf_block_vertices[f*18+i*3+1] + static_cast<GLfloat>(y) / 100.f);
+                vertices.push_back(tf_block_vertices[f*18+i*3+2] + static_cast<GLfloat>(z) / 100.f);
+                vertices.push_back(face_uv[i*2+0]);
+                vertices.push_back(face_uv[i*2+1]);
+                vertices.push_back(tex);
+            }
+        }
+    }
 };
 
 /*
@@ -185,28 +236,28 @@ private:
         for (uint16_t z = 0; z < 256; z++) {
             for (uint16_t y = 0; y < CHUNK_WIDTH; y++) {
                 Block* block = blocks[z][0][y];
-                if (block != nullptr && (chunk_left == nullptr || !chunk_left->opaque[z][15][y])) block->insert_face_vertices(vertices, BLOCK_FACE_LEFT);
+                if (block != nullptr && block->six_faces() && (chunk_left == nullptr || !chunk_left->opaque[z][15][y])) block->insert_face_vertices(vertices, BLOCK_FACE_LEFT);
             }
         }
 
         for (uint16_t z = 0; z < 256; z++) {
             for (uint16_t y = 0; y < CHUNK_WIDTH; y++) {
                 Block* block = blocks[z][15][y];
-                if (block != nullptr && (chunk_right == nullptr || !chunk_right->opaque[z][0][y])) block->insert_face_vertices(vertices, BLOCK_FACE_RIGHT);
+                if (block != nullptr && block->six_faces() && (chunk_right == nullptr || !chunk_right->opaque[z][0][y])) block->insert_face_vertices(vertices, BLOCK_FACE_RIGHT);
             }
         }
 
         for (uint16_t z = 0; z < 256; z++) {
             for (uint16_t x = 0; x < CHUNK_WIDTH; x++) {
                 Block* block = blocks[z][x][0];
-                if (block != nullptr && (chunk_front == nullptr || !chunk_front->opaque[z][x][15])) block->insert_face_vertices(vertices, BLOCK_FACE_FRONT);
+                if (block != nullptr && block->six_faces() && (chunk_front == nullptr || !chunk_front->opaque[z][x][15])) block->insert_face_vertices(vertices, BLOCK_FACE_FRONT);
             }
         }
 
         for (uint16_t z = 0; z < 256; z++) {
             for (uint16_t x = 0; x < CHUNK_WIDTH; x++) {
                 Block* block = blocks[z][x][15];
-                if (block != nullptr && (chunk_back == nullptr || !chunk_back->opaque[z][x][0])) block->insert_face_vertices(vertices, BLOCK_FACE_BACK);
+                if (block != nullptr && block->six_faces() && (chunk_back == nullptr || !chunk_back->opaque[z][x][0])) block->insert_face_vertices(vertices, BLOCK_FACE_BACK);
             }
         }
 
@@ -216,13 +267,17 @@ private:
                     Block* block = blocks[z][x][y];
                     if (block == nullptr) continue;
 
-                    if (x > 0             && !opaque[z][x-1][y]) block->insert_face_vertices(vertices, BLOCK_FACE_LEFT );
-                    if (x < CHUNK_WIDTH-1 && !opaque[z][x+1][y]) block->insert_face_vertices(vertices, BLOCK_FACE_RIGHT);
-                    if (y > 0             && !opaque[z][x][y-1]) block->insert_face_vertices(vertices, BLOCK_FACE_FRONT);
-                    if (y < CHUNK_WIDTH-1 && !opaque[z][x][y+1]) block->insert_face_vertices(vertices, BLOCK_FACE_BACK );
+                    if (block->six_faces()) {
+                        if (x > 0             && !opaque[z][x-1][y]) block->insert_face_vertices(vertices, BLOCK_FACE_LEFT );
+                        if (x < CHUNK_WIDTH-1 && !opaque[z][x+1][y]) block->insert_face_vertices(vertices, BLOCK_FACE_RIGHT);
+                        if (y > 0             && !opaque[z][x][y-1]) block->insert_face_vertices(vertices, BLOCK_FACE_FRONT);
+                        if (y < CHUNK_WIDTH-1 && !opaque[z][x][y+1]) block->insert_face_vertices(vertices, BLOCK_FACE_BACK );
 
-                    if (z == 0            || !opaque[z-1][x][y]) block->insert_face_vertices(vertices, BLOCK_FACE_BOTTOM);
-                    if (z == 255          || !opaque[z+1][x][y]) block->insert_face_vertices(vertices, BLOCK_FACE_TOP   );
+                        if (z == 0            || !opaque[z-1][x][y]) block->insert_face_vertices(vertices, BLOCK_FACE_BOTTOM);
+                        if (z == 255          || !opaque[z+1][x][y]) block->insert_face_vertices(vertices, BLOCK_FACE_TOP   );
+                    } else {
+                        block->insert_face_vertices(vertices);
+                    }
                 }
             }
         }

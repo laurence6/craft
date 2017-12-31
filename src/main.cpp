@@ -29,11 +29,13 @@ static void load_map(string map_path) {
         }
         Block* block = nullptr;
         if (t == "dirt") {
-            block = new DirtBlock(x, y, z);
+            block = new OpaqueBlock(x, y, z, dirt_block_tex);
         } else if (t == "grass") {
-            block = new GrassBlock(x, y, z);
+            block = new OpaqueBlock(x, y, z, grass_block_tex);
         } else if (t == "stone") {
-            block = new StoneBlock(x, y, z);
+            block = new OpaqueBlock(x, y, z, stone_block_tex);
+        } else if (t == "grass") {
+            block = new GrassBlock(x, y, z, grass_tex);
         }
         if (block != nullptr) {
             Scene::instance().add_block(block);
@@ -129,7 +131,6 @@ int main() {
 
     glfwSwapInterval(1); // vsync
 
-    glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glEnable(GL_BLEND);
