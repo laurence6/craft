@@ -11,16 +11,15 @@
 
 using namespace std;
 
-enum Status {
+enum State {
     Fixed,
     Normal,
-    Jumping,
     Falling,
 };
 
 class Object {
 public:
-    Status status = Status::Normal;
+    State state = State::Normal;
 
     vec3 pos;
     float rot = 0.f; // rotation around z axis / yaw
@@ -29,10 +28,25 @@ public:
     Collider* collider = nullptr;
 
 public:
+    void transit_state(State new_state) {
+        switch (new_state) {
+            case Fixed:
+                velocity = vec3(0.f, 0.f, 0.f);
+                break;
+            case Normal:
+                velocity.z = 0.f;
+                break;
+            case Falling:
+                velocity.z -= gravity_acc;
+                break;
+        }
+        state = new_state;
+    }
+
     void jump() {
-        if (status == Status::Normal) {
-            status = Status::Jumping;
-            velocity.z = 0.005f / 1000.f * 16.f;
+        if (state == State::Normal) {
+            transit_state(State::Falling);
+            velocity.z = jump_speed;
         }
     }
 

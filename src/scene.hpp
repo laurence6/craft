@@ -46,7 +46,7 @@ public:
         float del_t = static_cast<float>(now - last_update);
 
         for (Object* object : object_manager.get_objects()) {
-            if (object->status == Status::Fixed) {
+            if (object->state == State::Fixed) {
                 continue;
             }
 
@@ -57,29 +57,22 @@ public:
                 object->pos += del_p;
             }
             if (object->collider != nullptr) {
-                auto c = object->collider->collide(object->pos, block_manager);
-                switch (object->status) {
-                    case Status::Normal:
+                Collision c = object->collider->collide(object->pos, block_manager);
+                switch (object->state) {
+                    case State::Normal:
                         if (!c.is_grounded()) {
-                            object->status = Status::Falling;
+                            object->transit_state(State::Falling);
                         } else if (c.found) {
                             object->pos.x -= del_p.x;
                             object->pos.y -= del_p.y;
                         }
                         break;
-                    case Status::Jumping:
-                        if (c.found) {
-                            // FIXME
-                        } else {
-                            object->velocity.z = jump_speed;
-                            object->status = Status::Falling;
-                        }
-                        break;
-                    case Status::Falling:
-                        if (c.is_grounded()) {
-                            object->status = Status::Normal;
+                    case State::Falling:
+                        if (c.is_grounded() && object->velocity.z < 0.f) {
+                            object->transit_state(State::Normal);
                             object->pos.z = c.grounded;
-                            object->velocity.z = 0.f;
+                        } else if (c.found) {
+                            // FIXME
                         } else {
                             object->velocity.z = max(-fall_speed, object->velocity.z - gravity_acc);
                         }
