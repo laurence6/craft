@@ -34,6 +34,9 @@ private:
     unordered_map<uint64_t, RenderElement> chunks = {};
     RenderElement* objects = nullptr;
 
+    GLuint ui_buffer;
+    GLuint ui_program_ID;
+
 public:
     static RenderManager& instance() {
         static RenderManager ins;
@@ -65,6 +68,14 @@ public:
         glUniform1i(RenderElement::sampler_ID, 0);
 
         objects = new RenderElement(gen_buffer());
+
+        ui_buffer = gen_buffer();
+        upload_data(ui_buffer, vector<GLfloat> {
+            -CROSSHAIR_X, 0.0, CROSSHAIR_X, 0.0,
+            0.0, -CROSSHAIR_Y, 0.0, CROSSHAIR_Y,
+        });
+        ui_program_ID = load_shaders(SHADER_LINE_VERTEX_PATH, SHADER_LINE_FRAGMENT_PATH);
+        glLineWidth(CROSSHAIR_WIDTH);
     }
 
     void add_chunk(uint64_t chunk_id) {
@@ -94,11 +105,14 @@ private:
     RenderManager& operator=(RenderManager&&)      = delete;
 
     static void upload_data(RenderElement& element, const vector<GLfloat>& vertices, GLuint mode, GLuint n_triangles) {
-        glBindBuffer(GL_ARRAY_BUFFER, element.vertices_buffer);
-        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), &vertices.front(), GL_STATIC_DRAW);
-
+        upload_data(element.vertices_buffer, vertices);
         element.n_triangles = n_triangles;
         element.mode = mode;
+    }
+
+    static void upload_data(GLuint buffer, const vector<GLfloat>& data) {
+        glBindBuffer(GL_ARRAY_BUFFER, buffer);
+        glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(GLfloat), &data.front(), GL_STATIC_DRAW);
     }
 
     static void render_element(const RenderElement& element) {
@@ -113,6 +127,16 @@ private:
         glDrawArrays(element.mode, 0, element.n_triangles);
 
         glDisableVertexAttribArray(1);
+        glDisableVertexAttribArray(0);
+    }
+
+    void render_ui() const {
+        glEnableVertexAttribArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, ui_buffer);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid *)0);
+
+        glDrawArrays(GL_LINES, 0, 6);
+
         glDisableVertexAttribArray(0);
     }
 };

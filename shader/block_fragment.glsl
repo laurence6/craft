@@ -1,8 +1,8 @@
 #version 420 core
 
-in vec3 uv;
+layout(location = 0) in vec3 uv;
 
-out vec4 color;
+layout(location = 0) out vec4 color;
 
 uniform sampler2DArray sampler;
 

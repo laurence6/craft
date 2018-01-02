@@ -12,4 +12,7 @@ void RenderManager::render() const {
         render_element(chunk.second);
     }
     render_element(*objects);
+
+    glUseProgram(ui_program_ID);
+    render_ui();
 }
