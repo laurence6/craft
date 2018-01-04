@@ -18,6 +18,7 @@ public:
     static GLuint program_ID;
     static GLuint matrix_ID;
     static GLuint sampler_ID;
+    static GLuint sun_dir_ID;
 
     const GLuint vertices_buffer;
     GLenum mode = 0;
@@ -47,6 +48,7 @@ public:
         RenderElement::program_ID = load_shaders(SHADER_BLOCK_VERTEX_PATH, SHADER_BLOCK_FRAGMENT_PATH);
         RenderElement::matrix_ID = glGetUniformLocation(RenderElement::program_ID, "MVP");
         RenderElement::sampler_ID = glGetUniformLocation(RenderElement::program_ID, "sampler");
+        RenderElement::sun_dir_ID = glGetUniformLocation(RenderElement::program_ID, "sun_dir");
 
         GLuint texture_ID;
         glGenTextures(1, &texture_ID);
@@ -91,6 +93,11 @@ public:
         upload_data(*objects, vertices, mode, n_triangles);
     }
 
+    void upload_sun_dir(const vec3 sun_dir) {
+        glUseProgram(RenderElement::program_ID);
+        glUniform3f(RenderElement::sun_dir_ID, sun_dir.x, sun_dir.y, sun_dir.z);
+    }
+
     void render() const;
 
 private:
@@ -118,14 +125,19 @@ private:
     static void render_element(const RenderElement& element) {
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, element.vertices_buffer);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid *)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (GLvoid *)0);
 
         glEnableVertexAttribArray(1);
         glBindBuffer(GL_ARRAY_BUFFER, element.vertices_buffer);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid *)(3 * sizeof(GLfloat)));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (GLvoid *)(3 * sizeof(GLfloat)));
+
+        glEnableVertexAttribArray(2);
+        glBindBuffer(GL_ARRAY_BUFFER, element.vertices_buffer);
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (GLvoid *)(6 * sizeof(GLfloat)));
 
         glDrawArrays(element.mode, 0, element.n_triangles);
 
+        glDisableVertexAttribArray(2);
         glDisableVertexAttribArray(1);
         glDisableVertexAttribArray(0);
     }

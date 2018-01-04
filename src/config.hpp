@@ -26,6 +26,8 @@ constexpr float Z_NEAR = 0.001f, Z_FAR = 100.f;
 
 constexpr float CROSSHAIR_X = 30.f / 1280.f, CROSSHAIR_Y = 32.f / 960.f, CROSSHAIR_WIDTH = 4.f;
 
+constexpr uint64_t DAYTIME = 600; // sec
+
 constexpr uint32_t SUB_TEX_WIDTH = 64, SUB_TEX_HEIGHT = 64, N_TILES = 5;
 constexpr uint8_t N_MIP_LEVEL = 7;
 

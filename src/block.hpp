@@ -14,8 +14,8 @@
 
 using namespace std;
 
-static constexpr GLfloat _min = 0.00f, _max = 0.01f;
-static constexpr array<array<GLfloat, 2*3*3>, 6> id_block_vertices = {{
+constexpr GLfloat _min = 0.00f, _max = 0.01f;
+constexpr array<array<GLfloat, 2*3*3>, 6> id_block_vertices = {{
     [BLOCK_FACE_LEFT] = {{
         _min, _min, _max,
         _min, _max, _max,
@@ -71,7 +71,7 @@ static constexpr array<array<GLfloat, 2*3*3>, 6> id_block_vertices = {{
         _min, _max, _max,
     }},
 }};
-static constexpr array<GLfloat, 2*2*3*3> tf_block_vertices = {{
+constexpr array<GLfloat, 2*2*3*3> tf_block_vertices = {{
     _max, _min, _max,
     _min, _max, _max,
     _min, _max, _min,
@@ -89,7 +89,7 @@ static constexpr array<GLfloat, 2*2*3*3> tf_block_vertices = {{
     _max, _max, _max,
 }};
 
-static constexpr array<GLfloat, 3*2*2> face_uv = {{
+constexpr array<GLfloat, 2*2*3> face_uv = {{
     1.f, 0.f,
     0.f, 0.f,
     0.f, 1.f,
@@ -97,6 +97,15 @@ static constexpr array<GLfloat, 3*2*2> face_uv = {{
     0.f, 1.f,
     1.f, 1.f,
     1.f, 0.f,
+}};
+
+constexpr array<array<GLfloat, 3>, 6> face_normal = {{
+    [BLOCK_FACE_LEFT  ] = {{-0.4f, 0.f, 0.9f }},
+    [BLOCK_FACE_RIGHT ] = {{ 0.4f, 0.f, 0.9f }},
+    [BLOCK_FACE_FRONT ] = {{ 0.f, 0.f, 1.f }},
+    [BLOCK_FACE_BACK  ] = {{ 0.f, 0.f, 1.f }},
+    [BLOCK_FACE_BOTTOM] = {{ 0.f, 0.f,-1.f }},
+    [BLOCK_FACE_TOP   ] = {{ 0.f, 0.f, 1.f }},
 }};
 
 class Block {
@@ -148,6 +157,9 @@ private:
             vertices.push_back(face_uv[i*2+0]);
             vertices.push_back(face_uv[i*2+1]);
             vertices.push_back(tex[f]);
+            vertices.push_back(face_normal[f][0]);
+            vertices.push_back(face_normal[f][1]);
+            vertices.push_back(face_normal[f][2]);
         }
     }
 };
@@ -177,6 +189,9 @@ private:
                 vertices.push_back(face_uv[i*2+0]);
                 vertices.push_back(face_uv[i*2+1]);
                 vertices.push_back(tex);
+                vertices.push_back(face_normal[BLOCK_FACE_TOP][0]);
+                vertices.push_back(face_normal[BLOCK_FACE_TOP][1]);
+                vertices.push_back(face_normal[BLOCK_FACE_TOP][2]);
             }
         }
     }
@@ -187,9 +202,10 @@ private:
  *  16 * 16 * 256
  */
 
-static constexpr uint64_t CHUNK_WIDTH = 16;
-static constexpr uint64_t BLOCK_INDEX_MASK = 0x0000'000f;
-static constexpr uint64_t CHUNK_ID_MASK    = 0xffff'fff0;
+constexpr uint64_t
+    CHUNK_WIDTH      = 16,
+    BLOCK_INDEX_MASK = 0x0000'000f,
+    CHUNK_ID_MASK    = 0xffff'fff0;
 
 static uint64_t block_chunk_id(int32_t x, int32_t y) {
     uint64_t id = 0;
@@ -282,7 +298,7 @@ private:
             }
         }
 
-        RenderManager::instance().upload_data_chunk(chunk_id, vertices, GL_TRIANGLES, vertices.size()/6);
+        RenderManager::instance().upload_data_chunk(chunk_id, vertices, GL_TRIANGLES, vertices.size()/9);
     }
 };
 

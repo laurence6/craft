@@ -25,9 +25,14 @@ inline void log_vector(ostream& o, vector<char> message) {
     o << endl;
 }
 
-inline uint64_t time_now() noexcept {
+inline uint64_t time_now_ms() noexcept {
     using namespace chrono;
     return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+}
+
+inline uint64_t time_now_s() noexcept {
+    using namespace chrono;
+    return duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
 }
 
 inline GLuint gen_buffer() noexcept {

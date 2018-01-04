@@ -10,6 +10,7 @@
 #include "config.hpp"
 #include "object.hpp"
 #include "render.hpp"
+#include "util.hpp"
 
 using namespace std;
 
@@ -40,9 +41,9 @@ public:
     }
 
     void move_objects() {
-        static uint64_t last_update = time_now();
+        static uint64_t last_update = time_now_ms();
 
-        uint64_t now = time_now();
+        uint64_t now = time_now_ms();
         float del_t = static_cast<float>(now - last_update);
 
         for (Object* object : object_manager.get_objects()) {
@@ -86,6 +87,18 @@ public:
         last_update = now;
 
         update_vertices();
+    }
+
+    void update_sun_dir() const {
+        static uint64_t last_update = 0;
+        uint64_t now = time_now_s();
+        if (now > last_update) {
+            float t = static_cast<float>(now % DAYTIME) / static_cast<float>(DAYTIME) - 0.5f;
+            float x = t * 5.f;
+            vec3 dir = normalize(vec3(x, 0.f, 2.56f));
+            RenderManager::instance().upload_sun_dir(dir);
+            last_update = now;
+        }
     }
 
 private:
