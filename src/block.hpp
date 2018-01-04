@@ -1,10 +1,12 @@
 #ifndef BLOCK_HPP
 #define BLOCK_HPP
 
+#include <algorithm>
 #include <array>
 #include <limits>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include <GL/glew.h>
@@ -108,6 +110,12 @@ constexpr array<array<GLfloat, 3>, 6> face_normal = {{
     [BLOCK_FACE_TOP   ] = {{ 0.f, 0.f, 1.f }},
 }};
 
+struct BlockVertexData {
+    GLfloat        x,        y,        z;
+    GLfloat     uv_x,     uv_y,     uv_z;
+    GLfloat normal_x, normal_y, normal_z;
+};
+
 class Block {
     friend class BlockChunk;
 
@@ -129,8 +137,8 @@ protected:
 private:
     virtual bool six_faces() const = 0;
 
-    virtual void insert_face_vertices(vector<GLfloat>&, uint8_t) const {}
-    virtual void insert_face_vertices(vector<GLfloat>&) const {}
+    virtual void insert_face_vertices(vector<BlockVertexData>&, uint8_t) const {}
+    virtual void insert_face_vertices(vector<BlockVertexData>&) const {}
 };
 
 class OpaqueBlock : public Block {
@@ -149,17 +157,19 @@ private:
         return true;
     }
 
-    void insert_face_vertices(vector<GLfloat>& vertices, uint8_t f) const override {
+    void insert_face_vertices(vector<BlockVertexData>& vertices, uint8_t f) const override {
         for (uint8_t i = 0; i < 6; i++) {
-            vertices.push_back(id_block_vertices[f][i*3+0] + static_cast<GLfloat>(x) / 100.f);
-            vertices.push_back(id_block_vertices[f][i*3+1] + static_cast<GLfloat>(y) / 100.f);
-            vertices.push_back(id_block_vertices[f][i*3+2] + static_cast<GLfloat>(z) / 100.f);
-            vertices.push_back(face_uv[i*2+0]);
-            vertices.push_back(face_uv[i*2+1]);
-            vertices.push_back(tex[f]);
-            vertices.push_back(face_normal[f][0]);
-            vertices.push_back(face_normal[f][1]);
-            vertices.push_back(face_normal[f][2]);
+            vertices.push_back(BlockVertexData {
+                id_block_vertices[f][i*3+0] + static_cast<GLfloat>(x) / 100.f,
+                id_block_vertices[f][i*3+1] + static_cast<GLfloat>(y) / 100.f,
+                id_block_vertices[f][i*3+2] + static_cast<GLfloat>(z) / 100.f,
+                face_uv[i*2+0],
+                face_uv[i*2+1],
+                tex[f],
+                face_normal[f][0],
+                face_normal[f][1],
+                face_normal[f][2],
+            });
         }
     }
 };
@@ -180,18 +190,20 @@ private:
         return false;
     }
 
-    void insert_face_vertices(vector<GLfloat>& vertices) const override {
+    void insert_face_vertices(vector<BlockVertexData>& vertices) const override {
         for (uint8_t f = 0; f < 2; f++) {
             for (uint8_t i = 0; i < 6; i++) {
-                vertices.push_back(tf_block_vertices[f*18+i*3+0] + static_cast<GLfloat>(x) / 100.f);
-                vertices.push_back(tf_block_vertices[f*18+i*3+1] + static_cast<GLfloat>(y) / 100.f);
-                vertices.push_back(tf_block_vertices[f*18+i*3+2] + static_cast<GLfloat>(z) / 100.f);
-                vertices.push_back(face_uv[i*2+0]);
-                vertices.push_back(face_uv[i*2+1]);
-                vertices.push_back(tex);
-                vertices.push_back(face_normal[BLOCK_FACE_TOP][0]);
-                vertices.push_back(face_normal[BLOCK_FACE_TOP][1]);
-                vertices.push_back(face_normal[BLOCK_FACE_TOP][2]);
+                vertices.push_back(BlockVertexData {
+                    tf_block_vertices[f*18+i*3+0] + static_cast<GLfloat>(x) / 100.f,
+                    tf_block_vertices[f*18+i*3+1] + static_cast<GLfloat>(y) / 100.f,
+                    tf_block_vertices[f*18+i*3+2] + static_cast<GLfloat>(z) / 100.f,
+                    face_uv[i*2+0],
+                    face_uv[i*2+1],
+                    tex,
+                    face_normal[BLOCK_FACE_TOP][0],
+                    face_normal[BLOCK_FACE_TOP][1],
+                    face_normal[BLOCK_FACE_TOP][2],
+                });
             }
         }
     }
@@ -202,17 +214,158 @@ private:
  *  16 * 16 * 256
  */
 
+constexpr size_t ARENA_BLOCK_SIZE = ARENA_BLOCK_N_VERTICES * sizeof(BlockVertexData);
+
+class ArenaProxy;
+
+class BlockVerticesArena {
+    friend class ArenaProxy;
+
+private:
+    class ArenaBlock {
+    public:
+        size_t const offset;
+        size_t count = 0;
+
+    public:
+        ArenaBlock(size_t offset) : offset(offset) {}
+
+        void reset() {
+            count = 0;
+        }
+    };
+
+private:
+    GLuint              buffer;
+    size_t              length = 0;
+    vector<ArenaBlock*> unused = {};
+    vector<ArenaBlock*> used   = {};
+
+public:
+    BlockVerticesArena() {
+        buffer = gen_buffer();
+
+        for (size_t i = 0; i < ARENA_INIT; i++) {
+            unused.push_back(new ArenaBlock(ARENA_BLOCK_SIZE * length));
+            length += 1;
+        }
+
+        glBindBuffer(GL_ARRAY_BUFFER, buffer);
+        glBufferData(GL_ARRAY_BUFFER, ARENA_BLOCK_SIZE * length, nullptr, GL_DYNAMIC_DRAW);
+
+        RenderManager::instance().blocks_buffer = buffer;
+    }
+
+    void update_vertices() const {
+        RenderManager& rm = RenderManager::instance();
+        rm.blocks_first.clear();
+        rm.blocks_count.clear();
+        for (const ArenaBlock* used_block : used) {
+            rm.blocks_first.push_back(used_block->offset / sizeof(BlockVertexData));
+            rm.blocks_count.push_back(used_block->count);
+        }
+    }
+
+private:
+    void expand() {
+        GLuint new_buffer = gen_buffer();
+        size_t new_length = length;
+
+        for (size_t i = 0; i < ARENA_GROWTH; i++) {
+            unused.push_back(new ArenaBlock(ARENA_BLOCK_SIZE * new_length));
+            new_length += 1;
+        }
+
+        glBindBuffer(GL_ARRAY_BUFFER, new_buffer);
+        glBufferData(GL_ARRAY_BUFFER, ARENA_BLOCK_SIZE * new_length, nullptr, GL_DYNAMIC_DRAW);
+
+        glBindBuffer(GL_COPY_READ_BUFFER, buffer);
+        glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_ARRAY_BUFFER, 0, 0, ARENA_BLOCK_SIZE * length);
+
+        glDeleteBuffers(1, &buffer);
+
+        buffer = new_buffer;
+        length = new_length;
+
+        RenderManager::instance().blocks_buffer = buffer;
+    }
+
+    void alloc_n_arena_blocks(vector<ArenaBlock*>& arena_blocks, size_t n) {
+        if (n == arena_blocks.size()) {
+            return;
+        } else if (n < arena_blocks.size()) {
+            size_t n_to_free = arena_blocks.size() - n;
+            for (size_t i = 0; i < n_to_free; i++) {
+                ArenaBlock* arena_block = arena_blocks.back();
+                arena_blocks.pop_back();
+
+                arena_block->reset();
+
+                auto it = find(used.begin(), used.end(), arena_block);
+                swap(*it, used.back());
+                used.pop_back();
+
+                unused.push_back(arena_block);
+            }
+        } else {
+            size_t n_to_alloc = n - arena_blocks.size();
+            while(unused.size() < n_to_alloc) {
+                expand();
+            }
+
+            for (size_t i = 0; i < n_to_alloc; i++) {
+                ArenaBlock* arena_block = unused.back();
+                unused.pop_back();
+
+                used.push_back(arena_block);
+
+                arena_blocks.push_back(arena_block);
+            }
+        }
+    }
+
+    void upload_data(const ArenaBlock* arena_block, const BlockVertexData* data) const {
+        glBindBuffer(GL_ARRAY_BUFFER, buffer);
+        glBufferSubData(GL_ARRAY_BUFFER, arena_block->offset, sizeof(BlockVertexData) * arena_block->count, data);
+    }
+};
+
+class ArenaProxy {
+private:
+    BlockVerticesArena* const arena;
+    vector<BlockVerticesArena::ArenaBlock*> arena_blocks = {};
+
+public:
+    ArenaProxy(BlockVerticesArena* arena) : arena(arena) {}
+
+    ~ArenaProxy() {
+        arena->alloc_n_arena_blocks(arena_blocks, 0);
+    }
+
+    void upload_data(const vector<BlockVertexData>& vertices) {
+        size_t n_ab = vertices.size() / ARENA_BLOCK_N_VERTICES;
+        size_t rem = vertices.size() % ARENA_BLOCK_N_VERTICES;
+        if (rem > 0) {
+            n_ab += 1;
+        } else {
+            rem = ARENA_BLOCK_N_VERTICES;
+        }
+
+        arena->alloc_n_arena_blocks(arena_blocks, n_ab);
+
+        for (size_t i = 0; i < n_ab-1; i++) {
+            arena_blocks[i]->count = ARENA_BLOCK_N_VERTICES;
+            arena->upload_data(arena_blocks[i], &vertices[ARENA_BLOCK_N_VERTICES * i]);
+        }
+        arena_blocks[n_ab-1]->count = rem;
+        arena->upload_data(arena_blocks[n_ab-1], &vertices[ARENA_BLOCK_N_VERTICES * (n_ab-1)]);
+    }
+};
+
 constexpr uint64_t
     CHUNK_WIDTH      = 16,
     BLOCK_INDEX_MASK = 0x0000'000f,
     CHUNK_ID_MASK    = 0xffff'fff0;
-
-static uint64_t block_chunk_id(int32_t x, int32_t y) {
-    uint64_t id = 0;
-    id += ((static_cast<int64_t>(x) - numeric_limits<int32_t>::min()) & CHUNK_ID_MASK) << 32;
-    id += ((static_cast<int64_t>(y) - numeric_limits<int32_t>::min()) & CHUNK_ID_MASK);
-    return id;
-}
 
 class BlockChunk {
     friend class BlockManager;
@@ -221,14 +374,11 @@ private:
     array<array<array<Block*, CHUNK_WIDTH>, CHUNK_WIDTH>, 256> blocks = {};
     array<array<array<  bool, CHUNK_WIDTH>, CHUNK_WIDTH>, 256> opaque = {};
 
-    vector<GLfloat> vertices = {};
-
-public:
-    const vector<GLfloat>& get_vertices() const {
-        return vertices;
-    }
+    ArenaProxy arena_proxy;
 
 private:
+    BlockChunk(BlockVerticesArena* arena) : arena_proxy(ArenaProxy(arena)) {}
+
     void add_block(Block* block) {
         _get_block(block->x, block->y, block->z) = block;
         _get_opaque(block->x, block->y, block->z) = Block::is_opaque(block);
@@ -246,8 +396,9 @@ private:
         return opaque[z][x & BLOCK_INDEX_MASK][y & BLOCK_INDEX_MASK];
     }
 
-    void update_vertices(uint64_t chunk_id, const BlockChunk* chunk_left, const BlockChunk* chunk_right, const BlockChunk* chunk_front, const BlockChunk* chunk_back) {
-        vertices.clear();
+    void update_vertices(const BlockChunk* chunk_left, const BlockChunk* chunk_right, const BlockChunk* chunk_front, const BlockChunk* chunk_back) {
+        vector<BlockVertexData> vertices = {};
+        vertices.reserve(ARENA_BLOCK_N_VERTICES);
 
         for (uint16_t z = 0; z < 256; z++) {
             for (uint16_t y = 0; y < CHUNK_WIDTH; y++) {
@@ -298,11 +449,14 @@ private:
             }
         }
 
-        RenderManager::instance().upload_data_chunk(chunk_id, vertices, GL_TRIANGLES, vertices.size()/9);
+        arena_proxy.upload_data(vertices);
     }
 };
 
 class BlockManager {
+public:
+    BlockVerticesArena* arena;
+
 private:
     unordered_map<uint64_t, BlockChunk> chunks = {};
     unordered_set<uint64_t> chunks_need_update = {};
@@ -314,9 +468,8 @@ public:
         if (chunk != chunks.end()) {
             chunk->second.add_block(block);
         } else {
-            chunks.insert(make_pair(chunk_id, BlockChunk()));
+            chunks.insert(make_pair(chunk_id, BlockChunk(arena)));
             chunks.at(chunk_id).add_block(block);
-            RenderManager::instance().add_chunk(chunk_id);
         }
 
         chunks_need_update.insert(chunk_id);
@@ -332,7 +485,7 @@ public:
         }
     }
 
-    const BlockChunk* get_chunk(uint64_t chunk_id) {
+    const BlockChunk* get_chunk(uint64_t chunk_id) const {
         auto chunk = chunks.find(chunk_id);
         if (chunk != chunks.end()) {
             return &chunk->second;
@@ -344,7 +497,7 @@ public:
     void update_vertices() {
         if (!chunks_need_update.empty()) {
             for (uint64_t chunk_id : chunks_need_update) {
-                chunks.at(chunk_id).update_vertices(chunk_id,
+                chunks.at(chunk_id).update_vertices(
                     get_chunk(chunk_id-(CHUNK_WIDTH<<32)),
                     get_chunk(chunk_id+(CHUNK_WIDTH<<32)),
                     get_chunk(chunk_id-(CHUNK_WIDTH    )),
@@ -352,7 +505,16 @@ public:
                 );
             }
             chunks_need_update.clear();
+            arena->update_vertices();
         }
+    }
+
+private:
+    static uint64_t block_chunk_id(int32_t x, int32_t y) {
+        uint64_t id = 0;
+        id += ((static_cast<int64_t>(x) - numeric_limits<int32_t>::min()) & CHUNK_ID_MASK) << 32;
+        id += ((static_cast<int64_t>(y) - numeric_limits<int32_t>::min()) & CHUNK_ID_MASK);
+        return id;
     }
 };
 

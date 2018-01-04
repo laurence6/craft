@@ -25,7 +25,9 @@ public:
         return ins;
     }
 
-    void init() {}
+    void init() {
+        block_manager.arena = new BlockVerticesArena();
+    }
 
     void add_block(Block* block) {
         block_manager.add_block(block);
