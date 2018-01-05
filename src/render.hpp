@@ -89,12 +89,10 @@ public:
     void render() const;
 
 private:
-    RenderManager() {}
+    RenderManager() = default;
 
     RenderManager(const RenderManager&) = delete;
     RenderManager(RenderManager&&)      = delete;
-
-    ~RenderManager() {}
 
     RenderManager& operator=(const RenderManager&) = delete;
     RenderManager& operator=(RenderManager&&)      = delete;

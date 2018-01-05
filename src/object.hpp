@@ -8,6 +8,7 @@
 #include "collider.hpp"
 #include "math.hpp"
 #include "render.hpp"
+#include "util.hpp"
 
 using namespace std;
 
@@ -60,7 +61,7 @@ public:
     }
 };
 
-class ObjectManager {
+class ObjectManager : private NonCopy<ObjectManager> {
 private:
     vector<Object*> objects = {};
 

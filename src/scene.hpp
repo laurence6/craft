@@ -104,12 +104,10 @@ public:
     }
 
 private:
-    Scene() {}
+    Scene() = default;
 
     Scene(const Scene&) = delete;
     Scene(Scene&&)      = delete;
-
-    ~Scene() {}
 
     Scene& operator=(const Scene&) = delete;
     Scene& operator=(Scene&&)      = delete;

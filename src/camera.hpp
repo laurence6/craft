@@ -71,12 +71,10 @@ public:
     }
 
 private:
-    Camera() {}
+    Camera() = default;
 
     Camera(const Camera&) = delete;
     Camera(Camera&&)      = delete;
-
-    ~Camera() {}
 
     Camera& operator=(const Camera&) = delete;
     Camera& operator=(Camera&&)      = delete;

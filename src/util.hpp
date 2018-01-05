@@ -13,6 +13,21 @@
 
 using namespace std;
 
+template<class T>
+class NonCopy {
+protected:
+    constexpr NonCopy() = default;
+
+    NonCopy(NonCopy&&) = default;
+
+    NonCopy& operator=(NonCopy&&) = default;
+
+private:
+    NonCopy(const NonCopy&) = delete;
+
+    NonCopy& operator=(const NonCopy&) = delete;
+};
+
 inline void _exit(int code) {
     glfwTerminate();
     exit(code);

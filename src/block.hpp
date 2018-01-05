@@ -13,6 +13,7 @@
 
 #include "config.hpp"
 #include "render.hpp"
+#include "util.hpp"
 
 using namespace std;
 
@@ -116,7 +117,7 @@ struct BlockVertexData {
     GLfloat normal_x, normal_y, normal_z;
 };
 
-class Block {
+class Block : private NonCopy<Block> {
     friend class BlockChunk;
 
 public:
@@ -218,11 +219,11 @@ constexpr size_t ARENA_BLOCK_SIZE = ARENA_BLOCK_N_VERTICES * sizeof(BlockVertexD
 
 class ArenaProxy;
 
-class BlockVerticesArena {
+class BlockVerticesArena : private NonCopy<BlockVerticesArena> {
     friend class ArenaProxy;
 
 private:
-    class ArenaBlock {
+    class ArenaBlock : private NonCopy<ArenaBlock> {
     public:
         size_t const offset;
         size_t count = 0;
@@ -330,13 +331,15 @@ private:
     }
 };
 
-class ArenaProxy {
+class ArenaProxy : private NonCopy<ArenaProxy> {
 private:
     BlockVerticesArena* const arena;
     vector<BlockVerticesArena::ArenaBlock*> arena_blocks = {};
 
 public:
     ArenaProxy(BlockVerticesArena* arena) : arena(arena) {}
+
+    ArenaProxy(ArenaProxy&&) = default;
 
     ~ArenaProxy() {
         arena->alloc_n_arena_blocks(arena_blocks, 0);
@@ -367,7 +370,7 @@ constexpr uint64_t
     BLOCK_INDEX_MASK = 0x0000'000f,
     CHUNK_ID_MASK    = 0xffff'fff0;
 
-class BlockChunk {
+class BlockChunk : private NonCopy<BlockChunk> {
     friend class BlockManager;
 
 private:
@@ -453,7 +456,7 @@ private:
     }
 };
 
-class BlockManager {
+class BlockManager : private NonCopy<BlockManager> {
 public:
     BlockVerticesArena* arena;
 
