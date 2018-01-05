@@ -217,37 +217,68 @@ private:
 
 constexpr size_t ARENA_BLOCK_SIZE = ARENA_BLOCK_N_VERTICES * sizeof(BlockVertexData);
 
-class ArenaProxy;
-
 class BlockVerticesArena : private NonCopy<BlockVerticesArena> {
-    friend class ArenaProxy;
-
 private:
-    class ArenaBlock : private NonCopy<ArenaBlock> {
+    class Block : private NonCopy<Block> {
     public:
         size_t const offset;
         size_t count = 0;
 
     public:
-        ArenaBlock(size_t offset) : offset(offset) {}
+        Block(size_t offset) : offset(offset) {}
 
         void reset() {
             count = 0;
         }
     };
 
+public:
+    class Proxy : private NonCopy<Proxy> {
+    private:
+        BlockVerticesArena* const arena;
+        vector<BlockVerticesArena::Block*> arena_blocks = {};
+
+    public:
+        Proxy(BlockVerticesArena* arena) : arena(arena) {}
+
+        Proxy(Proxy&&) = default;
+
+        ~Proxy() {
+            arena->alloc_n_arena_blocks(arena_blocks, 0);
+        }
+
+        void upload_data(const vector<BlockVertexData>& vertices) {
+            size_t n_ab = vertices.size() / ARENA_BLOCK_N_VERTICES;
+            size_t rem = vertices.size() % ARENA_BLOCK_N_VERTICES;
+            if (rem > 0) {
+                n_ab += 1;
+            } else {
+                rem = ARENA_BLOCK_N_VERTICES;
+            }
+
+            arena->alloc_n_arena_blocks(arena_blocks, n_ab);
+
+            for (size_t i = 0; i < n_ab-1; i++) {
+                arena_blocks[i]->count = ARENA_BLOCK_N_VERTICES;
+                arena->upload_data(arena_blocks[i], &vertices[ARENA_BLOCK_N_VERTICES * i]);
+            }
+            arena_blocks[n_ab-1]->count = rem;
+            arena->upload_data(arena_blocks[n_ab-1], &vertices[ARENA_BLOCK_N_VERTICES * (n_ab-1)]);
+        }
+    };
+
 private:
-    GLuint              buffer;
-    size_t              length = 0;
-    vector<ArenaBlock*> unused = {};
-    vector<ArenaBlock*> used   = {};
+    GLuint         buffer;
+    size_t         length = 0;
+    vector<Block*> unused = {};
+    vector<Block*> used   = {};
 
 public:
     BlockVerticesArena() {
         buffer = gen_buffer();
 
         for (size_t i = 0; i < ARENA_INIT; i++) {
-            unused.push_back(new ArenaBlock(ARENA_BLOCK_SIZE * length));
+            unused.push_back(new Block(ARENA_BLOCK_SIZE * length));
             length += 1;
         }
 
@@ -261,7 +292,7 @@ public:
         RenderManager& rm = RenderManager::instance();
         rm.blocks_first.clear();
         rm.blocks_count.clear();
-        for (const ArenaBlock* used_block : used) {
+        for (const Block* used_block : used) {
             rm.blocks_first.push_back(used_block->offset / sizeof(BlockVertexData));
             rm.blocks_count.push_back(used_block->count);
         }
@@ -273,7 +304,7 @@ private:
         size_t new_length = length;
 
         for (size_t i = 0; i < ARENA_GROWTH; i++) {
-            unused.push_back(new ArenaBlock(ARENA_BLOCK_SIZE * new_length));
+            unused.push_back(new Block(ARENA_BLOCK_SIZE * new_length));
             new_length += 1;
         }
 
@@ -291,13 +322,13 @@ private:
         RenderManager::instance().blocks_buffer = buffer;
     }
 
-    void alloc_n_arena_blocks(vector<ArenaBlock*>& arena_blocks, size_t n) {
+    void alloc_n_arena_blocks(vector<Block*>& arena_blocks, size_t n) {
         if (n == arena_blocks.size()) {
             return;
         } else if (n < arena_blocks.size()) {
             size_t n_to_free = arena_blocks.size() - n;
             for (size_t i = 0; i < n_to_free; i++) {
-                ArenaBlock* arena_block = arena_blocks.back();
+                Block* arena_block = arena_blocks.back();
                 arena_blocks.pop_back();
 
                 arena_block->reset();
@@ -315,7 +346,7 @@ private:
             }
 
             for (size_t i = 0; i < n_to_alloc; i++) {
-                ArenaBlock* arena_block = unused.back();
+                Block* arena_block = unused.back();
                 unused.pop_back();
 
                 used.push_back(arena_block);
@@ -325,43 +356,9 @@ private:
         }
     }
 
-    void upload_data(const ArenaBlock* arena_block, const BlockVertexData* data) const {
+    void upload_data(const Block* arena_block, const BlockVertexData* data) const {
         glBindBuffer(GL_ARRAY_BUFFER, buffer);
         glBufferSubData(GL_ARRAY_BUFFER, arena_block->offset, sizeof(BlockVertexData) * arena_block->count, data);
-    }
-};
-
-class ArenaProxy : private NonCopy<ArenaProxy> {
-private:
-    BlockVerticesArena* const arena;
-    vector<BlockVerticesArena::ArenaBlock*> arena_blocks = {};
-
-public:
-    ArenaProxy(BlockVerticesArena* arena) : arena(arena) {}
-
-    ArenaProxy(ArenaProxy&&) = default;
-
-    ~ArenaProxy() {
-        arena->alloc_n_arena_blocks(arena_blocks, 0);
-    }
-
-    void upload_data(const vector<BlockVertexData>& vertices) {
-        size_t n_ab = vertices.size() / ARENA_BLOCK_N_VERTICES;
-        size_t rem = vertices.size() % ARENA_BLOCK_N_VERTICES;
-        if (rem > 0) {
-            n_ab += 1;
-        } else {
-            rem = ARENA_BLOCK_N_VERTICES;
-        }
-
-        arena->alloc_n_arena_blocks(arena_blocks, n_ab);
-
-        for (size_t i = 0; i < n_ab-1; i++) {
-            arena_blocks[i]->count = ARENA_BLOCK_N_VERTICES;
-            arena->upload_data(arena_blocks[i], &vertices[ARENA_BLOCK_N_VERTICES * i]);
-        }
-        arena_blocks[n_ab-1]->count = rem;
-        arena->upload_data(arena_blocks[n_ab-1], &vertices[ARENA_BLOCK_N_VERTICES * (n_ab-1)]);
     }
 };
 
@@ -377,10 +374,10 @@ private:
     array<array<array<Block*, CHUNK_WIDTH>, CHUNK_WIDTH>, 256> blocks = {};
     array<array<array<  bool, CHUNK_WIDTH>, CHUNK_WIDTH>, 256> opaque = {};
 
-    ArenaProxy arena_proxy;
+    BlockVerticesArena::Proxy arena_proxy;
 
 private:
-    BlockChunk(BlockVerticesArena* arena) : arena_proxy(ArenaProxy(arena)) {}
+    BlockChunk(BlockVerticesArena* arena) : arena_proxy(BlockVerticesArena::Proxy(arena)) {}
 
     void add_block(Block* block) {
         _get_block(block->x, block->y, block->z) = block;
