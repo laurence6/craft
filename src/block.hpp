@@ -118,24 +118,23 @@ struct BlockVertexData {
 };
 
 class Block : private NonCopy<Block> {
-    friend class BlockChunk;
+    friend class BlockManager;
 
 public:
     const int32_t x;
     const int32_t y;
     const uint8_t z;
 
-public:
+protected:
+    Block(int32_t x, int32_t y, uint8_t z) : x(x), y(y), z(z) {}
+
+private:
     static bool is_opaque(const Block* block) {
         return block != nullptr && block->is_opaque();
     }
 
     virtual bool is_opaque() const = 0;
 
-protected:
-    Block(int32_t x, int32_t y, uint8_t z) : x(x), y(y), z(z) {}
-
-private:
     virtual bool six_faces() const = 0;
 
     virtual void insert_face_vertices(vector<BlockVertexData>&, uint8_t) const {}
@@ -149,11 +148,11 @@ private:
 public:
     OpaqueBlock(int32_t x, int32_t y, int32_t z, array<GLfloat, 6> tex) : Block(x, y, z), tex(tex) {}
 
+private:
     bool is_opaque() const override {
         return true;
     }
 
-private:
     bool six_faces() const override {
         return true;
     }
@@ -182,11 +181,11 @@ private:
 public:
     GrassBlock(int32_t x, int32_t y, uint8_t z, GLfloat tex) : Block(x, y, z), tex(tex) {}
 
+private:
     bool is_opaque() const override {
         return false;
     }
 
-private:
     bool six_faces() const override {
         return false;
     }
@@ -209,11 +208,6 @@ private:
         }
     }
 };
-
-/*
- * Chunk:
- *  16 * 16 * 256
- */
 
 constexpr size_t ARENA_BLOCK_SIZE = ARENA_BLOCK_N_VERTICES * sizeof(BlockVertexData);
 
@@ -362,103 +356,108 @@ private:
     }
 };
 
+/*
+ * Chunk:
+ *  16 * 16 * 256
+ */
+
 constexpr uint64_t
     CHUNK_WIDTH      = 16,
     BLOCK_INDEX_MASK = 0x0000'000f,
     CHUNK_ID_MASK    = 0xffff'fff0;
 
-class BlockChunk : private NonCopy<BlockChunk> {
-    friend class BlockManager;
-
+class BlockManager : private NonCopy<BlockManager> {
 private:
-    array<array<array<Block*, CHUNK_WIDTH>, CHUNK_WIDTH>, 256> blocks = {};
-    array<array<array<  bool, CHUNK_WIDTH>, CHUNK_WIDTH>, 256> opaque = {};
+    class Chunk : private NonCopy<Chunk> {
+    private:
+        array<array<array<Block*, CHUNK_WIDTH>, CHUNK_WIDTH>, 256> blocks = {};
+        array<array<array<  bool, CHUNK_WIDTH>, CHUNK_WIDTH>, 256> opaque = {};
 
-    BlockVerticesArena::Proxy arena_proxy;
+        BlockVerticesArena::Proxy arena_proxy;
 
-private:
-    BlockChunk(BlockVerticesArena* arena) : arena_proxy(BlockVerticesArena::Proxy(arena)) {}
+    public:
+        Chunk(BlockVerticesArena* arena) : arena_proxy(BlockVerticesArena::Proxy(arena)) {}
 
-    void add_block(Block* block) {
-        _get_block(block->x, block->y, block->z) = block;
-        _get_opaque(block->x, block->y, block->z) = Block::is_opaque(block);
-    }
-
-    Block* get_block(int32_t x, int32_t y, uint8_t z) {
-        return _get_block(x, y, z);
-    }
-
-    Block*& _get_block(int32_t x, int32_t y, uint8_t z) {
-        return blocks[z][x & BLOCK_INDEX_MASK][y & BLOCK_INDEX_MASK];
-    }
-
-    bool& _get_opaque(int32_t x, int32_t y, uint8_t z) {
-        return opaque[z][x & BLOCK_INDEX_MASK][y & BLOCK_INDEX_MASK];
-    }
-
-    void update_vertices(const BlockChunk* chunk_left, const BlockChunk* chunk_right, const BlockChunk* chunk_front, const BlockChunk* chunk_back) {
-        vector<BlockVertexData> vertices = {};
-        vertices.reserve(ARENA_BLOCK_N_VERTICES);
-
-        for (uint16_t z = 0; z < 256; z++) {
-            for (uint16_t y = 0; y < CHUNK_WIDTH; y++) {
-                Block* block = blocks[z][0][y];
-                if (block != nullptr && block->six_faces() && (chunk_left == nullptr || !chunk_left->opaque[z][15][y])) block->insert_face_vertices(vertices, BLOCK_FACE_LEFT);
-            }
+        void add_block(Block* block) {
+            _get_block(block->x, block->y, block->z) = block;
+            _get_opaque(block->x, block->y, block->z) = Block::is_opaque(block);
         }
 
-        for (uint16_t z = 0; z < 256; z++) {
-            for (uint16_t y = 0; y < CHUNK_WIDTH; y++) {
-                Block* block = blocks[z][15][y];
-                if (block != nullptr && block->six_faces() && (chunk_right == nullptr || !chunk_right->opaque[z][0][y])) block->insert_face_vertices(vertices, BLOCK_FACE_RIGHT);
-            }
+        Block* get_block(int32_t x, int32_t y, uint8_t z) {
+            return _get_block(x, y, z);
         }
 
-        for (uint16_t z = 0; z < 256; z++) {
-            for (uint16_t x = 0; x < CHUNK_WIDTH; x++) {
-                Block* block = blocks[z][x][0];
-                if (block != nullptr && block->six_faces() && (chunk_front == nullptr || !chunk_front->opaque[z][x][15])) block->insert_face_vertices(vertices, BLOCK_FACE_FRONT);
-            }
-        }
+        void update_vertices(const Chunk* chunk_left, const Chunk* chunk_right, const Chunk* chunk_front, const Chunk* chunk_back) {
+            vector<BlockVertexData> vertices = {};
+            vertices.reserve(ARENA_BLOCK_N_VERTICES);
 
-        for (uint16_t z = 0; z < 256; z++) {
-            for (uint16_t x = 0; x < CHUNK_WIDTH; x++) {
-                Block* block = blocks[z][x][15];
-                if (block != nullptr && block->six_faces() && (chunk_back == nullptr || !chunk_back->opaque[z][x][0])) block->insert_face_vertices(vertices, BLOCK_FACE_BACK);
-            }
-        }
-
-        for (uint16_t z = 0; z < 256; z++) {
-            for (uint16_t x = 0; x < CHUNK_WIDTH; x++) {
+            for (uint16_t z = 0; z < 256; z++) {
                 for (uint16_t y = 0; y < CHUNK_WIDTH; y++) {
-                    Block* block = blocks[z][x][y];
-                    if (block == nullptr) continue;
+                    Block* block = blocks[z][0][y];
+                    if (block != nullptr && block->six_faces() && (chunk_left == nullptr || !chunk_left->opaque[z][15][y])) block->insert_face_vertices(vertices, BLOCK_FACE_LEFT);
+                }
+            }
 
-                    if (block->six_faces()) {
-                        if (x > 0             && !opaque[z][x-1][y]) block->insert_face_vertices(vertices, BLOCK_FACE_LEFT );
-                        if (x < CHUNK_WIDTH-1 && !opaque[z][x+1][y]) block->insert_face_vertices(vertices, BLOCK_FACE_RIGHT);
-                        if (y > 0             && !opaque[z][x][y-1]) block->insert_face_vertices(vertices, BLOCK_FACE_FRONT);
-                        if (y < CHUNK_WIDTH-1 && !opaque[z][x][y+1]) block->insert_face_vertices(vertices, BLOCK_FACE_BACK );
+            for (uint16_t z = 0; z < 256; z++) {
+                for (uint16_t y = 0; y < CHUNK_WIDTH; y++) {
+                    Block* block = blocks[z][15][y];
+                    if (block != nullptr && block->six_faces() && (chunk_right == nullptr || !chunk_right->opaque[z][0][y])) block->insert_face_vertices(vertices, BLOCK_FACE_RIGHT);
+                }
+            }
 
-                        if (z == 0            || !opaque[z-1][x][y]) block->insert_face_vertices(vertices, BLOCK_FACE_BOTTOM);
-                        if (z == 255          || !opaque[z+1][x][y]) block->insert_face_vertices(vertices, BLOCK_FACE_TOP   );
-                    } else {
-                        block->insert_face_vertices(vertices);
+            for (uint16_t z = 0; z < 256; z++) {
+                for (uint16_t x = 0; x < CHUNK_WIDTH; x++) {
+                    Block* block = blocks[z][x][0];
+                    if (block != nullptr && block->six_faces() && (chunk_front == nullptr || !chunk_front->opaque[z][x][15])) block->insert_face_vertices(vertices, BLOCK_FACE_FRONT);
+                }
+            }
+
+            for (uint16_t z = 0; z < 256; z++) {
+                for (uint16_t x = 0; x < CHUNK_WIDTH; x++) {
+                    Block* block = blocks[z][x][15];
+                    if (block != nullptr && block->six_faces() && (chunk_back == nullptr || !chunk_back->opaque[z][x][0])) block->insert_face_vertices(vertices, BLOCK_FACE_BACK);
+                }
+            }
+
+            for (uint16_t z = 0; z < 256; z++) {
+                for (uint16_t x = 0; x < CHUNK_WIDTH; x++) {
+                    for (uint16_t y = 0; y < CHUNK_WIDTH; y++) {
+                        Block* block = blocks[z][x][y];
+                        if (block == nullptr) continue;
+
+                        if (block->six_faces()) {
+                            if (x > 0             && !opaque[z][x-1][y]) block->insert_face_vertices(vertices, BLOCK_FACE_LEFT );
+                            if (x < CHUNK_WIDTH-1 && !opaque[z][x+1][y]) block->insert_face_vertices(vertices, BLOCK_FACE_RIGHT);
+                            if (y > 0             && !opaque[z][x][y-1]) block->insert_face_vertices(vertices, BLOCK_FACE_FRONT);
+                            if (y < CHUNK_WIDTH-1 && !opaque[z][x][y+1]) block->insert_face_vertices(vertices, BLOCK_FACE_BACK );
+
+                            if (z == 0            || !opaque[z-1][x][y]) block->insert_face_vertices(vertices, BLOCK_FACE_BOTTOM);
+                            if (z == 255          || !opaque[z+1][x][y]) block->insert_face_vertices(vertices, BLOCK_FACE_TOP   );
+                        } else {
+                            block->insert_face_vertices(vertices);
+                        }
                     }
                 }
             }
+
+            arena_proxy.upload_data(vertices);
         }
 
-        arena_proxy.upload_data(vertices);
-    }
-};
+    private:
+        Block*& _get_block(int32_t x, int32_t y, uint8_t z) {
+            return blocks[z][x & BLOCK_INDEX_MASK][y & BLOCK_INDEX_MASK];
+        }
 
-class BlockManager : private NonCopy<BlockManager> {
+        bool& _get_opaque(int32_t x, int32_t y, uint8_t z) {
+            return opaque[z][x & BLOCK_INDEX_MASK][y & BLOCK_INDEX_MASK];
+        }
+    };
+
 public:
     BlockVerticesArena* arena;
 
 private:
-    unordered_map<uint64_t, BlockChunk> chunks = {};
+    unordered_map<uint64_t, Chunk> chunks      = {};
     unordered_set<uint64_t> chunks_need_update = {};
 
 public:
@@ -468,7 +467,7 @@ public:
         if (chunk != chunks.end()) {
             chunk->second.add_block(block);
         } else {
-            chunks.insert(make_pair(chunk_id, BlockChunk(arena)));
+            chunks.insert(make_pair(chunk_id, Chunk(arena)));
             chunks.at(chunk_id).add_block(block);
         }
 
@@ -485,7 +484,7 @@ public:
         }
     }
 
-    const BlockChunk* get_chunk(uint64_t chunk_id) const {
+    const Chunk* get_chunk(uint64_t chunk_id) const {
         auto chunk = chunks.find(chunk_id);
         if (chunk != chunks.end()) {
             return &chunk->second;
