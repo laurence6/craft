@@ -453,14 +453,17 @@ private:
         }
     };
 
-public:
-    BlockVerticesArena* arena;
-
 private:
     unordered_map<uint64_t, Chunk> chunks      = {};
     unordered_set<uint64_t> chunks_need_update = {};
 
+    BlockVerticesArena* arena;
+
 public:
+    void init() {
+        arena = new BlockVerticesArena();
+    }
+
     void add_block(Block* block) {
         uint64_t chunk_id = block_chunk_id(block->x, block->y);
         auto chunk = chunks.find(chunk_id);
