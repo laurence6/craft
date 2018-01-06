@@ -39,6 +39,6 @@ inline GLuint gen_buffer() {
     return buffer;
 }
 
-GLuint load_shaders(std::string vertex_shader_path, std::string fragment_shader_path);
+GLuint load_shader(std::string vertex_shader_path, std::string fragment_shader_path);
 
 #endif

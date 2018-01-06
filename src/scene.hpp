@@ -98,7 +98,7 @@ public:
             float t = static_cast<float>(now % DAYTIME) / static_cast<float>(DAYTIME) - 0.5f;
             float x = t * 5.f;
             vec3 dir = normalize(vec3(x, 0.f, 2.56f));
-            RenderManager::instance().upload_sun_dir(dir);
+            RenderManager::instance().block_shader.upload_sun_dir(dir);
             last_update = now;
         }
     }

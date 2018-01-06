@@ -13,43 +13,38 @@
 
 using namespace std;
 
-class Camera;
-
-class RenderManager {
-public:
-    GLuint          blocks_buffer;
-    vector<GLint>   blocks_first;
-    vector<GLsizei> blocks_count;
-
-private:
-    GLuint program_ID;
-    GLuint matrix_ID;
-    GLuint sampler_ID;
-    GLuint sun_dir_ID;
-    GLuint ui_program_ID;
-
-    GLuint objects_buffer;
-    GLenum objects_n_triangles = 0;
-
-    GLuint ui_buffer;
+class Shader {
+protected:
+    GLuint ID;
 
 public:
-    static RenderManager& instance() {
-        static RenderManager ins;
-        return ins;
+    void use() const {
+        glUseProgram(ID);
     }
 
+protected:
+    void init(const string vertex_shader_path, const string fragment_shader_path) {
+        ID = load_shader(vertex_shader_path, fragment_shader_path);
+    };
+};
+
+class BlockShader : public Shader {
+private:
+    GLuint MVP;
+    GLuint sun_dir;
+    GLuint sampler;
+
+public:
     void init() {
-        program_ID = load_shaders(SHADER_BLOCK_VERTEX_PATH, SHADER_BLOCK_FRAGMENT_PATH);
-        matrix_ID = glGetUniformLocation(program_ID, "MVP");
-        sampler_ID = glGetUniformLocation(program_ID, "sampler");
-        sun_dir_ID = glGetUniformLocation(program_ID, "sun_dir");
-        ui_program_ID = load_shaders(SHADER_LINE_VERTEX_PATH, SHADER_LINE_FRAGMENT_PATH);
+        Shader::init(SHADER_BLOCK_VERTEX_PATH, SHADER_BLOCK_FRAGMENT_PATH);
 
+        MVP = glGetUniformLocation(ID, "MVP");
+        sun_dir = glGetUniformLocation(ID, "sun_dir");
+        sampler = glGetUniformLocation(ID, "sampler");
 
-        GLuint texture_ID;
-        glGenTextures(1, &texture_ID);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, texture_ID);
+        GLuint texture;
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, texture);
         glTexStorage3D(GL_TEXTURE_2D_ARRAY, N_MIP_LEVEL, GL_RGBA8, SUB_TEX_WIDTH, SUB_TEX_HEIGHT, N_TILES);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         const array<vector<uint8_t>, N_MIP_LEVEL> texture_data = load_texture(TEXTURE_FOLDER_PATH, 4);
@@ -63,8 +58,54 @@ public:
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, texture_ID);
-        glUniform1i(sampler_ID, 0);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, texture);
+        glUniform1i(sampler, 0);
+    }
+
+    void upload_MVP(const mat4 mvp) const {
+        use();
+        glUniformMatrix4fv(MVP, 1, GL_FALSE, &mvp[0][0]);
+    }
+
+    void upload_sun_dir(const vec3 dir) const {
+        use();
+        glUniform3f(sun_dir, dir.x, dir.y, dir.z);
+    }
+};
+
+class LineShader : public Shader {
+public:
+    void init() {
+        Shader::init(SHADER_LINE_VERTEX_PATH, SHADER_LINE_FRAGMENT_PATH);
+    }
+};
+
+class RenderManager {
+public:
+    BlockShader block_shader;
+
+    GLuint          blocks_buffer;
+    vector<GLint>   blocks_first = {};
+    vector<GLsizei> blocks_count = {};
+
+private:
+    LineShader  line_shader;
+
+    GLuint objects_buffer;
+    GLenum objects_n_triangles = 0;
+
+    GLuint ui_buffer;
+
+public:
+    static RenderManager& instance() {
+        static RenderManager ins;
+        return ins;
+    }
+
+    void init() {
+        block_shader.init();
+
+        line_shader.init();
 
         objects_buffer = gen_buffer();
 
@@ -79,11 +120,6 @@ public:
     void upload_objects_data(const vector<GLfloat>& vertices, GLuint n_triangles) {
         upload_data(objects_buffer, vertices);
         objects_n_triangles = n_triangles;
-    }
-
-    void upload_sun_dir(const vec3 sun_dir) {
-        glUseProgram(program_ID);
-        glUniform3f(sun_dir_ID, sun_dir.x, sun_dir.y, sun_dir.z);
     }
 
     void render() const;
@@ -103,6 +139,8 @@ private:
     }
 
     void render_blocks() const {
+        block_shader.use();
+
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, blocks_buffer);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (GLvoid *)0);
@@ -123,6 +161,9 @@ private:
     }
 
     void render_objects() const {
+        // FIXME
+        return;
+
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, objects_buffer);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid *)0);
@@ -138,6 +179,8 @@ private:
     }
 
     void render_ui() const {
+        line_shader.use();
+
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, ui_buffer);
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid *)0);

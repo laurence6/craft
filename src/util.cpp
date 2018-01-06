@@ -16,7 +16,7 @@ void _exit(int code) {
     exit(code);
 }
 
-GLuint load_shaders(string vertex_shader_path, string fragment_shader_path) {
+GLuint load_shader(string vertex_shader_path, string fragment_shader_path) {
     GLuint vertex_shader_ID   = glCreateShader(GL_VERTEX_SHADER);
     GLuint fragment_shader_ID = glCreateShader(GL_FRAGMENT_SHADER);
 
