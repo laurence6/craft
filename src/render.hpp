@@ -1,15 +1,10 @@
 #ifndef RENDER_HPP
 #define RENDER_HPP
 
-#include <array>
-#include <unordered_map>
 #include <vector>
-
-#include <GL/glew.h>
 
 #include "config.hpp"
 #include "util.hpp"
-#include "texture.hpp"
 
 using namespace std;
 
@@ -32,35 +27,11 @@ class BlockShader : public Shader {
 private:
     GLuint MVP;
     GLuint sun_dir;
+    GLuint normals;
     GLuint sampler;
 
 public:
-    void init() {
-        Shader::init(SHADER_BLOCK_VERTEX_PATH, SHADER_BLOCK_FRAGMENT_PATH);
-
-        MVP = glGetUniformLocation(ID, "MVP");
-        sun_dir = glGetUniformLocation(ID, "sun_dir");
-        sampler = glGetUniformLocation(ID, "sampler");
-
-        GLuint texture;
-        glGenTextures(1, &texture);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, texture);
-        glTexStorage3D(GL_TEXTURE_2D_ARRAY, N_MIP_LEVEL, GL_RGBA8, SUB_TEX_WIDTH, SUB_TEX_HEIGHT, N_TILES);
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        const array<vector<uint8_t>, N_MIP_LEVEL> texture_data = load_texture(TEXTURE_FOLDER_PATH, 4);
-        for (uint8_t i = 0; i < N_MIP_LEVEL; i++) {
-            uint32_t w = SUB_TEX_WIDTH >> i;
-            uint32_t h = SUB_TEX_HEIGHT >> i;
-            glTexSubImage3D(GL_TEXTURE_2D_ARRAY, i, 0, 0, 0, w, h, N_TILES, GL_RGBA, GL_UNSIGNED_BYTE, &texture_data[i].front());
-        }
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, texture);
-        glUniform1i(sampler, 0);
-    }
+    void init();
 
     void upload_MVP(const mat4 mvp) const {
         use();
@@ -138,45 +109,9 @@ private:
         glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(GLfloat), &data[0], GL_STATIC_DRAW);
     }
 
-    void render_blocks() const {
-        block_shader.use();
+    void render_blocks() const;
 
-        glEnableVertexAttribArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, blocks_buffer);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (GLvoid *)0);
-
-        glEnableVertexAttribArray(1);
-        glBindBuffer(GL_ARRAY_BUFFER, blocks_buffer);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (GLvoid *)(3 * sizeof(GLfloat)));
-
-        glEnableVertexAttribArray(2);
-        glBindBuffer(GL_ARRAY_BUFFER, blocks_buffer);
-        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (GLvoid *)(6 * sizeof(GLfloat)));
-
-        glMultiDrawArrays(GL_TRIANGLES, &blocks_first[0], &blocks_count[0], blocks_first.size());
-
-        glDisableVertexAttribArray(2);
-        glDisableVertexAttribArray(1);
-        glDisableVertexAttribArray(0);
-    }
-
-    void render_objects() const {
-        // FIXME
-        return;
-
-        glEnableVertexAttribArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, objects_buffer);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid *)0);
-
-        glEnableVertexAttribArray(1);
-        glBindBuffer(GL_ARRAY_BUFFER, objects_buffer);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid *)(3 * sizeof(GLfloat)));
-
-        glDrawArrays(GL_TRIANGLES, 0, objects_n_triangles);
-
-        glDisableVertexAttribArray(1);
-        glDisableVertexAttribArray(0);
-    }
+    void render_objects() const;
 
     void render_ui() const {
         line_shader.use();

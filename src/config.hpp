@@ -4,8 +4,6 @@
 #include <array>
 #include <string>
 
-#include <GL/glew.h>
-
 #include "math.hpp"
 
 using namespace std;
@@ -43,10 +41,10 @@ constexpr uint8_t
     BLOCK_FACE_BOTTOM = 4,
     BLOCK_FACE_TOP    = 5;
 
-constexpr array<GLfloat, 6> dirt_block_tex  = {{ 2, 2, 2, 2, 2, 2 }};
-constexpr array<GLfloat, 6> grass_block_tex = {{ 1, 1, 1, 1, 2, 0 }};
-constexpr array<GLfloat, 6> stone_block_tex = {{ 3, 3, 3, 3, 3, 3 }};
-constexpr GLfloat           grass_tex = 4;
+constexpr array<uint32_t, 6> dirt_block_tex  = {{ 2, 2, 2, 2, 2, 2 }};
+constexpr array<uint32_t, 6> grass_block_tex = {{ 1, 1, 1, 1, 2, 0 }};
+constexpr array<uint32_t, 6> stone_block_tex = {{ 3, 3, 3, 3, 3, 3 }};
+constexpr uint32_t           grass_tex = 4;
 
 constexpr float player_speed = 0.05f  / 1000.f;
 constexpr float gravity_acc  = 0.015f / 1000.f;

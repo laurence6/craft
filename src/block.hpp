@@ -18,103 +18,112 @@
 using namespace std;
 
 constexpr GLfloat _min = 0.00f, _max = 0.01f;
-constexpr array<array<GLfloat, 2*3*3>, 6> id_block_vertices = {{
+constexpr array<array<array<GLfloat, 3>, 6>, 6> id_block_vertices = {{
     [BLOCK_FACE_LEFT] = {{
-        _min, _min, _max,
-        _min, _max, _max,
-        _min, _max, _min,
+        {{ _min, _min, _max }},
+        {{ _min, _max, _max }},
+        {{ _min, _max, _min }},
 
-        _min, _max, _min,
-        _min, _min, _min,
-        _min, _min, _max,
+        {{ _min, _max, _min }},
+        {{ _min, _min, _min }},
+        {{ _min, _min, _max }},
     }},
     [BLOCK_FACE_RIGHT] = {{
-        _max, _max, _max,
-        _max, _min, _max,
-        _max, _min, _min,
+        {{ _max, _max, _max }},
+        {{ _max, _min, _max }},
+        {{ _max, _min, _min }},
 
-        _max, _min, _min,
-        _max, _max, _min,
-        _max, _max, _max,
+        {{ _max, _min, _min }},
+        {{ _max, _max, _min }},
+        {{ _max, _max, _max }},
     }},
     [BLOCK_FACE_FRONT] = {{
-        _max, _min, _max,
-        _min, _min, _max,
-        _min, _min, _min,
+        {{ _max, _min, _max }},
+        {{ _min, _min, _max }},
+        {{ _min, _min, _min }},
 
-        _min, _min, _min,
-        _max, _min, _min,
-        _max, _min, _max,
+        {{ _min, _min, _min }},
+        {{ _max, _min, _min }},
+        {{ _max, _min, _max }},
     }},
     [BLOCK_FACE_BACK] = {{
-        _min, _max, _max,
-        _max, _max, _max,
-        _max, _max, _min,
+        {{ _min, _max, _max }},
+        {{ _max, _max, _max }},
+        {{ _max, _max, _min }},
 
-        _max, _max, _min,
-        _min, _max, _min,
-        _min, _max, _max,
+        {{ _max, _max, _min }},
+        {{ _min, _max, _min }},
+        {{ _min, _max, _max }},
     }},
     [BLOCK_FACE_BOTTOM] = {{
-        _max, _min, _min,
-        _min, _min, _min,
-        _min, _max, _min,
+        {{ _max, _min, _min }},
+        {{ _min, _min, _min }},
+        {{ _min, _max, _min }},
 
-        _min, _max, _min,
-        _max, _max, _min,
-        _max, _min, _min,
+        {{ _min, _max, _min }},
+        {{ _max, _max, _min }},
+        {{ _max, _min, _min }},
     }},
     [BLOCK_FACE_TOP] = {{
-        _min, _max, _max,
-        _min, _min, _max,
-        _max, _min, _max,
+        {{ _min, _max, _max }},
+        {{ _min, _min, _max }},
+        {{ _max, _min, _max }},
 
-        _max, _min, _max,
-        _max, _max, _max,
-        _min, _max, _max,
+        {{ _max, _min, _max }},
+        {{ _max, _max, _max }},
+        {{ _min, _max, _max }},
     }},
 }};
-constexpr array<GLfloat, 2*2*3*3> tf_block_vertices = {{
-    _max, _min, _max,
-    _min, _max, _max,
-    _min, _max, _min,
+constexpr array<array<GLfloat, 3>, 12> tf_block_vertices = {{
+    {{ _max, _min, _max }},
+    {{ _min, _max, _max }},
+    {{ _min, _max, _min }},
 
-    _min, _max, _min,
-    _max, _min, _min,
-    _max, _min, _max,
+    {{ _min, _max, _min }},
+    {{ _max, _min, _min }},
+    {{ _max, _min, _max }},
 
-    _max, _max, _max,
-    _min, _min, _max,
-    _min, _min, _min,
+    {{ _max, _max, _max }},
+    {{ _min, _min, _max }},
+    {{ _min, _min, _min }},
 
-    _min, _min, _min,
-    _max, _max, _min,
-    _max, _max, _max,
+    {{ _min, _min, _min }},
+    {{ _max, _max, _min }},
+    {{ _max, _max, _max }},
 }};
 
-constexpr array<GLfloat, 2*2*3> face_uv = {{
-    1.f, 0.f,
-    0.f, 0.f,
-    0.f, 1.f,
-
-    0.f, 1.f,
-    1.f, 1.f,
-    1.f, 0.f,
+constexpr array<uint8_t, 6> uv_coord = {{
+    0b10,
+    0b00,
+    0b01,
+    0b01,
+    0b11,
+    0b10,
 }};
 
 constexpr array<array<GLfloat, 3>, 6> face_normal = {{
-    [BLOCK_FACE_LEFT  ] = {{-0.4f, 0.f, 0.9f }},
-    [BLOCK_FACE_RIGHT ] = {{ 0.4f, 0.f, 0.9f }},
-    [BLOCK_FACE_FRONT ] = {{ 0.f, 0.f, 1.f }},
-    [BLOCK_FACE_BACK  ] = {{ 0.f, 0.f, 1.f }},
-    [BLOCK_FACE_BOTTOM] = {{ 0.f, 0.f,-1.f }},
-    [BLOCK_FACE_TOP   ] = {{ 0.f, 0.f, 1.f }},
+    [BLOCK_FACE_LEFT  ] = {{-0.4f, 0.0f, 0.9f }},
+    [BLOCK_FACE_RIGHT ] = {{ 0.4f, 0.0f, 0.9f }},
+    [BLOCK_FACE_FRONT ] = {{ 0.0f, 0.0f, 1.0f }},
+    [BLOCK_FACE_BACK  ] = {{ 0.0f, 0.0f, 1.0f }},
+    [BLOCK_FACE_BOTTOM] = {{ 0.0f, 0.0f,-1.0f }},
+    [BLOCK_FACE_TOP   ] = {{ 0.0f, 0.0f, 1.0f }},
 }};
 
 struct BlockVertexData {
-    GLfloat        x,        y,        z;
-    GLfloat     uv_x,     uv_y,     uv_z;
-    GLfloat normal_x, normal_y, normal_z;
+    GLfloat x, y, z;
+    GLuint param; // 3 bits: face index, 2 bits: uv_coord, 27 bits: tex index
+
+    constexpr BlockVertexData(GLfloat x, GLfloat y, GLfloat z, uint32_t face, uint32_t uv_coord, uint32_t tex) : x(x), y(y), z(z), param(gen_param(face, uv_coord, tex)) {}
+
+private:
+    constexpr GLuint gen_param(uint32_t face, uint32_t uv_coord, uint32_t tex) {
+        GLuint param = 0;
+        param += face << 29;
+        param += uv_coord << 27;
+        param += tex;
+        return param;
+    }
 };
 
 class Block : private NonCopy<Block> {
@@ -143,10 +152,10 @@ private:
 
 class OpaqueBlock : public Block {
 private:
-    const array<GLfloat, 6> tex;
+    const array<uint32_t, 6> tex;
 
 public:
-    OpaqueBlock(int32_t x, int32_t y, int32_t z, array<GLfloat, 6> tex) : Block(x, y, z), tex(tex) {}
+    OpaqueBlock(int32_t x, int32_t y, int32_t z, array<uint32_t, 6> tex) : Block(x, y, z), tex(tex) {}
 
 private:
     bool is_opaque() const override {
@@ -159,24 +168,21 @@ private:
 
     void insert_face_vertices(vector<BlockVertexData>& vertices, uint8_t f) const override {
         for (uint8_t i = 0; i < 6; i++) {
-            vertices.push_back(BlockVertexData {
-                id_block_vertices[f][i*3+0] + static_cast<GLfloat>(x) / 100.f,
-                id_block_vertices[f][i*3+1] + static_cast<GLfloat>(y) / 100.f,
-                id_block_vertices[f][i*3+2] + static_cast<GLfloat>(z) / 100.f,
-                face_uv[i*2+0],
-                face_uv[i*2+1],
-                tex[f],
-                face_normal[f][0],
-                face_normal[f][1],
-                face_normal[f][2],
-            });
+            vertices.push_back(BlockVertexData(
+                id_block_vertices[f][i][0] + static_cast<GLfloat>(x) / 100.f,
+                id_block_vertices[f][i][1] + static_cast<GLfloat>(y) / 100.f,
+                id_block_vertices[f][i][2] + static_cast<GLfloat>(z) / 100.f,
+                f,
+                uv_coord[i],
+                tex[f]
+            ));
         }
     }
 };
 
 class GrassBlock : public Block {
 private:
-    const GLfloat tex;
+    const uint32_t tex;
 
 public:
     GrassBlock(int32_t x, int32_t y, uint8_t z, GLfloat tex) : Block(x, y, z), tex(tex) {}
@@ -193,17 +199,14 @@ private:
     void insert_face_vertices(vector<BlockVertexData>& vertices) const override {
         for (uint8_t f = 0; f < 2; f++) {
             for (uint8_t i = 0; i < 6; i++) {
-                vertices.push_back(BlockVertexData {
-                    tf_block_vertices[f*18+i*3+0] + static_cast<GLfloat>(x) / 100.f,
-                    tf_block_vertices[f*18+i*3+1] + static_cast<GLfloat>(y) / 100.f,
-                    tf_block_vertices[f*18+i*3+2] + static_cast<GLfloat>(z) / 100.f,
-                    face_uv[i*2+0],
-                    face_uv[i*2+1],
-                    tex,
-                    face_normal[BLOCK_FACE_TOP][0],
-                    face_normal[BLOCK_FACE_TOP][1],
-                    face_normal[BLOCK_FACE_TOP][2],
-                });
+                vertices.push_back(BlockVertexData(
+                    tf_block_vertices[f*6+i][0] + static_cast<GLfloat>(x) / 100.f,
+                    tf_block_vertices[f*6+i][1] + static_cast<GLfloat>(y) / 100.f,
+                    tf_block_vertices[f*6+i][2] + static_cast<GLfloat>(z) / 100.f,
+                    BLOCK_FACE_TOP,
+                    uv_coord[i],
+                    tex
+                ));
             }
         }
     }
