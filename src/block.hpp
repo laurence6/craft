@@ -271,7 +271,7 @@ private:
     vector<Block*> used   = {};
 
 public:
-    BlockVerticesArena() {
+    void init() {
         buffer = gen_buffer();
 
         for (size_t i = 0; i < ARENA_INIT; i++) {
@@ -460,11 +460,11 @@ private:
     unordered_map<uint64_t, Chunk> chunks      = {};
     unordered_set<uint64_t> chunks_need_update = {};
 
-    BlockVerticesArena* arena;
+    BlockVerticesArena arena;
 
 public:
     void init() {
-        arena = new BlockVerticesArena();
+        arena.init();
     }
 
     void add_block(Block* block) {
@@ -473,7 +473,7 @@ public:
         if (chunk != chunks.end()) {
             chunk->second.add_block(block);
         } else {
-            chunks.insert(make_pair(chunk_id, Chunk(arena)));
+            chunks.insert(make_pair(chunk_id, Chunk(&arena)));
             chunks.at(chunk_id).add_block(block);
         }
 
@@ -510,7 +510,7 @@ public:
                 );
             }
             chunks_need_update.clear();
-            arena->update_vertices();
+            arena.update_vertices();
         }
     }
 
