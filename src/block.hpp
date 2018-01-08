@@ -134,17 +134,22 @@ public:
     const int32_t y;
     const uint8_t z;
 
+private:
+    const bool six_faces;
+
 protected:
-    Block(int32_t x, int32_t y, uint8_t z) : x(x), y(y), z(z) {}
+    Block(int32_t x, int32_t y, uint8_t z, bool six_faces) : x(x), y(y), z(z), six_faces(six_faces) {}
 
 private:
     static bool is_opaque(const Block* block) {
         return block != nullptr && block->is_opaque();
     }
 
-    virtual bool is_opaque() const = 0;
+    bool has_six_faces() const {
+        return six_faces;
+    }
 
-    virtual bool six_faces() const = 0;
+    virtual bool is_opaque() const = 0;
 
     virtual void insert_face_vertices(vector<BlockVertexData>&, uint8_t) const {}
     virtual void insert_face_vertices(vector<BlockVertexData>&) const {}
@@ -155,14 +160,10 @@ private:
     const array<uint32_t, 6> tex;
 
 public:
-    OpaqueBlock(int32_t x, int32_t y, int32_t z, array<uint32_t, 6> tex) : Block(x, y, z), tex(tex) {}
+    OpaqueBlock(int32_t x, int32_t y, int32_t z, array<uint32_t, 6> tex) : Block(x, y, z, true), tex(tex) {}
 
 private:
     bool is_opaque() const override {
-        return true;
-    }
-
-    bool six_faces() const override {
         return true;
     }
 
@@ -185,14 +186,10 @@ private:
     const uint32_t tex;
 
 public:
-    GrassBlock(int32_t x, int32_t y, uint8_t z, GLfloat tex) : Block(x, y, z), tex(tex) {}
+    GrassBlock(int32_t x, int32_t y, uint8_t z, GLfloat tex) : Block(x, y, z, false), tex(tex) {}
 
 private:
     bool is_opaque() const override {
-        return false;
-    }
-
-    bool six_faces() const override {
         return false;
     }
 
@@ -408,28 +405,28 @@ private:
             for (uint16_t z = 0; z < 256; z++) {
                 for (uint16_t y = 0; y < CHUNK_WIDTH; y++) {
                     Block* block = blocks[z][0][y];
-                    if (block != nullptr && block->six_faces() && (chunk_left == nullptr || !chunk_left->opaque[z][15][y])) block->insert_face_vertices(vertices, BLOCK_FACE_LEFT);
+                    if (block != nullptr && block->has_six_faces() && (chunk_left == nullptr || !chunk_left->opaque[z][15][y])) block->insert_face_vertices(vertices, BLOCK_FACE_LEFT);
                 }
             }
 
             for (uint16_t z = 0; z < 256; z++) {
                 for (uint16_t y = 0; y < CHUNK_WIDTH; y++) {
                     Block* block = blocks[z][15][y];
-                    if (block != nullptr && block->six_faces() && (chunk_right == nullptr || !chunk_right->opaque[z][0][y])) block->insert_face_vertices(vertices, BLOCK_FACE_RIGHT);
+                    if (block != nullptr && block->has_six_faces() && (chunk_right == nullptr || !chunk_right->opaque[z][0][y])) block->insert_face_vertices(vertices, BLOCK_FACE_RIGHT);
                 }
             }
 
             for (uint16_t z = 0; z < 256; z++) {
                 for (uint16_t x = 0; x < CHUNK_WIDTH; x++) {
                     Block* block = blocks[z][x][0];
-                    if (block != nullptr && block->six_faces() && (chunk_front == nullptr || !chunk_front->opaque[z][x][15])) block->insert_face_vertices(vertices, BLOCK_FACE_FRONT);
+                    if (block != nullptr && block->has_six_faces() && (chunk_front == nullptr || !chunk_front->opaque[z][x][15])) block->insert_face_vertices(vertices, BLOCK_FACE_FRONT);
                 }
             }
 
             for (uint16_t z = 0; z < 256; z++) {
                 for (uint16_t x = 0; x < CHUNK_WIDTH; x++) {
                     Block* block = blocks[z][x][15];
-                    if (block != nullptr && block->six_faces() && (chunk_back == nullptr || !chunk_back->opaque[z][x][0])) block->insert_face_vertices(vertices, BLOCK_FACE_BACK);
+                    if (block != nullptr && block->has_six_faces() && (chunk_back == nullptr || !chunk_back->opaque[z][x][0])) block->insert_face_vertices(vertices, BLOCK_FACE_BACK);
                 }
             }
 
@@ -439,7 +436,7 @@ private:
                         Block* block = blocks[z][x][y];
                         if (block == nullptr) continue;
 
-                        if (block->six_faces()) {
+                        if (block->has_six_faces()) {
                             if (x > 0             && !opaque[z][x-1][y]) block->insert_face_vertices(vertices, BLOCK_FACE_LEFT );
                             if (x < CHUNK_WIDTH-1 && !opaque[z][x+1][y]) block->insert_face_vertices(vertices, BLOCK_FACE_RIGHT);
                             if (y > 0             && !opaque[z][x][y-1]) block->insert_face_vertices(vertices, BLOCK_FACE_FRONT);
@@ -527,10 +524,11 @@ public:
 
 private:
     static uint64_t block_chunk_id(int32_t x, int32_t y) {
+        constexpr uint64_t mask = (CHUNK_ID_MASK << 32) + CHUNK_ID_MASK;
         uint64_t id = 0;
-        id += ((static_cast<int64_t>(x) - numeric_limits<int32_t>::min()) & CHUNK_ID_MASK) << 32;
-        id += ((static_cast<int64_t>(y) - numeric_limits<int32_t>::min()) & CHUNK_ID_MASK);
-        return id;
+        id += (static_cast<int64_t>(x) - numeric_limits<int32_t>::min()) << 32;
+        id += static_cast<int64_t>(y) - numeric_limits<int32_t>::min();
+        return id & mask;
     }
 };
 
