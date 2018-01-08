@@ -240,10 +240,6 @@ public:
 
         Proxy(Proxy&&) = default;
 
-        ~Proxy() {
-            arena->alloc_n_arena_blocks(arena_blocks, 0);
-        }
-
         void upload_data(const vector<BlockVertexData>& vertices) {
             size_t n_ab = vertices.size() / ARENA_BLOCK_N_VERTICES;
             size_t rem = vertices.size() % ARENA_BLOCK_N_VERTICES;
@@ -265,24 +261,27 @@ public:
     };
 
 private:
-    GLuint         buffer;
+    GLuint         vao;
+    GLuint         vbo;
     size_t         length = 0;
     vector<Block*> unused = {};
     vector<Block*> used   = {};
 
 public:
     void init() {
-        buffer = gen_buffer();
-
         for (size_t i = 0; i < ARENA_INIT; i++) {
             unused.push_back(new Block(ARENA_BLOCK_SIZE * length));
             length += 1;
         }
 
-        glBindBuffer(GL_ARRAY_BUFFER, buffer);
+        vbo = gen_vbo();
+
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(GL_ARRAY_BUFFER, ARENA_BLOCK_SIZE * length, nullptr, GL_DYNAMIC_DRAW);
 
-        RenderManager::instance().blocks_buffer = buffer;
+        vao = gen_vao();
+        RenderManager::instance().blocks_vao = vao;
+        update_vao();
     }
 
     void update_vertices() const {
@@ -296,8 +295,20 @@ public:
     }
 
 private:
+    void update_vao() const {
+        glBindVertexArray(vao);
+
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(BlockVertexData), (GLvoid *)0);
+        glVertexAttribIPointer(1, 1, GL_UNSIGNED_INT, sizeof(BlockVertexData), (GLvoid *)(3 * sizeof(GLfloat)));
+    }
+
     void expand() {
-        GLuint new_buffer = gen_buffer();
+        GLuint new_vbo = gen_vbo();
         size_t new_length = length;
 
         for (size_t i = 0; i < ARENA_GROWTH; i++) {
@@ -305,18 +316,18 @@ private:
             new_length += 1;
         }
 
-        glBindBuffer(GL_ARRAY_BUFFER, new_buffer);
+        glBindBuffer(GL_ARRAY_BUFFER, new_vbo);
         glBufferData(GL_ARRAY_BUFFER, ARENA_BLOCK_SIZE * new_length, nullptr, GL_DYNAMIC_DRAW);
 
-        glBindBuffer(GL_COPY_READ_BUFFER, buffer);
+        glBindBuffer(GL_COPY_READ_BUFFER, vbo);
         glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_ARRAY_BUFFER, 0, 0, ARENA_BLOCK_SIZE * length);
 
-        glDeleteBuffers(1, &buffer);
+        glDeleteBuffers(1, &vbo);
 
-        buffer = new_buffer;
+        vbo = new_vbo;
         length = new_length;
 
-        RenderManager::instance().blocks_buffer = buffer;
+        update_vao();
     }
 
     void alloc_n_arena_blocks(vector<Block*>& arena_blocks, size_t n) {
@@ -354,7 +365,7 @@ private:
     }
 
     void upload_data(const Block* arena_block, const BlockVertexData* data) const {
-        glBindBuffer(GL_ARRAY_BUFFER, buffer);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferSubData(GL_ARRAY_BUFFER, arena_block->offset, sizeof(BlockVertexData) * arena_block->count, data);
     }
 };

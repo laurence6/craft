@@ -137,10 +137,6 @@ int main() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    GLuint vertex_array_ID;
-    glGenVertexArrays(1, &vertex_array_ID);
-    glBindVertexArray(vertex_array_ID);
-
     RenderManager::instance().init();
     Scene::instance().init();
     Camera::instance().init();

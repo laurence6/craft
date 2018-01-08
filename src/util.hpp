@@ -33,10 +33,16 @@ inline uint64_t time_now_s() noexcept {
     return duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
 }
 
-inline GLuint gen_buffer() {
-    GLuint buffer;
-    glGenBuffers(1, &buffer);
-    return buffer;
+inline GLuint gen_vbo() {
+    GLuint vbo;
+    glGenBuffers(1, &vbo);
+    return vbo;
+}
+
+inline GLuint gen_vao() {
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+    return vao;
 }
 
 GLuint load_shader(std::string vertex_shader_path, std::string fragment_shader_path);

@@ -18,11 +18,6 @@ enum State {
     Falling,
 };
 
-struct ObjectVertexData {
-    GLfloat        x,        y,        z;
-    GLfloat     uv_x,     uv_y,     uv_z;
-};
-
 class Object {
 public:
     State state = State::Normal;
@@ -81,7 +76,7 @@ public:
             }
         }
 
-        RenderManager::instance().upload_objects_data(vertices, vertices.size() / 6);
+        // FIXME
     }
 
     const vector<Object*>& get_objects() {

@@ -55,17 +55,14 @@ class RenderManager {
 public:
     BlockShader block_shader;
 
-    GLuint          blocks_buffer;
+    GLuint          blocks_vao;
     vector<GLint>   blocks_first = {};
     vector<GLsizei> blocks_count = {};
 
 private:
     LineShader  line_shader;
 
-    GLuint objects_buffer;
-    GLenum objects_n_triangles = 0;
-
-    GLuint ui_buffer;
+    GLuint ui_vao;
 
 public:
     static RenderManager& instance() {
@@ -78,19 +75,23 @@ public:
 
         line_shader.init();
 
-        objects_buffer = gen_buffer();
+        {
+            GLuint ui_vbo = gen_vbo();
+            upload_data(ui_vbo, vector<GLfloat> {
+                -CROSSHAIR_X, 0.0, CROSSHAIR_X, 0.0,
+                0.0, -CROSSHAIR_Y, 0.0, CROSSHAIR_Y,
+            });
 
-        ui_buffer = gen_buffer();
-        upload_data(ui_buffer, vector<GLfloat> {
-            -CROSSHAIR_X, 0.0, CROSSHAIR_X, 0.0,
-            0.0, -CROSSHAIR_Y, 0.0, CROSSHAIR_Y,
-        });
-        glLineWidth(CROSSHAIR_WIDTH);
-    }
+            glLineWidth(CROSSHAIR_WIDTH);
 
-    void upload_objects_data(const vector<GLfloat>& vertices, GLuint n_triangles) {
-        upload_data(objects_buffer, vertices);
-        objects_n_triangles = n_triangles;
+            ui_vao = gen_vao();
+            glBindVertexArray(ui_vao);
+
+            glBindBuffer(GL_ARRAY_BUFFER, ui_vbo);
+
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid *)0);
+        }
     }
 
     void render() const;
@@ -104,25 +105,29 @@ private:
     RenderManager& operator=(const RenderManager&) = delete;
     RenderManager& operator=(RenderManager&&)      = delete;
 
-    static void upload_data(GLuint buffer, const vector<GLfloat>& data) {
-        glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    static void upload_data(GLuint vbo, const vector<GLfloat>& data) {
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(GLfloat), &data[0], GL_STATIC_DRAW);
     }
 
-    void render_blocks() const;
+    void render_blocks() const {
+        block_shader.use();
 
-    void render_objects() const;
+        glBindVertexArray(blocks_vao);
+
+        glMultiDrawArrays(GL_TRIANGLES, &blocks_first[0], &blocks_count[0], blocks_first.size());
+    }
+
+    void render_objects() const {
+        // FIXME
+    }
 
     void render_ui() const {
         line_shader.use();
 
-        glEnableVertexAttribArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, ui_buffer);
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid *)0);
+        glBindVertexArray(ui_vao);
 
         glDrawArrays(GL_LINES, 0, 6);
-
-        glDisableVertexAttribArray(0);
     }
 };
 
