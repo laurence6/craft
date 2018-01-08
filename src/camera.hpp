@@ -32,21 +32,19 @@ public:
         collider = new Collider(0.003f, 0.000f, 0.0195f);
     }
 
-    void start_move_forward()  { v_forward = clamp(v_forward + cam_speed, -cam_speed, cam_speed); update_velocity(); }
+#define MOVE(d, v, as1, as2)                                                                           \
+    void start_move_ ## d () { v = clamp(v as1 cam_speed, -cam_speed, cam_speed); update_velocity(); } \
+    void stop_move_  ## d () { v = clamp(v as2 cam_speed, -cam_speed, cam_speed); update_velocity(); }
 
-    void stop_move_forward()   { v_forward = clamp(v_forward - cam_speed, -cam_speed, cam_speed); update_velocity(); }
+    MOVE(forward,  v_forward, +, -)
 
-    void start_move_backward() { v_forward = clamp(v_forward - cam_speed, -cam_speed, cam_speed); update_velocity(); }
+    MOVE(backward, v_forward, -, +)
 
-    void stop_move_backward()  { v_forward = clamp(v_forward + cam_speed, -cam_speed, cam_speed); update_velocity(); }
+    MOVE(left,  v_left, +, -)
 
-    void start_move_left()  { v_left = clamp(v_left + cam_speed, -cam_speed, cam_speed); update_velocity(); }
+    MOVE(right, v_left, -, +)
 
-    void stop_move_left()   { v_left = clamp(v_left - cam_speed, -cam_speed, cam_speed); update_velocity(); }
-
-    void start_move_right() { v_left = clamp(v_left - cam_speed, -cam_speed, cam_speed); update_velocity(); }
-
-    void stop_move_right()  { v_left = clamp(v_left + cam_speed, -cam_speed, cam_speed); update_velocity(); }
+#undef MOVE
 
     void rotate(float del_x, float del_y) {
         rot = fmod(rot + del_x * cam_rot_speed, 360.f);
