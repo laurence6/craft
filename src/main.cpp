@@ -29,14 +29,14 @@ static void load_map(string map_path) {
             break;
         }
         Block* block = nullptr;
-        if (t == "dirt") {
-            block = new OpaqueBlock(x, y, z, dirt_block_tex);
-        } else if (t == "grass") {
-            block = new OpaqueBlock(x, y, z, grass_block_tex);
+        if (t == "grass") {
+            block = new GrassBlock(x, y, z);
+        } else if (t == "dirt") {
+            block = new DirtBlock(x, y, z);
         } else if (t == "stone") {
-            block = new OpaqueBlock(x, y, z, stone_block_tex);
+            block = new StoneBlock(x, y, z);
         } else if (t == "grass") {
-            block = new GrassBlock(x, y, z, grass_tex);
+            block = new Grass(x, y, z);
         }
         if (block != nullptr) {
             Scene::instance().add_block(block);

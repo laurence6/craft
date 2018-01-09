@@ -153,7 +153,7 @@ class OpaqueBlock : public Block {
 private:
     const array<uint32_t, 6> tex;
 
-public:
+protected:
     OpaqueBlock(int32_t x, int32_t y, int32_t z, array<uint32_t, 6> tex) : Block(x, y, z, true), tex(tex) {}
 
 private:
@@ -175,12 +175,27 @@ private:
     }
 };
 
-class GrassBlock : public Block {
+class GrassBlock : public OpaqueBlock {
+public:
+    GrassBlock(int32_t x, int32_t y, int32_t z) : OpaqueBlock(x, y, z, grass_block_tex) {}
+};
+
+class DirtBlock : public OpaqueBlock {
+public:
+    DirtBlock(int32_t x, int32_t y, int32_t z) : OpaqueBlock(x, y, z, dirt_block_tex) {}
+};
+
+class StoneBlock : public OpaqueBlock {
+public:
+    StoneBlock(int32_t x, int32_t y, int32_t z) : OpaqueBlock(x, y, z, stone_block_tex) {}
+};
+
+class Grass : public Block {
 private:
     const uint32_t tex;
 
 public:
-    GrassBlock(int32_t x, int32_t y, uint8_t z, GLfloat tex) : Block(x, y, z, false), tex(tex) {}
+    Grass(int32_t x, int32_t y, uint8_t z) : Block(x, y, z, false), tex(grass_tex) {}
 
 private:
     bool is_opaque() const override {
