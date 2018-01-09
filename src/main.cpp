@@ -144,6 +144,8 @@ int main() {
     load_map(MAP_PATH);
     Scene::instance().add_object(&Camera::instance());
 
+    glClearColor(0.5f, 0.6f, 0.7f, 1.f);
+
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
