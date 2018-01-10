@@ -147,6 +147,8 @@ private:
 
     virtual void insert_face_vertices(vector<BlockVertexData>&, uint8_t) const {}
     virtual void insert_face_vertices(vector<BlockVertexData>&) const {}
+
+    virtual uint16_t id() const = 0;
 };
 
 class OpaqueBlock : public Block {
@@ -178,16 +180,25 @@ private:
 class GrassBlock : public OpaqueBlock {
 public:
     GrassBlock(int32_t x, int32_t y, int32_t z) : OpaqueBlock(x, y, z, grass_block_tex) {}
+
+private:
+    uint16_t id() const override;
 };
 
 class DirtBlock : public OpaqueBlock {
 public:
     DirtBlock(int32_t x, int32_t y, int32_t z) : OpaqueBlock(x, y, z, dirt_block_tex) {}
+
+private:
+    uint16_t id() const override;
 };
 
 class StoneBlock : public OpaqueBlock {
 public:
     StoneBlock(int32_t x, int32_t y, int32_t z) : OpaqueBlock(x, y, z, stone_block_tex) {}
+
+private:
+    uint16_t id() const override;
 };
 
 class Grass : public Block {
@@ -216,6 +227,10 @@ private:
             }
         }
     }
+
+    uint16_t id() const override;
 };
+
+Block* new_block(uint16_t id, int32_t x, int32_t y, int32_t z);
 
 #endif
