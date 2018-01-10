@@ -23,21 +23,12 @@ static void load_map(string map_path) {
     }
 
     while (true) {
-        string t; long x, y; unsigned int z;
-        map_file >> t >> x >> y >> z;
+        long id, x, y, z;
+        map_file >> id >> x >> y >> z;
         if (map_file.eof()) {
             break;
         }
-        Block* block = nullptr;
-        if (t == "grass") {
-            block = new GrassBlock(x, y, z);
-        } else if (t == "dirt") {
-            block = new DirtBlock(x, y, z);
-        } else if (t == "stone") {
-            block = new StoneBlock(x, y, z);
-        } else if (t == "grass") {
-            block = new Grass(x, y, z);
-        }
+        Block* block = new_block(id, x, y, z);
         if (block != nullptr) {
             Scene::instance().add_block(block);
         }

@@ -5,6 +5,11 @@ map_ppm_path = "map.ppm"
 
 map_output_path = "map"
 
+grass_block_id = 1
+dirt_block_id  = 2
+stone_block_id = 3
+grass_id       = 4
+
 def calculate_height(r, g, b):
     avg = (r+g+b)/3
     return int(avg / 255 * 32 + 0)
@@ -33,16 +38,16 @@ with open(map_output_path, "w") as map_file:
         for _x in range(x):
             h = hs[_y * x + _x]
             for _z in range(h):
-                t = ""
+                t = 0
                 if _z < h-4:
-                    t = "stone"
+                    t = stone_block_id
                 elif _z < h-1:
-                    t = "dirt"
+                    t = dirt_block_id
                 else:
-                    t = "grass"
+                    t = grass_block_id
                 map_file.write("%s %s %s %s\n" % (
                     t,
                     _x - int(x/2),
-                    int(y/2) - _y,
+                    int(y/2) - _y - 1,
                     _z,
                 ))
