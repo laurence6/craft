@@ -131,6 +131,9 @@ public:
 private:
     const bool six_faces;
 
+public:
+    virtual ~Block() = default;
+
 protected:
     Block(int32_t x, int32_t y, uint8_t z, bool six_faces) : x(x), y(y), z(z), six_faces(six_faces) {}
 
@@ -154,6 +157,9 @@ private:
 class OpaqueBlock : public Block {
 private:
     const array<uint32_t, 6> tex;
+
+public:
+    ~OpaqueBlock() override = default;
 
 protected:
     OpaqueBlock(int32_t x, int32_t y, int32_t z, array<uint32_t, 6> tex) : Block(x, y, z, true), tex(tex) {}
@@ -207,6 +213,8 @@ private:
 
 public:
     Grass(int32_t x, int32_t y, uint8_t z) : Block(x, y, z, false), tex(grass_tex) {}
+
+    ~Grass() override = default;
 
 private:
     bool is_opaque() const override {

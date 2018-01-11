@@ -3,7 +3,6 @@
 
 #include <algorithm>
 #include <array>
-#include <limits>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -62,6 +61,10 @@ public:
             }
             arena_blocks[n_ab-1]->count = rem;
             arena->upload_data(arena_blocks[n_ab-1], &vertices[ARENA_BLOCK_N_VERTICES * (n_ab-1)]);
+        }
+
+        void reset() {
+            arena->alloc_n_arena_blocks(arena_blocks, 0);
         }
     };
 
@@ -197,6 +200,35 @@ private:
     public:
         Chunk(BlockVerticesArena* arena) : arena_proxy(BlockVerticesArena::Proxy(arena)) {}
 
+        Chunk(BlockVerticesArena* arena, uint64_t chunk_id, const vector<uint32_t>& blocks) : Chunk(arena) {
+            for (uint32_t b : blocks) {
+                add_block(unmarshal(chunk_id, b));
+            }
+        }
+
+        static vector<uint32_t> unload(Chunk* chunk) {
+            vector<uint32_t> chunk_data = {};
+            chunk_data.reserve(CHUNK_WIDTH * CHUNK_WIDTH * 128);
+
+            for (uint16_t z = 0; z < 256; z++) {
+                for (uint16_t x = 0; x < CHUNK_WIDTH; x++) {
+                    for (uint16_t y = 0; y < CHUNK_WIDTH; y++) {
+                        Block* block = chunk->blocks[z][x][y];
+                        if (block != nullptr) {
+                            chunk_data.push_back(marshal(block));
+                            delete block;
+                        }
+                    }
+                }
+            }
+
+            chunk->arena_proxy.reset();
+            delete chunk;
+
+            chunk_data.shrink_to_fit();
+            return chunk_data;
+        }
+
         void add_block(Block* block) {
             _get_block(block->x, block->y, block->z) = block;
             _get_opaque(block->x, block->y, block->z) = Block::is_opaque(block);
@@ -270,10 +302,40 @@ private:
         bool& _get_opaque(int32_t x, int32_t y, uint8_t z) {
             return opaque[z][x & BLOCK_INDEX_MASK][y & BLOCK_INDEX_MASK];
         }
+
+        // 32 bits:
+        //    x :  4,
+        //    y :  4,
+        //    z :  8,
+        //   id : 10,
+        //      :  6, (currently unused)
+        static uint32_t marshal(const Block* block) {
+            uint32_t v = 0;
+            v += (static_cast<uint32_t>(block->x) & BLOCK_INDEX_MASK) << 28;
+            v += (static_cast<uint32_t>(block->y) & BLOCK_INDEX_MASK) << 24;
+            v += static_cast<uint32_t>(block->z) << 16;
+            v += static_cast<uint32_t>(block->id()) << 6;
+            return v;
+        }
+
+        static Block* unmarshal(uint64_t chunk_id, uint32_t block) {
+            constexpr uint32_t
+                X_MASK  = 0xf000'0000,
+                Y_MASK  = 0x0f00'0000,
+                Z_MASK  = 0x00ff'0000,
+                ID_MASK = 0x0000'ffc0;
+
+            int32_t x = static_cast<int32_t>(((block & X_MASK) >> 28) + (chunk_id >> 32));
+            int32_t y = static_cast<int32_t>(((block & Y_MASK) >> 24) + (chunk_id & 0xffff'ffff));
+            uint8_t z = static_cast<uint8_t>((block & Z_MASK) >> 16);
+            uint16_t id = static_cast<uint16_t>((block & ID_MASK) >> 6);
+
+            return new_block(id, x, y, z);
+        }
     };
 
 private:
-    unordered_map<uint64_t, Chunk> chunks      = {};
+    unordered_map<uint64_t, Chunk*> chunks     = {};
     unordered_set<uint64_t> chunks_need_update = {};
 
     BlockVerticesArena arena;
@@ -287,10 +349,10 @@ public:
         uint64_t chunk_id = block_chunk_id(block->x, block->y);
         auto chunk = chunks.find(chunk_id);
         if (chunk != chunks.end()) {
-            chunk->second.add_block(block);
+            chunk->second->add_block(block);
         } else {
-            chunks.insert(make_pair(chunk_id, Chunk(&arena)));
-            chunks.at(chunk_id).add_block(block);
+            chunks.insert(make_pair(chunk_id, new Chunk(&arena)));
+            chunks.at(chunk_id)->add_block(block);
         }
 
         chunks_need_update.insert(chunk_id);
@@ -300,7 +362,7 @@ public:
         uint64_t chunk_id = block_chunk_id(x, y);
         auto chunk = chunks.find(chunk_id);
         if (chunk != chunks.end()) {
-            return chunk->second.get_block(x, y, z);
+            return chunk->second->get_block(x, y, z);
         } else {
             return nullptr;
         }
@@ -309,7 +371,7 @@ public:
     const Chunk* get_chunk(uint64_t chunk_id) const {
         auto chunk = chunks.find(chunk_id);
         if (chunk != chunks.end()) {
-            return &chunk->second;
+            return chunk->second;
         } else {
             return nullptr;
         }
@@ -318,7 +380,7 @@ public:
     void update_vertices() {
         if (!chunks_need_update.empty()) {
             for (uint64_t chunk_id : chunks_need_update) {
-                chunks.at(chunk_id).update_vertices(
+                chunks.at(chunk_id)->update_vertices(
                     get_chunk(chunk_id-(CHUNK_WIDTH<<32)),
                     get_chunk(chunk_id+(CHUNK_WIDTH<<32)),
                     get_chunk(chunk_id-(CHUNK_WIDTH    )),
@@ -334,8 +396,8 @@ private:
     static uint64_t block_chunk_id(int32_t x, int32_t y) {
         constexpr uint64_t mask = (CHUNK_ID_MASK << 32) + CHUNK_ID_MASK;
         uint64_t id = 0;
-        id += (static_cast<int64_t>(x) - numeric_limits<int32_t>::min()) << 32;
-        id += static_cast<int64_t>(y) - numeric_limits<int32_t>::min();
+        id += static_cast<uint64_t>(static_cast<uint32_t>(x)) << 32;
+        id += static_cast<uint64_t>(static_cast<uint32_t>(y));
         return id & mask;
     }
 };
