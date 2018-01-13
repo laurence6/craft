@@ -55,12 +55,14 @@ public:
 
             arena->alloc_n_arena_blocks(arena_blocks, n_ab);
 
-            for (size_t i = 0; i < n_ab-1; i++) {
-                arena_blocks[i]->count = ARENA_BLOCK_N_VERTICES;
-                arena->upload_data(arena_blocks[i], &vertices[ARENA_BLOCK_N_VERTICES * i]);
+            if (n_ab > 0) {
+                for (size_t i = 0; i < n_ab-1; i++) {
+                    arena_blocks[i]->count = ARENA_BLOCK_N_VERTICES;
+                    arena->upload_data(arena_blocks[i], &vertices[ARENA_BLOCK_N_VERTICES * i]);
+                }
+                arena_blocks[n_ab-1]->count = rem;
+                arena->upload_data(arena_blocks[n_ab-1], &vertices[ARENA_BLOCK_N_VERTICES * (n_ab-1)]);
             }
-            arena_blocks[n_ab-1]->count = rem;
-            arena->upload_data(arena_blocks[n_ab-1], &vertices[ARENA_BLOCK_N_VERTICES * (n_ab-1)]);
         }
 
         void reset() {
