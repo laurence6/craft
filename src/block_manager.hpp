@@ -382,11 +382,13 @@ public:
     void update_vertices() {
         if (!chunks_need_update.empty()) {
             for (uint64_t chunk_id : chunks_need_update) {
+                uint32_t chunk_x = chunk_id >> 32;
+                uint32_t chunk_y = chunk_id & 0xffff'ffff;
                 chunks.at(chunk_id)->update_vertices(
-                    get_chunk(chunk_id-(CHUNK_WIDTH<<32)),
-                    get_chunk(chunk_id+(CHUNK_WIDTH<<32)),
-                    get_chunk(chunk_id-(CHUNK_WIDTH    )),
-                    get_chunk(chunk_id+(CHUNK_WIDTH    ))
+                    get_chunk((static_cast<uint64_t>(chunk_x-CHUNK_WIDTH) << 32) + chunk_y),
+                    get_chunk((static_cast<uint64_t>(chunk_x+CHUNK_WIDTH) << 32) + chunk_y),
+                    get_chunk((static_cast<uint64_t>(chunk_x) << 32) + chunk_y-CHUNK_WIDTH),
+                    get_chunk((static_cast<uint64_t>(chunk_x) << 32) + chunk_y+CHUNK_WIDTH)
                 );
             }
             chunks_need_update.clear();
