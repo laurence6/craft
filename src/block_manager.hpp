@@ -192,6 +192,40 @@ constexpr uint64_t
 
 class BlockManager : private NonCopy<BlockManager> {
 private:
+    class ChunkID {
+    public:
+        uint32_t x, y;
+
+    public:
+        ChunkID(int32_t _x, int32_t _y) {
+            x = static_cast<uint32_t>(_x) & CHUNK_ID_MASK;
+            y = static_cast<uint32_t>(_y) & CHUNK_ID_MASK;
+        }
+
+        ChunkID(uint64_t chunk_id) {
+            x = chunk_id >> 32;
+            y = chunk_id & 0xffff'ffff;
+        }
+
+        template<int32_t dx, int32_t dy>
+        ChunkID update() const {
+            ChunkID chunk_id;
+            chunk_id.x = x + CHUNK_WIDTH * dx;
+            chunk_id.y = y + CHUNK_WIDTH * dy;
+            return chunk_id;
+        }
+
+        uint64_t gen_chunk_id() const {
+            uint64_t id = 0;
+            id += static_cast<uint64_t>(x) << 32;
+            id += static_cast<uint64_t>(y);
+            return id;
+        }
+
+    private:
+        ChunkID() = default;
+    };
+
     class Chunk : private NonCopy<Chunk> {
     private:
         array<array<array<Block*, CHUNK_WIDTH>, CHUNK_WIDTH>, 256> blocks = {};
@@ -320,15 +354,17 @@ private:
             return v;
         }
 
-        static Block* unmarshal(uint64_t chunk_id, uint32_t block) {
+        static Block* unmarshal(uint64_t _chunk_id, uint32_t block) {
             constexpr uint32_t
                 X_MASK  = 0xf000'0000,
                 Y_MASK  = 0x0f00'0000,
                 Z_MASK  = 0x00ff'0000,
                 ID_MASK = 0x0000'ffc0;
 
-            int32_t x = static_cast<int32_t>(((block & X_MASK) >> 28) + (chunk_id >> 32));
-            int32_t y = static_cast<int32_t>(((block & Y_MASK) >> 24) + (chunk_id & 0xffff'ffff));
+            ChunkID chunk_id = ChunkID(_chunk_id);
+
+            int32_t x = static_cast<int32_t>(((block & X_MASK) >> 28) + chunk_id.x);
+            int32_t y = static_cast<int32_t>(((block & Y_MASK) >> 24) + chunk_id.y);
             uint8_t z = static_cast<uint8_t>((block & Z_MASK) >> 16);
             uint16_t id = static_cast<uint16_t>((block & ID_MASK) >> 6);
 
@@ -348,7 +384,7 @@ public:
     }
 
     void add_block(Block* block) {
-        uint64_t chunk_id = block_chunk_id(block->x, block->y);
+        uint64_t chunk_id = ChunkID(block->x, block->y).gen_chunk_id();
         auto chunk = chunks.find(chunk_id);
         if (chunk != chunks.end()) {
             chunk->second->add_block(block);
@@ -361,7 +397,7 @@ public:
     }
 
     Block* get_block(int32_t x, int32_t y, uint8_t z) {
-        uint64_t chunk_id = block_chunk_id(x, y);
+        uint64_t chunk_id = ChunkID(x, y).gen_chunk_id();
         auto chunk = chunks.find(chunk_id);
         if (chunk != chunks.end()) {
             return chunk->second->get_block(x, y, z);
@@ -381,28 +417,18 @@ public:
 
     void update_vertices() {
         if (!chunks_need_update.empty()) {
-            for (uint64_t chunk_id : chunks_need_update) {
-                uint32_t chunk_x = chunk_id >> 32;
-                uint32_t chunk_y = chunk_id & 0xffff'ffff;
-                chunks.at(chunk_id)->update_vertices(
-                    get_chunk((static_cast<uint64_t>(chunk_x-CHUNK_WIDTH) << 32) + chunk_y),
-                    get_chunk((static_cast<uint64_t>(chunk_x+CHUNK_WIDTH) << 32) + chunk_y),
-                    get_chunk((static_cast<uint64_t>(chunk_x) << 32) + chunk_y-CHUNK_WIDTH),
-                    get_chunk((static_cast<uint64_t>(chunk_x) << 32) + chunk_y+CHUNK_WIDTH)
+            for (uint64_t _chunk_id : chunks_need_update) {
+                ChunkID chunk_id = ChunkID(_chunk_id);
+                chunks.at(_chunk_id)->update_vertices(
+                    get_chunk(chunk_id.update<-1, 0>().gen_chunk_id()),
+                    get_chunk(chunk_id.update< 1, 0>().gen_chunk_id()),
+                    get_chunk(chunk_id.update< 0,-1>().gen_chunk_id()),
+                    get_chunk(chunk_id.update< 0, 1>().gen_chunk_id())
                 );
             }
             chunks_need_update.clear();
             arena.update_vertices();
         }
-    }
-
-private:
-    static uint64_t block_chunk_id(int32_t x, int32_t y) {
-        constexpr uint64_t mask = (CHUNK_ID_MASK << 32) + CHUNK_ID_MASK;
-        uint64_t id = 0;
-        id += static_cast<uint64_t>(static_cast<uint32_t>(x)) << 32;
-        id += static_cast<uint64_t>(static_cast<uint32_t>(y));
-        return id & mask;
     }
 };
 
