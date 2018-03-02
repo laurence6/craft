@@ -281,28 +281,28 @@ private:
             for (uint16_t z = 0; z < 256; z++) {
                 for (uint16_t y = 0; y < CHUNK_WIDTH; y++) {
                     Block* block = blocks[z][0][y];
-                    if (block != nullptr && block->has_six_faces() && (chunk_left == nullptr || !chunk_left->opaque[z][15][y])) block->insert_face_vertices(vertices, BLOCK_FACE_LEFT);
+                    if (block != nullptr && block->has_six_faces() && (chunk_left == nullptr || !chunk_left->opaque[z][15][y])) block->insert_face_vertices(vertices, FACE_LEFT);
                 }
             }
 
             for (uint16_t z = 0; z < 256; z++) {
                 for (uint16_t y = 0; y < CHUNK_WIDTH; y++) {
                     Block* block = blocks[z][15][y];
-                    if (block != nullptr && block->has_six_faces() && (chunk_right == nullptr || !chunk_right->opaque[z][0][y])) block->insert_face_vertices(vertices, BLOCK_FACE_RIGHT);
+                    if (block != nullptr && block->has_six_faces() && (chunk_right == nullptr || !chunk_right->opaque[z][0][y])) block->insert_face_vertices(vertices, FACE_RIGHT);
                 }
             }
 
             for (uint16_t z = 0; z < 256; z++) {
                 for (uint16_t x = 0; x < CHUNK_WIDTH; x++) {
                     Block* block = blocks[z][x][0];
-                    if (block != nullptr && block->has_six_faces() && (chunk_front == nullptr || !chunk_front->opaque[z][x][15])) block->insert_face_vertices(vertices, BLOCK_FACE_FRONT);
+                    if (block != nullptr && block->has_six_faces() && (chunk_front == nullptr || !chunk_front->opaque[z][x][15])) block->insert_face_vertices(vertices, FACE_FRONT);
                 }
             }
 
             for (uint16_t z = 0; z < 256; z++) {
                 for (uint16_t x = 0; x < CHUNK_WIDTH; x++) {
                     Block* block = blocks[z][x][15];
-                    if (block != nullptr && block->has_six_faces() && (chunk_back == nullptr || !chunk_back->opaque[z][x][0])) block->insert_face_vertices(vertices, BLOCK_FACE_BACK);
+                    if (block != nullptr && block->has_six_faces() && (chunk_back == nullptr || !chunk_back->opaque[z][x][0])) block->insert_face_vertices(vertices, FACE_BACK);
                 }
             }
 
@@ -313,13 +313,13 @@ private:
                         if (block == nullptr) continue;
 
                         if (block->has_six_faces()) {
-                            if (x > 0             && !opaque[z][x-1][y]) block->insert_face_vertices(vertices, BLOCK_FACE_LEFT );
-                            if (x < CHUNK_WIDTH-1 && !opaque[z][x+1][y]) block->insert_face_vertices(vertices, BLOCK_FACE_RIGHT);
-                            if (y > 0             && !opaque[z][x][y-1]) block->insert_face_vertices(vertices, BLOCK_FACE_FRONT);
-                            if (y < CHUNK_WIDTH-1 && !opaque[z][x][y+1]) block->insert_face_vertices(vertices, BLOCK_FACE_BACK );
+                            if (x > 0             && !opaque[z][x-1][y]) block->insert_face_vertices(vertices, FACE_LEFT );
+                            if (x < CHUNK_WIDTH-1 && !opaque[z][x+1][y]) block->insert_face_vertices(vertices, FACE_RIGHT);
+                            if (y > 0             && !opaque[z][x][y-1]) block->insert_face_vertices(vertices, FACE_FRONT);
+                            if (y < CHUNK_WIDTH-1 && !opaque[z][x][y+1]) block->insert_face_vertices(vertices, FACE_BACK );
 
-                            if (z == 0            || !opaque[z-1][x][y]) block->insert_face_vertices(vertices, BLOCK_FACE_BOTTOM);
-                            if (z == 255          || !opaque[z+1][x][y]) block->insert_face_vertices(vertices, BLOCK_FACE_TOP   );
+                            if (z == 0            || !opaque[z-1][x][y]) block->insert_face_vertices(vertices, FACE_BOTTOM);
+                            if (z == 255          || !opaque[z+1][x][y]) block->insert_face_vertices(vertices, FACE_TOP   );
                         } else {
                             block->insert_face_vertices(vertices);
                         }

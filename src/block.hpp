@@ -13,7 +13,7 @@ using namespace std;
 
 constexpr GLfloat _min = 0.00f, _max = 0.01f;
 constexpr array<array<array<GLfloat, 3>, 6>, 6> id_block_vertices = {{
-    [BLOCK_FACE_LEFT] = {{
+    [FACE_LEFT] = {{
         {{ _min, _min, _max }},
         {{ _min, _max, _max }},
         {{ _min, _max, _min }},
@@ -22,7 +22,7 @@ constexpr array<array<array<GLfloat, 3>, 6>, 6> id_block_vertices = {{
         {{ _min, _min, _min }},
         {{ _min, _min, _max }},
     }},
-    [BLOCK_FACE_RIGHT] = {{
+    [FACE_RIGHT] = {{
         {{ _max, _max, _max }},
         {{ _max, _min, _max }},
         {{ _max, _min, _min }},
@@ -31,7 +31,7 @@ constexpr array<array<array<GLfloat, 3>, 6>, 6> id_block_vertices = {{
         {{ _max, _max, _min }},
         {{ _max, _max, _max }},
     }},
-    [BLOCK_FACE_FRONT] = {{
+    [FACE_FRONT] = {{
         {{ _max, _min, _max }},
         {{ _min, _min, _max }},
         {{ _min, _min, _min }},
@@ -40,7 +40,7 @@ constexpr array<array<array<GLfloat, 3>, 6>, 6> id_block_vertices = {{
         {{ _max, _min, _min }},
         {{ _max, _min, _max }},
     }},
-    [BLOCK_FACE_BACK] = {{
+    [FACE_BACK] = {{
         {{ _min, _max, _max }},
         {{ _max, _max, _max }},
         {{ _max, _max, _min }},
@@ -49,7 +49,7 @@ constexpr array<array<array<GLfloat, 3>, 6>, 6> id_block_vertices = {{
         {{ _min, _max, _min }},
         {{ _min, _max, _max }},
     }},
-    [BLOCK_FACE_BOTTOM] = {{
+    [FACE_BOTTOM] = {{
         {{ _max, _min, _min }},
         {{ _min, _min, _min }},
         {{ _min, _max, _min }},
@@ -58,7 +58,7 @@ constexpr array<array<array<GLfloat, 3>, 6>, 6> id_block_vertices = {{
         {{ _max, _max, _min }},
         {{ _max, _min, _min }},
     }},
-    [BLOCK_FACE_TOP] = {{
+    [FACE_TOP] = {{
         {{ _min, _max, _max }},
         {{ _min, _min, _max }},
         {{ _max, _min, _max }},
@@ -96,12 +96,12 @@ constexpr array<uint8_t, 6> uv_coord = {{
 }};
 
 constexpr array<array<GLfloat, 3>, 6> face_normal = {{
-    [BLOCK_FACE_LEFT  ] = {{-0.4f, 0.0f, 0.9f }},
-    [BLOCK_FACE_RIGHT ] = {{ 0.4f, 0.0f, 0.9f }},
-    [BLOCK_FACE_FRONT ] = {{ 0.0f, 0.0f, 1.0f }},
-    [BLOCK_FACE_BACK  ] = {{ 0.0f, 0.0f, 1.0f }},
-    [BLOCK_FACE_BOTTOM] = {{ 0.0f, 0.0f,-1.0f }},
-    [BLOCK_FACE_TOP   ] = {{ 0.0f, 0.0f, 1.0f }},
+    [FACE_LEFT  ] = {{-0.4f, 0.0f, 0.9f }},
+    [FACE_RIGHT ] = {{ 0.4f, 0.0f, 0.9f }},
+    [FACE_FRONT ] = {{ 0.0f, 0.0f, 1.0f }},
+    [FACE_BACK  ] = {{ 0.0f, 0.0f, 1.0f }},
+    [FACE_BOTTOM] = {{ 0.0f, 0.0f,-1.0f }},
+    [FACE_TOP   ] = {{ 0.0f, 0.0f, 1.0f }},
 }};
 
 struct BlockVertexData {
@@ -228,7 +228,7 @@ private:
                     tf_block_vertices[f*6+i][0] + static_cast<GLfloat>(x) / 100.f,
                     tf_block_vertices[f*6+i][1] + static_cast<GLfloat>(y) / 100.f,
                     tf_block_vertices[f*6+i][2] + static_cast<GLfloat>(z) / 100.f,
-                    BLOCK_FACE_TOP,
+                    FACE_TOP,
                     uv_coord[i],
                     tex
                 ));
