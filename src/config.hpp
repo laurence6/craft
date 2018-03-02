@@ -34,12 +34,12 @@ constexpr uint32_t SUB_TEX_WIDTH = 64, SUB_TEX_HEIGHT = 64, N_TILES = 5;
 constexpr uint8_t N_MIP_LEVEL = 7;
 
 constexpr uint8_t
-    FACE_LEFT   = 0,
-    FACE_RIGHT  = 1,
-    FACE_FRONT  = 2,
-    FACE_BACK   = 3,
-    FACE_BOTTOM = 4,
-    FACE_TOP    = 5;
+    FACE_LEFT   = 0, FACE_LEFT_BIT   = 1 << 0,
+    FACE_RIGHT  = 1, FACE_RIGHT_BIT  = 1 << 1,
+    FACE_FRONT  = 2, FACE_FRONT_BIT  = 1 << 2,
+    FACE_BACK   = 3, FACE_BACK_BIT   = 1 << 3,
+    FACE_BOTTOM = 4, FACE_BOTTOM_BIT = 1 << 4,
+    FACE_TOP    = 5, FACE_TOP_BIT    = 1 << 5;
 
 constexpr array<uint32_t, 6> grass_block_tex = {{ 1, 1, 1, 1, 2, 0 }};
 constexpr array<uint32_t, 6> dirt_block_tex  = {{ 2, 2, 2, 2, 2, 2 }};

@@ -142,6 +142,7 @@ int main() {
 
         Scene::instance().move_objects();
         Scene::instance().update_sun_dir();
+        Scene::instance().update_vertices();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
