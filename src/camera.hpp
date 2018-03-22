@@ -12,13 +12,14 @@ class Camera : public Object {
 private:
     float cam_speed = player_speed;
 
+    float rot = 0.f; // rotation around z axis / yaw
+    float pitch = 90.f;
+
     vec3 cam_d    = vec3(1.f, 0.f, 0.f);
     vec3 player_f = vec3(1.f, 0.f, 0.f);
     vec3 player_l = vec3(0.f, 1.f, 0.f);
     float v_forward = 0.f;
     float v_left    = 0.f;
-
-    float pitch = 90.f;
 
 public:
     static Camera& instance() {

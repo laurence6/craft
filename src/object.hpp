@@ -23,7 +23,6 @@ public:
     State state = State::Normal;
 
     vec3 pos;
-    float rot = 0.f; // rotation around z axis / yaw
     vec3 velocity = vec3(0.f, 0.f, 0.f);
 
     Collider* collider = nullptr;
@@ -81,10 +80,6 @@ public:
 
     const vector<Object*>& get_objects() {
         return objects;
-    }
-
-    const vector<GLfloat>& get_vertices() const {
-        return vertices;
     }
 };
 

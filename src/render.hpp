@@ -90,7 +90,7 @@ public:
             glBindBuffer(GL_ARRAY_BUFFER, ui_vbo);
 
             glEnableVertexAttribArray(0);
-            glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid *)0);
+            glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (GLvoid*)0);
         }
     }
 
@@ -107,7 +107,7 @@ private:
 
     static void upload_data(GLuint vbo, const vector<GLfloat>& data) {
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(GLfloat), &data[0], GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * data.size(), &data[0], GL_STATIC_DRAW);
     }
 
     void render_blocks() const {
