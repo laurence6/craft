@@ -3,8 +3,7 @@
 #include <GL/glew.h>
 
 #include "block.hpp"
-#include "camera.hpp"
-#include "render.hpp"
+#include "shader.hpp"
 #include "texture.hpp"
 
 void BlockShader::init() {
@@ -37,14 +36,4 @@ void BlockShader::init() {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, texture);
     glUniform1i(sampler, 0);
-}
-
-void RenderManager::render() const {
-    block_shader.upload_MVP(Camera::instance().get_mvp());
-
-    render_blocks();
-
-    render_objects();
-
-    render_ui();
 }

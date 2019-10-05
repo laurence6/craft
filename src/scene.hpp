@@ -7,9 +7,10 @@
 #include <GL/glew.h>
 
 #include "block.hpp"
+#include "camera.hpp"
 #include "config.hpp"
 #include "object.hpp"
-#include "render.hpp"
+#include "shader.hpp"
 #include "util.hpp"
 
 using namespace std;
@@ -35,11 +36,6 @@ public:
 
     void add_object(Object* obj) {
         object_manager.add_object(obj);
-    }
-
-    void update_vertices() {
-        block_manager.update_vertices();
-        object_manager.update_vertices();
     }
 
     void move_objects() {
@@ -91,6 +87,11 @@ public:
         update_vertices();
     }
 
+    void update_vertices() {
+        block_manager.update_vertices();
+        object_manager.update_vertices();
+    }
+
     void update_sun_dir() const {
         static uint64_t last_update = 0;
         uint64_t now = time_now_s();
@@ -98,9 +99,15 @@ public:
             float t = static_cast<float>(now % DAYTIME) / static_cast<float>(DAYTIME) - 0.5f;
             float x = t * 5.f;
             vec3 dir = normalize(vec3(x, 0.f, 2.56f));
-            RenderManager::instance().block_shader.upload_sun_dir(dir);
+            ShaderManager::instance().block_shader.upload_sun_dir(dir);
             last_update = now;
         }
+    }
+
+    void render() {
+        ShaderManager::instance().block_shader.upload_MVP(Camera::instance().get_mvp());
+        ShaderManager::instance().block_shader.use();
+        block_manager.render();
     }
 
 private:

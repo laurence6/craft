@@ -8,9 +8,10 @@
 
 #include "block.hpp"
 #include "camera.hpp"
-#include "render.hpp"
 #include "scene.hpp"
+#include "shader.hpp"
 #include "texture.hpp"
+#include "ui.hpp"
 #include "util.hpp"
 
 using namespace std;
@@ -128,14 +129,15 @@ int main() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    RenderManager::instance().init();
+    ShaderManager::instance().init();
     Scene::instance().init();
     Camera::instance().init();
+    UIManager::instance().init();
 
     load_map(MAP_PATH);
     Scene::instance().add_object(&Camera::instance());
 
-    glClearColor(0.5f, 0.6f, 0.7f, 1.f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.f);
 
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
@@ -146,7 +148,8 @@ int main() {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        RenderManager::instance().render();
+        Scene::instance().render();
+        UIManager::instance().render();
 
         glfwSwapBuffers(window);
     }

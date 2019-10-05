@@ -121,8 +121,6 @@ private:
 };
 
 class Block : private NonCopy<Block> {
-    friend class BlockManager;
-
 public:
     const int32_t x;
     const int32_t y;
@@ -134,10 +132,8 @@ private:
 public:
     virtual ~Block() = default;
 
-protected:
-    Block(int32_t x, int32_t y, uint8_t z, bool six_faces) : x(x), y(y), z(z), six_faces(six_faces) {}
+    virtual uint16_t id() const = 0;
 
-private:
     static bool is_opaque(const Block* block) {
         return block != nullptr && block->is_opaque();
     }
@@ -146,12 +142,14 @@ private:
         return six_faces;
     }
 
-    virtual bool is_opaque() const = 0;
-
     virtual void insert_face_vertices(vector<BlockVertexData>&, uint8_t) const {}
     virtual void insert_face_vertices(vector<BlockVertexData>&) const {}
 
-    virtual uint16_t id() const = 0;
+protected:
+    Block(int32_t x, int32_t y, uint8_t z, bool six_faces) : x(x), y(y), z(z), six_faces(six_faces) {}
+
+private:
+    virtual bool is_opaque() const = 0;
 };
 
 class OpaqueBlock : public Block {

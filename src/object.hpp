@@ -7,7 +7,7 @@
 
 #include "collider.hpp"
 #include "math.hpp"
-#include "render.hpp"
+#include "shader.hpp"
 #include "util.hpp"
 
 using namespace std;
