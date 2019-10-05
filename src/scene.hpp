@@ -15,17 +15,12 @@
 
 using namespace std;
 
-class Scene {
+class Scene : public Singleton<Scene> {
 private:
     BlockManager  block_manager  = BlockManager();
     ObjectManager object_manager = ObjectManager();
 
 public:
-    static Scene& instance() {
-        static Scene ins;
-        return ins;
-    }
-
     void init() {
         block_manager.init();
     }
@@ -109,15 +104,6 @@ public:
         ShaderManager::instance().block_shader.use();
         block_manager.render();
     }
-
-private:
-    Scene() = default;
-
-    Scene(const Scene&) = delete;
-    Scene(Scene&&)      = delete;
-
-    Scene& operator=(const Scene&) = delete;
-    Scene& operator=(Scene&&)      = delete;
 };
 
 #endif

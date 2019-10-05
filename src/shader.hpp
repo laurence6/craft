@@ -51,18 +51,13 @@ public:
     }
 };
 
-class ShaderManager {
+class ShaderManager : public Singleton<ShaderManager> {
 public:
     BlockShader block_shader;
 
     LineShader  line_shader;
 
 public:
-    static ShaderManager& instance() {
-        static ShaderManager ins;
-        return ins;
-    }
-
     void init() {
         block_shader.init();
 
@@ -70,14 +65,6 @@ public:
     }
 
 private:
-    ShaderManager() = default;
-
-    ShaderManager(const ShaderManager&) = delete;
-    ShaderManager(ShaderManager&&)      = delete;
-
-    ShaderManager& operator=(const ShaderManager&) = delete;
-    ShaderManager& operator=(ShaderManager&&)      = delete;
-
     static void upload_data(GLuint vbo, const vector<GLfloat>& data) {
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * data.size(), data.data(), GL_STATIC_DRAW);

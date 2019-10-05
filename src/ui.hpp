@@ -7,16 +7,11 @@
 #include "shader.hpp"
 #include "util.hpp"
 
-class UIManager {
+class UIManager : public Singleton<UIManager> {
 public:
     GLuint vao;
 
 public:
-    static UIManager& instance() {
-        static UIManager ins;
-        return ins;
-    }
-
     void init() {
         vector<GLfloat> data {
             -CROSSHAIR_X, 0.0, CROSSHAIR_X, 0.0,
@@ -43,15 +38,6 @@ public:
 
         glDrawArrays(GL_LINES, 0, 6);
     }
-
-private:
-    UIManager() = default;
-
-    UIManager(const UIManager&) = delete;
-    UIManager(UIManager&&)      = delete;
-
-    UIManager& operator=(const UIManager&) = delete;
-    UIManager& operator=(UIManager&&)      = delete;
 };
 
 #endif

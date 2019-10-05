@@ -5,10 +5,11 @@
 #include "config.hpp"
 #include "math.hpp"
 #include "object.hpp"
+#include "util.hpp"
 
 using namespace std;
 
-class Camera : public Object {
+class Camera : public Singleton<Camera>, public Object {
 private:
     float cam_speed = player_speed;
 
@@ -22,11 +23,6 @@ private:
     float v_left    = 0.f;
 
 public:
-    static Camera& instance() {
-        static Camera ins;
-        return ins;
-    }
-
     void init() {
         pos = vec3(0.f, 0.f, 0.5f);
 
@@ -70,14 +66,6 @@ public:
     }
 
 private:
-    Camera() = default;
-
-    Camera(const Camera&) = delete;
-    Camera(Camera&&)      = delete;
-
-    Camera& operator=(const Camera&) = delete;
-    Camera& operator=(Camera&&)      = delete;
-
     void update_velocity() {
         vec3 new_v = player_f * v_forward + player_l * v_left;
         new_v.z = 0.f;

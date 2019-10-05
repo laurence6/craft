@@ -6,7 +6,7 @@
 
 #include <GL/glew.h>
 
-template<class T>
+template<typename T>
 class NonCopy {
 protected:
     constexpr NonCopy() = default;
@@ -19,6 +19,24 @@ private:
     NonCopy(const NonCopy&) = delete;
 
     NonCopy& operator=(const NonCopy&) = delete;
+};
+
+template<typename T>
+class Singleton {
+public:
+    static T& instance() {
+        static T ins;
+        return ins;
+    }
+
+protected:
+    Singleton() = default;
+
+    Singleton(Singleton const&) = delete;
+    Singleton(Singleton&&)      = delete;
+
+    Singleton& operator=(Singleton const&) = delete;
+    Singleton& operator=(Singleton&&)      = delete;
 };
 
 void _exit(int code);
