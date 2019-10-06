@@ -86,26 +86,25 @@ void Chunk::update_vertices(uint8_t flags, array<const Chunk*, 4> adj_chunks) {
 
 void BlockManager::add_block(Block* block) {
     ChunkID chunk_id = ChunkID(block->x, block->y);
-    uint64_t _chunk_id = chunk_id.gen_chunk_id();
 
     Chunk* chunk;
-    auto chunk_i = chunks.find(_chunk_id);
+    auto chunk_i = chunks.find(chunk_id);
     if (chunk_i != chunks.end()) {
         chunk = chunk_i->second;
     } else {
-        chunk = new Chunk(_chunk_id);
-        chunks.insert(make_pair(_chunk_id, chunk));
+        chunk = new Chunk(chunk_id);
+        chunks.insert(make_pair(chunk_id, chunk));
     }
 
     chunk->add_block(block);
 
     uint8_t flags = boarder_flags(block);
-    add_chunk_need_update(_chunk_id, flags);
+    add_chunk_need_update(chunk_id, flags);
     if (flags != 0) {
-        if ((flags & FACE_LEFT_BIT) != 0) add_chunk_need_update(chunk_id.update<-1, 0>().gen_chunk_id(), FACE_RIGHT_BIT);
-        if ((flags & FACE_RIGHT_BIT) != 0) add_chunk_need_update(chunk_id.update< 1, 0>().gen_chunk_id(), FACE_LEFT_BIT);
-        if ((flags & FACE_FRONT_BIT) != 0) add_chunk_need_update(chunk_id.update<0,-1>().gen_chunk_id(), FACE_BACK_BIT);
-        if ((flags & FACE_BACK_BIT) != 0) add_chunk_need_update(chunk_id.update<0, 1>().gen_chunk_id(), FACE_FRONT_BIT);
+        if ((flags & FACE_LEFT_BIT) != 0) add_chunk_need_update(chunk_id.add(-1, 0), FACE_RIGHT_BIT);
+        if ((flags & FACE_RIGHT_BIT) != 0) add_chunk_need_update(chunk_id.add( 1, 0), FACE_LEFT_BIT);
+        if ((flags & FACE_FRONT_BIT) != 0) add_chunk_need_update(chunk_id.add(0, -1), FACE_BACK_BIT);
+        if ((flags & FACE_BACK_BIT) != 0) add_chunk_need_update(chunk_id.add(0, 1), FACE_FRONT_BIT);
     }
 }
 
@@ -118,10 +117,10 @@ void BlockManager::update_vertices() {
                 chunk_iter->second->update_vertices(
                     chunk_u.second,
                     {{
-                        get_chunk(chunk_id.update<-1, 0>().gen_chunk_id()),
-                        get_chunk(chunk_id.update< 1, 0>().gen_chunk_id()),
-                        get_chunk(chunk_id.update< 0,-1>().gen_chunk_id()),
-                        get_chunk(chunk_id.update< 0, 1>().gen_chunk_id()),
+                        get_chunk(chunk_id.add(-1, 0)),
+                        get_chunk(chunk_id.add( 1, 0)),
+                        get_chunk(chunk_id.add( 0,-1)),
+                        get_chunk(chunk_id.add( 0, 1)),
                     }}
                 );
             }

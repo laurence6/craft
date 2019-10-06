@@ -16,12 +16,20 @@ using namespace std;
  *  16 * 16 * 256
  */
 
-constexpr uint64_t
-    CHUNK_WIDTH      = 16,
-    BLOCK_INDEX_MASK = 0x0000'000f,
-    CHUNK_ID_MASK    = 0xffff'fff0;
+constexpr uint32_t CHUNK_WIDTH = 16;
+constexpr uint64_t BLOCK_INDEX_MASK = 0x0000'000f, CHUNK_ID_MASK = 0xffff'fff0;
 
 class ChunkID {
+public:
+    struct Hasher {
+        size_t operator()(ChunkID const& chunk_id) const {
+            uint64_t id = 0;
+            id += static_cast<uint64_t>(chunk_id.x) << 32;
+            id += static_cast<uint64_t>(chunk_id.y);
+            return id;
+        }
+    };
+
 public:
     uint32_t x, y;
 
@@ -31,35 +39,20 @@ public:
         y = static_cast<uint32_t>(_y) & CHUNK_ID_MASK;
     }
 
-    ChunkID(uint64_t chunk_id) {
-        x = chunk_id >> 32;
-        y = chunk_id & 0xffff'ffff;
+    ChunkID add(int32_t dx, int32_t dy) const {
+        return ChunkID { static_cast<int32_t>(x + CHUNK_WIDTH * dx), static_cast<int32_t>(y + CHUNK_WIDTH * dy) };
     }
 
-    template<int32_t dx, int32_t dy>
-    ChunkID update() const {
-        ChunkID chunk_id;
-        chunk_id.x = x + CHUNK_WIDTH * dx;
-        chunk_id.y = y + CHUNK_WIDTH * dy;
-        return chunk_id;
+    bool operator==(ChunkID const& o) const {
+        return x == o.x && y == o.y;
     }
-
-    uint64_t gen_chunk_id() const {
-        uint64_t id = 0;
-        id += static_cast<uint64_t>(x) << 32;
-        id += static_cast<uint64_t>(y);
-        return id;
-    }
-
-private:
-    ChunkID() = default;
 };
 
 class ChunkVertices : private NonCopy<ChunkVertices> {
 private:
-    GLuint         vao;
-    GLuint         vbo;
-    size_t         count = 0;
+    GLuint vao;
+    GLuint vbo;
+    size_t count = 0;
 
 public:
     ChunkVertices() {
@@ -97,7 +90,7 @@ public:
 
 class Chunk : private NonCopy<Chunk> {
 public:
-    const uint64_t chunk_id;
+    const ChunkID chunk_id;
 
 private:
     array<array<array<Block*, CHUNK_WIDTH>, CHUNK_WIDTH>, 256> blocks = {};
@@ -109,7 +102,7 @@ private:
     ChunkVertices chunk_vertices;
 
 public:
-    Chunk(uint64_t chunk_id) : chunk_id(chunk_id) {
+    Chunk(ChunkID chunk_id) : chunk_id(chunk_id) {
     }
 
     static vector<uint32_t> unload(Chunk* chunk);
@@ -153,14 +146,12 @@ private:
         return v;
     }
 
-    static Block* unmarshal(uint64_t _chunk_id, uint32_t block) {
+    static Block* unmarshal(ChunkID chunk_id, uint32_t block) {
         constexpr uint32_t
             X_MASK  = 0xf000'0000,
             Y_MASK  = 0x0f00'0000,
             Z_MASK  = 0x00ff'0000,
             ID_MASK = 0x0000'ffc0;
-
-        ChunkID chunk_id = ChunkID(_chunk_id);
 
         int32_t x = static_cast<int32_t>(((block & X_MASK) >> 28) + chunk_id.x);
         int32_t y = static_cast<int32_t>(((block & Y_MASK) >> 24) + chunk_id.y);
@@ -173,8 +164,8 @@ private:
 
 class BlockManager : private NonCopy<BlockManager> {
 private:
-    unordered_map<uint64_t, Chunk*>  chunks             = {};
-    unordered_map<uint64_t, uint8_t> chunks_need_update = {};
+    unordered_map<ChunkID, Chunk*, ChunkID::Hasher>  chunks             = {};
+    unordered_map<ChunkID, uint8_t, ChunkID::Hasher> chunks_need_update = {};
 
 public:
     void init() {
@@ -183,7 +174,7 @@ public:
     void add_block(Block* block);
 
     Block* get_block(int32_t x, int32_t y, uint8_t z) {
-        uint64_t chunk_id = ChunkID(x, y).gen_chunk_id();
+        ChunkID chunk_id { x, y };
         auto chunk = chunks.find(chunk_id);
         if (chunk != chunks.end()) {
             return chunk->second->get_block(x, y, z);
@@ -192,7 +183,7 @@ public:
         }
     }
 
-    Chunk const* get_chunk(uint64_t chunk_id) const {
+    Chunk const* get_chunk(ChunkID chunk_id) const {
         auto chunk = chunks.find(chunk_id);
         if (chunk != chunks.end()) {
             return chunk->second;
@@ -201,7 +192,7 @@ public:
         }
     }
 
-    void add_chunk_need_update(uint64_t chunk_id, uint8_t flags) {
+    void add_chunk_need_update(ChunkID chunk_id, uint8_t flags) {
         auto chunk_u_iter = chunks_need_update.find(chunk_id);
         if (chunk_u_iter != chunks_need_update.end()) {
             chunk_u_iter->second |= flags;
