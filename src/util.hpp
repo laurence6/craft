@@ -11,11 +11,13 @@ class NonCopy {
 protected:
     constexpr NonCopy() = default;
 
-    NonCopy(NonCopy&&) = default;
+    NonCopy(NonCopy&&) noexcept = default;
 
-    NonCopy& operator=(NonCopy&&) = default;
+    NonCopy& operator=(NonCopy&&) noexcept = default;
 
-private:
+    ~NonCopy() = default;
+
+public:
     NonCopy(const NonCopy&) = delete;
 
     NonCopy& operator=(const NonCopy&) = delete;
@@ -32,6 +34,9 @@ public:
 protected:
     Singleton() = default;
 
+    ~Singleton() = default;
+
+public:
     Singleton(Singleton const&) = delete;
     Singleton(Singleton&&)      = delete;
 
@@ -73,6 +78,6 @@ inline void del_vao(GLuint& vao) {
     vao = 0;
 }
 
-GLuint load_shader(std::string vertex_shader_path, std::string fragment_shader_path);
+GLuint load_shader(std::string const& vertex_shader_path, std::string const& fragment_shader_path);
 
 #endif

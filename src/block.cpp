@@ -20,8 +20,9 @@ Block* new_block(uint16_t id, int32_t x, int32_t y, int32_t z) {
 #define X(ID, BLOCK) case ID: return new BLOCK(x, y, z);
         BLOCKS
 #undef X
+        default:
+            cerr << "Undefined block id " << id << endl;
+            _exit(1);
+            return nullptr;
     }
-    cerr << "Undefined block id " << id << endl;
-    _exit(1);
-    return nullptr;
 }

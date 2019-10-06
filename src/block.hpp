@@ -113,8 +113,8 @@ struct BlockVertexData {
 private:
     constexpr GLuint gen_param(uint32_t face, uint32_t uv_coord, uint32_t tex) {
         GLuint param = 0;
-        param += face << 29;
-        param += uv_coord << 27;
+        param += face << 29u;
+        param += uv_coord << 27u;
         param += tex;
         return param;
     }
@@ -156,9 +156,6 @@ class OpaqueBlock : public Block {
 private:
     const array<uint32_t, 6> tex;
 
-public:
-    ~OpaqueBlock() override = default;
-
 protected:
     OpaqueBlock(int32_t x, int32_t y, int32_t z, array<uint32_t, 6> tex) : Block(x, y, z, true), tex(tex) {}
 
@@ -169,7 +166,7 @@ private:
 
     void insert_face_vertices(vector<BlockVertexData>& vertices, uint8_t f) const override {
         for (uint8_t i = 0; i < 6; i++) {
-            vertices.push_back(BlockVertexData(
+            vertices.emplace_back(BlockVertexData(
                 id_block_vertices[f][i][0] + static_cast<GLfloat>(x) / 100.f,
                 id_block_vertices[f][i][1] + static_cast<GLfloat>(y) / 100.f,
                 id_block_vertices[f][i][2] + static_cast<GLfloat>(z) / 100.f,
@@ -212,8 +209,6 @@ private:
 public:
     Grass(int32_t x, int32_t y, uint8_t z) : Block(x, y, z, false), tex(grass_tex) {}
 
-    ~Grass() override = default;
-
 private:
     bool is_opaque() const override {
         return false;
@@ -222,7 +217,7 @@ private:
     void insert_face_vertices(vector<BlockVertexData>& vertices) const override {
         for (uint8_t f = 0; f < 2; f++) {
             for (uint8_t i = 0; i < 6; i++) {
-                vertices.push_back(BlockVertexData(
+                vertices.emplace_back(BlockVertexData(
                     tf_block_vertices[f*6+i][0] + static_cast<GLfloat>(x) / 100.f,
                     tf_block_vertices[f*6+i][1] + static_cast<GLfloat>(y) / 100.f,
                     tf_block_vertices[f*6+i][2] + static_cast<GLfloat>(z) / 100.f,

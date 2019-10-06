@@ -16,7 +16,7 @@
 
 using namespace std;
 
-static void load_map(string map_path) {
+static void load_map(string const& map_path) {
     ifstream map_file(map_path);
     if (!map_file.is_open()) {
         cerr << "Cannot open " << map_path << endl;
@@ -72,8 +72,8 @@ static void key_callback(GLFWwindow* window, int key, int, int action, int) {
 static void cursor_pos_callback(GLFWwindow*, double posx, double posy) {
     static double last_posx = posx, last_posy = posy;
 
-    float del_x = static_cast<float>(last_posx - posx);
-    float del_y = static_cast<float>(posy - last_posy);
+    auto del_x = static_cast<float>(last_posx - posx);
+    auto del_y = static_cast<float>(posy - last_posy);
     last_posx = posx;
     last_posy = posy;
 
@@ -97,7 +97,7 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
 }
 
 int main() {
-    if (!glfwInit()) {
+    if (glfwInit() == 0) {
         _exit(1);
     }
 
@@ -107,7 +107,7 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, nullptr, nullptr);
-    if (!window) {
+    if (window == nullptr) {
         _exit(1);
     }
 
@@ -139,7 +139,7 @@ int main() {
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.f);
 
-    while (!glfwWindowShouldClose(window)) {
+    while (glfwWindowShouldClose(window) == 0) {
         glfwPollEvents();
 
         Scene::instance().move_objects();

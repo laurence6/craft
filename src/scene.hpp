@@ -37,7 +37,7 @@ public:
         static uint64_t last_update = time_now_ms();
 
         uint64_t now = time_now_ms();
-        float del_t = static_cast<float>(now - last_update);
+        auto del_t = static_cast<float>(now - last_update);
 
         for (Object* object : object_manager.get_objects()) {
             if (object->state == State::Fixed) {

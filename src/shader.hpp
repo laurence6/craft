@@ -18,7 +18,7 @@ public:
     }
 
 protected:
-    void init(const string vertex_shader_path, const string fragment_shader_path) {
+    void init(string const& vertex_shader_path, string const& fragment_shader_path) {
         ID = load_shader(vertex_shader_path, fragment_shader_path);
     };
 };
@@ -54,13 +54,11 @@ public:
 class ShaderManager : public Singleton<ShaderManager> {
 public:
     BlockShader block_shader;
-
-    LineShader  line_shader;
+    LineShader line_shader;
 
 public:
     void init() {
         block_shader.init();
-
         line_shader.init();
     }
 

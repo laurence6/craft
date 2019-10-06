@@ -58,7 +58,7 @@ public:
         update_velocity();
     }
 
-    const mat4 get_mvp() const {
+    mat4 get_mvp() const {
         const mat4 projection = perspective(FOVY, ASPECT, Z_NEAR, Z_FAR);
         mat4 view = lookAt(pos, pos + cam_d, vec3(0.f, 0.f, 1.f));
         mat4 mvp = projection * view;

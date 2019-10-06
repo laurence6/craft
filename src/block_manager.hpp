@@ -24,7 +24,7 @@ public:
     struct Hasher {
         size_t operator()(ChunkID const& chunk_id) const {
             uint64_t id = 0;
-            id += static_cast<uint64_t>(chunk_id.x) << 32;
+            id += static_cast<uint64_t>(chunk_id.x) << 32u;
             id += static_cast<uint64_t>(chunk_id.y);
             return id;
         }
@@ -102,7 +102,7 @@ private:
     ChunkVertices chunk_vertices;
 
 public:
-    Chunk(ChunkID chunk_id) : chunk_id(chunk_id) {
+    explicit Chunk(ChunkID chunk_id) : chunk_id(chunk_id) {
     }
 
     static vector<uint32_t> unload(Chunk* chunk);
@@ -124,11 +124,11 @@ public:
 
 private:
     Block*& _get_block(int32_t x, int32_t y, uint8_t z) {
-        return blocks[z][x & BLOCK_INDEX_MASK][y & BLOCK_INDEX_MASK];
+        return blocks[z][static_cast<uint64_t>(x) & BLOCK_INDEX_MASK][static_cast<uint64_t>(y) & BLOCK_INDEX_MASK];
     }
 
     bool& _get_opaque(int32_t x, int32_t y, uint8_t z) {
-        return opaque[z][x & BLOCK_INDEX_MASK][y & BLOCK_INDEX_MASK];
+        return opaque[z][static_cast<uint64_t>(x) & BLOCK_INDEX_MASK][static_cast<uint64_t>(y) & BLOCK_INDEX_MASK];
     }
 
     // 32 bits:
@@ -139,24 +139,23 @@ private:
     //      :  6, (currently unused)
     static uint32_t marshal(Block const* block) {
         uint32_t v = 0;
-        v += (static_cast<uint32_t>(block->x) & BLOCK_INDEX_MASK) << 28;
-        v += (static_cast<uint32_t>(block->y) & BLOCK_INDEX_MASK) << 24;
-        v += static_cast<uint32_t>(block->z) << 16;
-        v += static_cast<uint32_t>(block->id()) << 6;
+        v += (static_cast<uint32_t>(block->x) & BLOCK_INDEX_MASK) << 28u;
+        v += (static_cast<uint32_t>(block->y) & BLOCK_INDEX_MASK) << 24u;
+        v += static_cast<uint32_t>(block->z) << 16u;
+        v += static_cast<uint32_t>(block->id()) << 6u;
         return v;
     }
 
     static Block* unmarshal(ChunkID chunk_id, uint32_t block) {
-        constexpr uint32_t
-            X_MASK  = 0xf000'0000,
-            Y_MASK  = 0x0f00'0000,
-            Z_MASK  = 0x00ff'0000,
-            ID_MASK = 0x0000'ffc0;
+        constexpr uint32_t X_MASK  = 0xf000'0000;
+        constexpr uint32_t Y_MASK  = 0x0f00'0000;
+        constexpr uint32_t Z_MASK  = 0x00ff'0000;
+        constexpr uint32_t ID_MASK = 0x0000'ffc0;
 
-        int32_t x = static_cast<int32_t>(((block & X_MASK) >> 28) + chunk_id.x);
-        int32_t y = static_cast<int32_t>(((block & Y_MASK) >> 24) + chunk_id.y);
-        uint8_t z = static_cast<uint8_t>((block & Z_MASK) >> 16);
-        uint16_t id = static_cast<uint16_t>((block & ID_MASK) >> 6);
+        auto x = static_cast<int32_t>(((block & X_MASK) >> 28u) + chunk_id.x);
+        auto y = static_cast<int32_t>(((block & Y_MASK) >> 24u) + chunk_id.y);
+        auto z = static_cast<uint8_t>((block & Z_MASK) >> 16u);
+        auto id = static_cast<uint16_t>((block & ID_MASK) >> 6u);
 
         return new_block(id, x, y, z);
     }
@@ -178,18 +177,16 @@ public:
         auto chunk = chunks.find(chunk_id);
         if (chunk != chunks.end()) {
             return chunk->second->get_block(x, y, z);
-        } else {
-            return nullptr;
         }
+        return nullptr;
     }
 
     Chunk const* get_chunk(ChunkID chunk_id) const {
         auto chunk = chunks.find(chunk_id);
         if (chunk != chunks.end()) {
             return chunk->second;
-        } else {
-            return nullptr;
         }
+        return nullptr;
     }
 
     void add_chunk_need_update(ChunkID chunk_id, uint8_t flags) {
@@ -211,9 +208,8 @@ public:
 
 private:
     static uint8_t boarder_flags(Block const* block) {
-        const uint8_t
-            x = block->x & BLOCK_INDEX_MASK,
-            y = block->y & BLOCK_INDEX_MASK;
+        const uint8_t x = static_cast<uint64_t>(block->x) & BLOCK_INDEX_MASK;
+        const uint8_t y = static_cast<uint64_t>(block->y) & BLOCK_INDEX_MASK;
 
         uint8_t flags = 0;
 

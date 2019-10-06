@@ -1,8 +1,8 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
-#include <memory>
 #include <string>
+#include <vector>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -16,11 +16,11 @@ void _exit(int code) {
     exit(code);
 }
 
-GLuint load_shader(string vertex_shader_path, string fragment_shader_path) {
+GLuint load_shader(string const& vertex_shader_path, string const& fragment_shader_path) {
     GLuint vertex_shader_ID   = glCreateShader(GL_VERTEX_SHADER);
     GLuint fragment_shader_ID = glCreateShader(GL_FRAGMENT_SHADER);
 
-    string vertex_shader_code = "";
+    string vertex_shader_code;
     ifstream vertex_shader_stream(vertex_shader_path);
     if (vertex_shader_stream.is_open()) {
         string line;
@@ -32,7 +32,7 @@ GLuint load_shader(string vertex_shader_path, string fragment_shader_path) {
         _exit(1);
     }
 
-    string fragment_shader_code = "";
+    string fragment_shader_code;
     ifstream fragment_shader_stream(fragment_shader_path);
     if (fragment_shader_stream.is_open()) {
         string line;
@@ -44,16 +44,16 @@ GLuint load_shader(string vertex_shader_path, string fragment_shader_path) {
     GLint result = GL_FALSE;
     int info_log_length;
 
-    const char* vertex_shader_p = vertex_shader_code.c_str();
+    char const* vertex_shader_p = vertex_shader_code.c_str();
     glShaderSource(vertex_shader_ID, 1, &vertex_shader_p, nullptr);
     glCompileShader(vertex_shader_ID);
 
     glGetShaderiv(vertex_shader_ID, GL_COMPILE_STATUS, &result);
     glGetShaderiv(vertex_shader_ID, GL_INFO_LOG_LENGTH, &info_log_length);
     if (info_log_length > 0) {
-        unique_ptr<char[]> error_message { new char[info_log_length] };
-        glGetShaderInfoLog(vertex_shader_ID, info_log_length, nullptr, &error_message[0]);
-        cerr << error_message.get() << endl;
+        vector<char> error_message(info_log_length);
+        glGetShaderInfoLog(vertex_shader_ID, info_log_length, nullptr, error_message.data());
+        cerr << error_message.data() << endl;
         _exit(1);
     }
 
@@ -64,9 +64,9 @@ GLuint load_shader(string vertex_shader_path, string fragment_shader_path) {
     glGetShaderiv(fragment_shader_ID, GL_COMPILE_STATUS, &result);
     glGetShaderiv(fragment_shader_ID, GL_INFO_LOG_LENGTH, &info_log_length);
     if (info_log_length > 0) {
-        unique_ptr<char[]> error_message { new char[info_log_length] };
-        glGetShaderInfoLog(fragment_shader_ID, info_log_length, nullptr, &error_message[0]);
-        cerr << error_message.get() << endl;
+        vector<char> error_message(info_log_length);
+        glGetShaderInfoLog(fragment_shader_ID, info_log_length, nullptr, error_message.data());
+        cerr << error_message.data() << endl;
         _exit(1);
     }
 
@@ -78,9 +78,9 @@ GLuint load_shader(string vertex_shader_path, string fragment_shader_path) {
     glGetProgramiv(program_ID, GL_LINK_STATUS, &result);
     glGetProgramiv(program_ID, GL_INFO_LOG_LENGTH, &info_log_length);
     if (info_log_length > 0) {
-        unique_ptr<char[]> error_message { new char[info_log_length] };
-        glGetProgramInfoLog(program_ID, info_log_length, nullptr, &error_message[0]);
-        cerr << error_message.get() << endl;
+        vector<char> error_message(info_log_length);
+        glGetProgramInfoLog(program_ID, info_log_length, nullptr, error_message.data());
+        cerr << error_message.data() << endl;
         _exit(1);
     }
 
