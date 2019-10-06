@@ -100,8 +100,8 @@ public:
     }
 
     void render() {
-        ShaderManager::instance().block_shader.upload_MVP(Camera::instance().get_mvp());
         ShaderManager::instance().block_shader.use();
+        ShaderManager::instance().block_shader.upload_MVP(Camera::instance().get_mvp());
         block_manager.render();
     }
 };
