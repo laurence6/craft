@@ -20,7 +20,7 @@ const char* const WINDOW_TITLE = "craft";
 
 constexpr float FOVY = radians(60.f);
 constexpr float ASPECT = 1280.f / 960.f;
-constexpr float Z_NEAR = 0.001f, Z_FAR = 100.f;
+constexpr float Z_NEAR = 0.01f, Z_FAR = 1000.f;
 
 constexpr float CROSSHAIR_X = 30.f / 1280.f, CROSSHAIR_Y = 32.f / 960.f, CROSSHAIR_WIDTH = 4.f;
 
@@ -46,10 +46,10 @@ constexpr array<uint32_t, 6> dirt_block_tex  = {{ 2, 2, 2, 2, 2, 2 }};
 constexpr array<uint32_t, 6> stone_block_tex = {{ 3, 3, 3, 3, 3, 3 }};
 constexpr uint32_t           grass_tex = 4;
 
-constexpr float player_speed = 0.05f  / 1000.f;
-constexpr float gravity_acc  = 0.015f / 1000.f;
-constexpr float fall_speed   = 0.3f   / 1000.f;
-constexpr float jump_speed   = 0.2f   / 1000.f;
+constexpr float player_speed = 0.05f  / 10.f;
+constexpr float gravity_acc  = 0.015f / 10.f;
+constexpr float fall_speed   = 0.3f   / 10.f;
+constexpr float jump_speed   = 0.2f   / 10.f;
 
 constexpr float cam_rot_speed = 0.25f;
 

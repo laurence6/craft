@@ -11,7 +11,7 @@
 
 using namespace std;
 
-constexpr GLfloat _min = 0.00f, _max = 0.01f;
+constexpr GLfloat _min = 0.f, _max = 1.f;
 constexpr array<array<array<GLfloat, 3>, 6>, 6> id_block_vertices = {{
     [FACE_LEFT] = {{
         {{ _min, _min, _max }},
@@ -167,9 +167,9 @@ private:
     void insert_face_vertices(vector<BlockVertexData>& vertices, uint8_t f) const override {
         for (uint8_t i = 0; i < 6; i++) {
             vertices.emplace_back(BlockVertexData(
-                id_block_vertices[f][i][0] + static_cast<GLfloat>(x) / 100.f,
-                id_block_vertices[f][i][1] + static_cast<GLfloat>(y) / 100.f,
-                id_block_vertices[f][i][2] + static_cast<GLfloat>(z) / 100.f,
+                id_block_vertices[f][i][0] + static_cast<GLfloat>(x),
+                id_block_vertices[f][i][1] + static_cast<GLfloat>(y),
+                id_block_vertices[f][i][2] + static_cast<GLfloat>(z),
                 f,
                 uv_coord[i],
                 tex[f]
@@ -218,9 +218,9 @@ private:
         for (uint8_t f = 0; f < 2; f++) {
             for (uint8_t i = 0; i < 6; i++) {
                 vertices.emplace_back(BlockVertexData(
-                    tf_block_vertices[f*6+i][0] + static_cast<GLfloat>(x) / 100.f,
-                    tf_block_vertices[f*6+i][1] + static_cast<GLfloat>(y) / 100.f,
-                    tf_block_vertices[f*6+i][2] + static_cast<GLfloat>(z) / 100.f,
+                    tf_block_vertices[f*6+i][0] + static_cast<GLfloat>(x),
+                    tf_block_vertices[f*6+i][1] + static_cast<GLfloat>(y),
+                    tf_block_vertices[f*6+i][2] + static_cast<GLfloat>(z),
                     FACE_TOP,
                     uv_coord[i],
                     tex

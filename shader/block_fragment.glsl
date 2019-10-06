@@ -15,7 +15,7 @@ void main() {
         discard;
     }
 
-    float fog = clamp(gl_FragCoord.w / gl_FragCoord.z + 0.2, 0.0, 1.0);
+    float fog = clamp(gl_FragCoord.w / gl_FragCoord.z + 20., 0.0, 1.0);
     fog = pow(fog, 8);
 
     color = vec4(tex_color.rgb * light, tex_color.a);

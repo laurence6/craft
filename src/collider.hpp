@@ -39,12 +39,12 @@ public:
         float max_y = pos.y + radius;
         float min_z = pos.z - height_l;
         float max_z = pos.z + height_u;
-        auto min_x_b = static_cast<int32_t>(floor(min_x * 100.f + 0.001f));
-        auto max_x_b = static_cast<int32_t>(floor(max_x * 100.f - 0.001f));
-        auto min_y_b = static_cast<int32_t>(floor(min_y * 100.f + 0.001f));
-        auto max_y_b = static_cast<int32_t>(floor(max_y * 100.f - 0.001f));
-        auto min_z_b = static_cast<uint8_t>(floor(min_z * 100.f + 0.001f));
-        auto max_z_b = static_cast<uint8_t>(floor(max_z * 100.f - 0.001f));
+        auto min_x_b = static_cast<int32_t>(floor(min_x + 0.1f));
+        auto max_x_b = static_cast<int32_t>(floor(max_x - 0.1f));
+        auto min_y_b = static_cast<int32_t>(floor(min_y + 0.1f));
+        auto max_y_b = static_cast<int32_t>(floor(max_y - 0.1f));
+        auto min_z_b = static_cast<uint8_t>(floor(min_z + 0.1f));
+        auto max_z_b = static_cast<uint8_t>(floor(max_z - 0.1f));
 
         bool found = false;
         for (int32_t z = min_z_b; z <= max_z_b; z++) {
@@ -71,7 +71,7 @@ public:
                 }
             }
         }
-        float highest_z = static_cast<float>(highest_z_b) / 100.f;
+        float highest_z = static_cast<float>(highest_z_b);
         float grounded = (min_z - highest_z < 5e-6f) ? highest_z + height_l : NAN;
 
         return Collision { found, grounded };

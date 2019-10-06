@@ -24,9 +24,9 @@ private:
 
 public:
     void init() {
-        pos = vec3(0.f, 0.f, 0.5f);
+        pos = vec3(0.f, 0.f, 50.f);
 
-        collider = new Collider(0.003f, 0.000f, 0.0195f);
+        collider = new Collider(0.3f, 0.0f, 1.95f);
     }
 
     vec3 const& get_forward() const {
