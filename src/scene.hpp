@@ -94,14 +94,14 @@ public:
             float t = static_cast<float>(now % DAYTIME) / static_cast<float>(DAYTIME) - 0.5f;
             float x = t * 5.f;
             vec3 dir = normalize(vec3(x, 0.f, 2.56f));
-            ShaderManager::instance().block_shader.upload_sun_dir(dir);
+            ShaderManager::ins().block_shader.upload_sun_dir(dir);
             last_update = now;
         }
     }
 
     void render() {
-        ShaderManager::instance().block_shader.use();
-        ShaderManager::instance().block_shader.upload_MVP(Camera::instance().get_mvp());
+        ShaderManager::ins().block_shader.use();
+        ShaderManager::ins().block_shader.upload_MVP(Camera::ins().get_mvp());
         block_manager.render();
     }
 };

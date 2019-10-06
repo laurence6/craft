@@ -32,7 +32,7 @@ public:
     }
 
     void render() const {
-        ShaderManager::instance().line_shader.use();
+        ShaderManager::ins().line_shader.use();
 
         glBindVertexArray(vao);
 

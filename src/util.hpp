@@ -26,7 +26,7 @@ public:
 template<typename T>
 class Singleton {
 public:
-    static T& instance() {
+    static T& ins() {
         static T ins;
         return ins;
     }

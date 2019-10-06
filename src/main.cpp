@@ -31,7 +31,7 @@ static void load_map(string const& map_path) {
         }
         Block* block = new_block(id, x, y, z);
         if (block != nullptr) {
-            Scene::instance().add_block(block);
+            Scene::ins().add_block(block);
         }
     }
 }
@@ -46,18 +46,18 @@ static void key_callback(GLFWwindow* window, int key, int, int action, int) {
                     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
                     window_exclusive = false;
                     break;
-                case GLFW_KEY_W: Camera::instance().start_move_forward(); break;
-                case GLFW_KEY_S: Camera::instance().start_move_backward(); break;
-                case GLFW_KEY_A: Camera::instance().start_move_left(); break;
-                case GLFW_KEY_D: Camera::instance().start_move_right(); break;
-                case GLFW_KEY_SPACE: Camera::instance().jump(); break;
+                case GLFW_KEY_W: Camera::ins().start_move_forward(); break;
+                case GLFW_KEY_S: Camera::ins().start_move_backward(); break;
+                case GLFW_KEY_A: Camera::ins().start_move_left(); break;
+                case GLFW_KEY_D: Camera::ins().start_move_right(); break;
+                case GLFW_KEY_SPACE: Camera::ins().jump(); break;
             }
         } else if (action == GLFW_RELEASE) {
             switch (key) {
-                case GLFW_KEY_W: Camera::instance().stop_move_forward(); break;
-                case GLFW_KEY_S: Camera::instance().stop_move_backward(); break;
-                case GLFW_KEY_A: Camera::instance().stop_move_left(); break;
-                case GLFW_KEY_D: Camera::instance().stop_move_right(); break;
+                case GLFW_KEY_W: Camera::ins().stop_move_forward(); break;
+                case GLFW_KEY_S: Camera::ins().stop_move_backward(); break;
+                case GLFW_KEY_A: Camera::ins().stop_move_left(); break;
+                case GLFW_KEY_D: Camera::ins().stop_move_right(); break;
             }
         }
     } else {
@@ -78,7 +78,7 @@ static void cursor_pos_callback(GLFWwindow*, double posx, double posy) {
     last_posy = posy;
 
     if (window_exclusive) {
-        Camera::instance().rotate(del_x, del_y);
+        Camera::ins().rotate(del_x, del_y);
     }
 }
 
@@ -129,27 +129,27 @@ int main() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    ShaderManager::instance().init();
-    Scene::instance().init();
-    Camera::instance().init();
-    UIManager::instance().init();
+    ShaderManager::ins().init();
+    Scene::ins().init();
+    Camera::ins().init();
+    UIManager::ins().init();
 
     load_map(MAP_PATH);
-    Scene::instance().add_object(&Camera::instance());
+    Scene::ins().add_object(&Camera::ins());
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.f);
 
     while (glfwWindowShouldClose(window) == 0) {
         glfwPollEvents();
 
-        Scene::instance().move_objects();
-        Scene::instance().update_sun_dir();
-        Scene::instance().update_vertices();
+        Scene::ins().move_objects();
+        Scene::ins().update_sun_dir();
+        Scene::ins().update_vertices();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        Scene::instance().render();
-        UIManager::instance().render();
+        Scene::ins().render();
+        UIManager::ins().render();
 
         glfwSwapBuffers(window);
     }
