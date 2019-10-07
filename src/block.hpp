@@ -157,7 +157,7 @@ private:
     const array<uint32_t, 6> tex;
 
 protected:
-    OpaqueBlock(int32_t x, int32_t y, int32_t z, array<uint32_t, 6> tex) : Block(x, y, z, true), tex(tex) {}
+    OpaqueBlock(int32_t x, int32_t y, uint8_t z, array<uint32_t, 6> tex) : Block(x, y, z, true), tex(tex) {}
 
 private:
     bool is_opaque() const override {
@@ -180,7 +180,7 @@ private:
 
 class GrassBlock : public OpaqueBlock {
 public:
-    GrassBlock(int32_t x, int32_t y, int32_t z) : OpaqueBlock(x, y, z, grass_block_tex) {}
+    GrassBlock(int32_t x, int32_t y, uint8_t z) : OpaqueBlock(x, y, z, grass_block_tex) {}
 
 private:
     uint16_t id() const override;
@@ -188,7 +188,7 @@ private:
 
 class DirtBlock : public OpaqueBlock {
 public:
-    DirtBlock(int32_t x, int32_t y, int32_t z) : OpaqueBlock(x, y, z, dirt_block_tex) {}
+    DirtBlock(int32_t x, int32_t y, uint8_t z) : OpaqueBlock(x, y, z, dirt_block_tex) {}
 
 private:
     uint16_t id() const override;
@@ -196,7 +196,7 @@ private:
 
 class StoneBlock : public OpaqueBlock {
 public:
-    StoneBlock(int32_t x, int32_t y, int32_t z) : OpaqueBlock(x, y, z, stone_block_tex) {}
+    StoneBlock(int32_t x, int32_t y, uint8_t z) : OpaqueBlock(x, y, z, stone_block_tex) {}
 
 private:
     uint16_t id() const override;
@@ -232,6 +232,6 @@ private:
     uint16_t id() const override;
 };
 
-Block* new_block(uint16_t id, int32_t x, int32_t y, int32_t z);
+Block* new_block(uint16_t id, int32_t x, int32_t y, uint8_t z);
 
 #endif

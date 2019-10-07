@@ -15,7 +15,7 @@ using namespace std;
     BLOCKS
 #undef X
 
-Block* new_block(uint16_t id, int32_t x, int32_t y, int32_t z) {
+Block* new_block(uint16_t id, int32_t x, int32_t y, uint8_t z) {
     switch (id) {
 #define X(ID, BLOCK) case ID: return new BLOCK(x, y, z);
         BLOCKS
