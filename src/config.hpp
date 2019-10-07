@@ -10,6 +10,8 @@ using namespace std;
 
 const string SHADER_BLOCK_VERTEX_PATH = "shader/block_vertex.glsl";
 const string SHADER_BLOCK_FRAGMENT_PATH = "shader/block_fragment.glsl";
+const string SHADER_BLOCK_EDGE_VERTEX_PATH = "shader/block_edge_vertex.glsl";
+const string SHADER_BLOCK_EDGE_FRAGMENT_PATH = "shader/block_edge_fragment.glsl";
 const string SHADER_LINE_VERTEX_PATH = "shader/line_vertex.glsl";
 const string SHADER_LINE_FRAGMENT_PATH = "shader/line_fragment.glsl";
 const string TEXTURE_FOLDER_PATH = "texture";
@@ -21,6 +23,8 @@ const char* const WINDOW_TITLE = "craft";
 constexpr float FOVY = radians(60.f);
 constexpr float ASPECT = 1280.f / 960.f;
 constexpr float Z_NEAR = 0.01f, Z_FAR = 1000.f;
+
+constexpr float BLOCK_EDGE_WIDTH = 2.f;
 
 constexpr float CROSSHAIR_X = 30.f / 1280.f, CROSSHAIR_Y = 32.f / 960.f, CROSSHAIR_WIDTH = 4.f;
 

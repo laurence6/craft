@@ -33,14 +33,30 @@ private:
 public:
     void init();
 
-    void upload_MVP(const mat4 mvp) const {
+    void upload_MVP(mat4 const& mvp) const {
         use();
         glUniformMatrix4fv(MVP, 1, GL_FALSE, &mvp[0][0]);
     }
 
-    void upload_sun_dir(const vec3 dir) const {
+    void upload_sun_dir(vec3 const& dir) const {
         use();
         glUniform3f(sun_dir, dir.x, dir.y, dir.z);
+    }
+};
+
+class BlockEdgeShader : public Shader {
+private:
+    GLuint MVP;
+
+public:
+    void init() {
+        Shader::init(SHADER_BLOCK_EDGE_VERTEX_PATH, SHADER_BLOCK_EDGE_FRAGMENT_PATH);
+        MVP = glGetUniformLocation(ID, "MVP");
+    }
+
+    void upload_MVP(mat4 const& mvp) const {
+        use();
+        glUniformMatrix4fv(MVP, 1, GL_FALSE, &mvp[0][0]);
     }
 };
 
@@ -54,18 +70,14 @@ public:
 class ShaderManager : public Singleton<ShaderManager> {
 public:
     BlockShader block_shader;
+    BlockEdgeShader block_edge_shader;
     LineShader line_shader;
 
 public:
     void init() {
         block_shader.init();
+        block_edge_shader.init();
         line_shader.init();
-    }
-
-private:
-    static void upload_data(GLuint vbo, const vector<GLfloat>& data) {
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * data.size(), data.data(), GL_STATIC_DRAW);
     }
 };
 

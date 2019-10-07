@@ -11,79 +11,79 @@
 
 using namespace std;
 
-constexpr GLfloat _min = 0.f, _max = 1.f;
+constexpr GLfloat _0 = 0.f, _1 = 1.f;
 constexpr array<array<array<GLfloat, 3>, 6>, 6> id_block_vertices = {{
     [FACE_LEFT] = {{
-        {{ _min, _min, _max }},
-        {{ _min, _max, _max }},
-        {{ _min, _max, _min }},
+        {{ _0, _0, _1 }},
+        {{ _0, _1, _1 }},
+        {{ _0, _1, _0 }},
 
-        {{ _min, _max, _min }},
-        {{ _min, _min, _min }},
-        {{ _min, _min, _max }},
+        {{ _0, _1, _0 }},
+        {{ _0, _0, _0 }},
+        {{ _0, _0, _1 }},
     }},
     [FACE_RIGHT] = {{
-        {{ _max, _max, _max }},
-        {{ _max, _min, _max }},
-        {{ _max, _min, _min }},
+        {{ _1, _1, _1 }},
+        {{ _1, _0, _1 }},
+        {{ _1, _0, _0 }},
 
-        {{ _max, _min, _min }},
-        {{ _max, _max, _min }},
-        {{ _max, _max, _max }},
+        {{ _1, _0, _0 }},
+        {{ _1, _1, _0 }},
+        {{ _1, _1, _1 }},
     }},
     [FACE_FRONT] = {{
-        {{ _max, _min, _max }},
-        {{ _min, _min, _max }},
-        {{ _min, _min, _min }},
+        {{ _1, _0, _1 }},
+        {{ _0, _0, _1 }},
+        {{ _0, _0, _0 }},
 
-        {{ _min, _min, _min }},
-        {{ _max, _min, _min }},
-        {{ _max, _min, _max }},
+        {{ _0, _0, _0 }},
+        {{ _1, _0, _0 }},
+        {{ _1, _0, _1 }},
     }},
     [FACE_BACK] = {{
-        {{ _min, _max, _max }},
-        {{ _max, _max, _max }},
-        {{ _max, _max, _min }},
+        {{ _0, _1, _1 }},
+        {{ _1, _1, _1 }},
+        {{ _1, _1, _0 }},
 
-        {{ _max, _max, _min }},
-        {{ _min, _max, _min }},
-        {{ _min, _max, _max }},
+        {{ _1, _1, _0 }},
+        {{ _0, _1, _0 }},
+        {{ _0, _1, _1 }},
     }},
     [FACE_BOTTOM] = {{
-        {{ _max, _min, _min }},
-        {{ _min, _min, _min }},
-        {{ _min, _max, _min }},
+        {{ _1, _0, _0 }},
+        {{ _0, _0, _0 }},
+        {{ _0, _1, _0 }},
 
-        {{ _min, _max, _min }},
-        {{ _max, _max, _min }},
-        {{ _max, _min, _min }},
+        {{ _0, _1, _0 }},
+        {{ _1, _1, _0 }},
+        {{ _1, _0, _0 }},
     }},
     [FACE_TOP] = {{
-        {{ _min, _max, _max }},
-        {{ _min, _min, _max }},
-        {{ _max, _min, _max }},
+        {{ _0, _1, _1 }},
+        {{ _0, _0, _1 }},
+        {{ _1, _0, _1 }},
 
-        {{ _max, _min, _max }},
-        {{ _max, _max, _max }},
-        {{ _min, _max, _max }},
+        {{ _1, _0, _1 }},
+        {{ _1, _1, _1 }},
+        {{ _0, _1, _1 }},
     }},
 }};
 constexpr array<array<GLfloat, 3>, 12> tf_block_vertices = {{
-    {{ _max, _min, _max }},
-    {{ _min, _max, _max }},
-    {{ _min, _max, _min }},
+    {{ _1, _0, _1 }},
+    {{ _0, _1, _1 }},
+    {{ _0, _1, _0 }},
 
-    {{ _min, _max, _min }},
-    {{ _max, _min, _min }},
-    {{ _max, _min, _max }},
+    {{ _0, _1, _0 }},
+    {{ _1, _0, _0 }},
+    {{ _1, _0, _1 }},
 
-    {{ _max, _max, _max }},
-    {{ _min, _min, _max }},
-    {{ _min, _min, _min }},
+    {{ _1, _1, _1 }},
+    {{ _0, _0, _1 }},
+    {{ _0, _0, _0 }},
 
-    {{ _min, _min, _min }},
-    {{ _max, _max, _min }},
-    {{ _max, _max, _max }},
+    {{ _0, _0, _0 }},
+    {{ _1, _1, _0 }},
+    {{ _1, _1, _1 }},
 }};
 
 constexpr array<uint8_t, 6> uv_coord = {{
