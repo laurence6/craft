@@ -1,15 +1,20 @@
 #ifndef CAMERA_HPP
 #define CAMERA_HPP
 
+#include "block.hpp"
 #include "collider.hpp"
 #include "config.hpp"
 #include "math.hpp"
 #include "object.hpp"
+#include "ray.hpp"
 #include "util.hpp"
 
 using namespace std;
 
 class Camera : public Singleton<Camera>, public Object {
+public:
+    Block* target = nullptr;
+
 private:
     float cam_speed = player_speed;
 
@@ -29,8 +34,8 @@ public:
         collider = new Collider(0.3f, 0.0f, 1.95f);
     }
 
-    vec3 const& get_forward() const {
-        return forward;
+    void update() {
+        target = Ray::cast_block(pos, forward, 24);
     }
 
 #define MOVE_FUNC(d, v, as1, as2)                                                                      \

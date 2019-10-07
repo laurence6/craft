@@ -83,9 +83,8 @@ int main() {
     while (glfwWindowShouldClose(window) == 0) {
         glfwPollEvents();
 
-        Scene::ins().move_objects();
-        Scene::ins().update_sun_dir();
-        Scene::ins().update_vertices();
+        Scene::ins().update();
+        Camera::ins().update();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
