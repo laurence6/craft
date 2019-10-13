@@ -57,9 +57,9 @@ public:
 
 class ObjectManager : private NonCopy<ObjectManager> {
 private:
-    vector<Object*> objects = {};
+    vector<Object*> objects {};
 
-    vector<GLfloat> vertices = {};
+    vector<GLfloat> vertices {};
 
 public:
     void add_object(Object* obj) {

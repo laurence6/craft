@@ -13,7 +13,7 @@
 #include "util.hpp"
 
 array<vector<uint8_t>, N_MIP_LEVEL> load_texture(string tex_folder_path, int n_channels) {
-    array<vector<uint8_t>, N_MIP_LEVEL> data = {};
+    array<vector<uint8_t>, N_MIP_LEVEL> data {};
 
     if (tex_folder_path.back() != '/') {
         tex_folder_path.append("/");
