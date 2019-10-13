@@ -18,21 +18,17 @@ const string TEXTURE_FOLDER_PATH = "texture";
 const string MAP_PATH = "map";
 
 constexpr int WINDOW_WIDTH = 1280, WINDOW_HEIGHT = 960;
-const char* const WINDOW_TITLE = "craft";
+char const* const WINDOW_TITLE = "craft";
 
 constexpr float FOVY = radians(60.f);
 constexpr float ASPECT = 1280.f / 960.f;
 constexpr float Z_NEAR = 0.01f, Z_FAR = 1000.f;
 
-constexpr float BLOCK_EDGE_WIDTH = 2.f;
+constexpr float BLOCK_EDGE_WIDTH = 3.f;
 
 constexpr float CROSSHAIR_X = 30.f / 1280.f, CROSSHAIR_Y = 32.f / 960.f, CROSSHAIR_WIDTH = 4.f;
 
 constexpr uint64_t DAYTIME = 600; // sec
-
-constexpr size_t ARENA_BLOCK_N_VERTICES = 3 * 6 * 16 * 16;
-constexpr size_t ARENA_INIT             = 360;
-constexpr size_t ARENA_GROWTH           = 90;
 
 constexpr uint32_t SUB_TEX_WIDTH = 64, SUB_TEX_HEIGHT = 64, N_TILES = 5;
 constexpr uint8_t N_MIP_LEVEL = 7;
