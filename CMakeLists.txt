@@ -2,7 +2,8 @@ cmake_minimum_required ( VERSION 3.1 )
 
 set ( CMAKE_BUILD_TYPE Release )
 
-FILE ( GLOB craft_source src/*.cpp )
+project ( craft )
+file ( GLOB craft_source src/*.cpp )
 add_executable ( craft ${craft_source} )
 
 set_target_properties ( craft PROPERTIES
