@@ -1,5 +1,6 @@
 #include "camera.hpp"
 #include "input.hpp"
+#include "scene.hpp"
 
 static bool window_exclusive = false;
 
@@ -49,6 +50,15 @@ void cursor_pos_callback(GLFWwindow*, double posx, double posy) {
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int) {
     if (window_exclusive) {
+        if (action == GLFW_RELEASE) {
+            switch (button) {
+                case GLFW_MOUSE_BUTTON_LEFT:
+                    if (Camera::ins().target != nullptr) {
+                        Scene::ins().block_manager.del_block(Camera::ins().target);
+                    }
+                break;
+            }
+        }
     } else {
         if (action == GLFW_RELEASE) {
             switch (button) {

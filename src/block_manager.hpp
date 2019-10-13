@@ -112,6 +112,11 @@ public:
         _get_opaque(block->x, block->y, block->z) = Block::is_opaque(block);
     }
 
+    void del_block(Block* block) {
+        _get_block(block->x, block->y, block->z) = nullptr;
+        _get_opaque(block->x, block->y, block->z) = false;
+    }
+
     Block* get_block(int32_t x, int32_t y, uint8_t z) {
         return _get_block(x, y, z);
     }
@@ -172,30 +177,15 @@ public:
 
     void add_block(Block* block);
 
+    void del_block(Block*& block);
+
     Block* get_block(int32_t x, int32_t y, uint8_t z) {
         ChunkID chunk_id { x, y };
-        auto chunk = chunks.find(chunk_id);
-        if (chunk != chunks.end()) {
-            return chunk->second->get_block(x, y, z);
+        Chunk* chunk = get_chunk(chunk_id);
+        if (chunk == nullptr) {
+            return nullptr;
         }
-        return nullptr;
-    }
-
-    Chunk const* get_chunk(ChunkID chunk_id) const {
-        auto chunk = chunks.find(chunk_id);
-        if (chunk != chunks.end()) {
-            return chunk->second;
-        }
-        return nullptr;
-    }
-
-    void add_chunk_need_update(ChunkID chunk_id, uint8_t flags) {
-        auto chunk_u_iter = chunks_need_update.find(chunk_id);
-        if (chunk_u_iter != chunks_need_update.end()) {
-            chunk_u_iter->second |= flags;
-        } else {
-            chunks_need_update.insert(make_pair(chunk_id, flags));
-        }
+        return chunk->get_block(x, y, z);
     }
 
     void update_vertices();
@@ -207,6 +197,34 @@ public:
     }
 
 private:
+    Chunk* get_chunk(ChunkID chunk_id) {
+        auto chunk = chunks.find(chunk_id);
+        if (chunk != chunks.end()) {
+            return chunk->second;
+        }
+        return nullptr;
+    }
+
+    void add_chunks_need_update(ChunkID chunk_id, Block const* block) {
+        uint8_t flags = boarder_flags(block);
+        add_chunk_need_update(chunk_id, flags);
+        if (flags != 0) {
+            if ((flags & FACE_LEFT_BIT) != 0) add_chunk_need_update(chunk_id.add(-1, 0), FACE_RIGHT_BIT);
+            if ((flags & FACE_RIGHT_BIT) != 0) add_chunk_need_update(chunk_id.add( 1, 0), FACE_LEFT_BIT);
+            if ((flags & FACE_FRONT_BIT) != 0) add_chunk_need_update(chunk_id.add(0, -1), FACE_BACK_BIT);
+            if ((flags & FACE_BACK_BIT) != 0) add_chunk_need_update(chunk_id.add(0, 1), FACE_FRONT_BIT);
+        }
+    }
+
+    void add_chunk_need_update(ChunkID chunk_id, uint8_t flags) {
+        auto chunk_u_iter = chunks_need_update.find(chunk_id);
+        if (chunk_u_iter != chunks_need_update.end()) {
+            chunk_u_iter->second |= flags;
+        } else {
+            chunks_need_update.insert(make_pair(chunk_id, flags));
+        }
+    }
+
     static uint8_t boarder_flags(Block const* block) {
         const uint8_t x = static_cast<uint64_t>(block->x) & BLOCK_INDEX_MASK;
         const uint8_t y = static_cast<uint64_t>(block->y) & BLOCK_INDEX_MASK;
