@@ -82,7 +82,7 @@ public:
 
     void add_block(Block* block) {
         _get_block(block->x, block->y, block->z) = block;
-        _get_opaque(block->x, block->y, block->z) = Block::is_opaque(block);
+        _get_opaque(block->x, block->y, block->z) = block->is_opaque();
     }
 
     void del_block(Block* block) {

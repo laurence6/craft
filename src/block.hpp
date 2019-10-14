@@ -134,9 +134,7 @@ public:
 
     virtual uint16_t id() const = 0;
 
-    static bool is_opaque(const Block* block) {
-        return block != nullptr && block->is_opaque();
-    }
+    virtual bool is_opaque() const = 0;
 
     bool has_six_faces() const {
         return six_faces;
@@ -147,9 +145,6 @@ public:
 
 protected:
     Block(int32_t x, int32_t y, uint8_t z, bool six_faces) : x(x), y(y), z(z), six_faces(six_faces) {}
-
-private:
-    virtual bool is_opaque() const = 0;
 };
 
 class OpaqueBlock : public Block {

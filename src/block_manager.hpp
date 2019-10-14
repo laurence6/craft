@@ -47,23 +47,14 @@ private:
         return nullptr;
     }
 
-    void add_chunks_need_update(ChunkID chunk_id, Block const* block) {
+    void update_chunks_need_update(ChunkID chunk_id, Block const* block) {
         uint8_t flags = boarder_flags(block);
-        add_chunk_need_update(chunk_id, flags);
+        chunks_need_update[chunk_id] |= flags;
         if (flags != 0) {
-            if ((flags & FACE_LEFT_BIT) != 0) add_chunk_need_update(chunk_id.add(-1, 0), FACE_RIGHT_BIT);
-            if ((flags & FACE_RIGHT_BIT) != 0) add_chunk_need_update(chunk_id.add( 1, 0), FACE_LEFT_BIT);
-            if ((flags & FACE_FRONT_BIT) != 0) add_chunk_need_update(chunk_id.add(0, -1), FACE_BACK_BIT);
-            if ((flags & FACE_BACK_BIT) != 0) add_chunk_need_update(chunk_id.add(0, 1), FACE_FRONT_BIT);
-        }
-    }
-
-    void add_chunk_need_update(ChunkID chunk_id, uint8_t flags) {
-        auto chunk_u_iter = chunks_need_update.find(chunk_id);
-        if (chunk_u_iter != chunks_need_update.end()) {
-            chunk_u_iter->second |= flags;
-        } else {
-            chunks_need_update.insert(make_pair(chunk_id, flags));
+            if ((flags & FACE_LEFT_BIT ) != 0) chunks_need_update[chunk_id.add(-1, 0)] |= FACE_RIGHT_BIT;
+            if ((flags & FACE_RIGHT_BIT) != 0) chunks_need_update[chunk_id.add( 1, 0)] |= FACE_LEFT_BIT;
+            if ((flags & FACE_FRONT_BIT) != 0) chunks_need_update[chunk_id.add( 0,-1)] |= FACE_BACK_BIT;
+            if ((flags & FACE_BACK_BIT ) != 0) chunks_need_update[chunk_id.add( 0, 1)] |= FACE_FRONT_BIT;
         }
     }
 
@@ -73,10 +64,10 @@ private:
 
         uint8_t flags = 0;
 
-        if (x == 0)             flags |= FACE_LEFT_BIT;
-        if (x == CHUNK_WIDTH-1) flags |= FACE_RIGHT_BIT;
-        if (y == 0)             flags |= FACE_FRONT_BIT;
-        if (y == CHUNK_WIDTH-1) flags |= FACE_BACK_BIT;
+        if      (x == 0)             flags |= FACE_LEFT_BIT;
+        else if (x == CHUNK_WIDTH-1) flags |= FACE_RIGHT_BIT;
+        if      (y == 0)             flags |= FACE_FRONT_BIT;
+        else if (y == CHUNK_WIDTH-1) flags |= FACE_BACK_BIT;
 
         return flags;
     }

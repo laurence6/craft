@@ -55,12 +55,7 @@ vector<uint32_t> Chunk::unload(Chunk* chunk) {
 }
 
 void Chunk::update_vertices(uint8_t flags, array<const Chunk*, 4>&& adj_chunks) {
-    vd_inner.clear();
-    for (int i = 0; i < 4; i++) {
-        vd_outer[i].clear();
-    }
-
-#define INSERT_OUTER_SURFACE(S, XY, INDEX_SELF, INDEX_ADJ)                                                                                           \
+#define UPDATE_OUTER_SURFACE(S, XY, INDEX_SELF, INDEX_ADJ)                                                                                           \
     if ((flags & FACE_##S##_BIT) != 0) {                                                                                                             \
         vd_outer[FACE_##S].clear();                                                                                                                  \
         for (uint16_t z = 0; z < 256; z++) {                                                                                                         \
@@ -73,13 +68,14 @@ void Chunk::update_vertices(uint8_t flags, array<const Chunk*, 4>&& adj_chunks) 
         }                                                                                                                                            \
     }
 
-    INSERT_OUTER_SURFACE(LEFT,  y, [0][y], [CHUNK_WIDTH-1][y])
-    INSERT_OUTER_SURFACE(RIGHT, y, [CHUNK_WIDTH-1][y], [0][y])
-    INSERT_OUTER_SURFACE(FRONT, x, [x][0], [x][CHUNK_WIDTH-1])
-    INSERT_OUTER_SURFACE(BACK,  x, [x][CHUNK_WIDTH-1], [x][0])
+    UPDATE_OUTER_SURFACE(LEFT,  y, [0][y], [CHUNK_WIDTH-1][y])
+    UPDATE_OUTER_SURFACE(RIGHT, y, [CHUNK_WIDTH-1][y], [0][y])
+    UPDATE_OUTER_SURFACE(FRONT, x, [x][0], [x][CHUNK_WIDTH-1])
+    UPDATE_OUTER_SURFACE(BACK,  x, [x][CHUNK_WIDTH-1], [x][0])
 
-#undef INSERT_OUTER_SURFACE
+#undef UPDATE_OUTER_SURFACE
 
+    vd_inner.clear();
     for (uint16_t z = 0; z < 256; z++) {
         for (uint16_t x = 0; x < CHUNK_WIDTH; x++) {
             for (uint16_t y = 0; y < CHUNK_WIDTH; y++) {

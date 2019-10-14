@@ -10,7 +10,7 @@ void BlockManager::add_block(Block* block) {
 
     chunk->add_block(block);
 
-    add_chunks_need_update(chunk_id, block);
+    update_chunks_need_update(chunk_id, block);
 }
 
 void BlockManager::del_block(Block*& block) {
@@ -22,7 +22,7 @@ void BlockManager::del_block(Block*& block) {
 
     chunk->del_block(block);
 
-    add_chunks_need_update(chunk_id, block);
+    update_chunks_need_update(chunk_id, block);
 
     delete block;
     block = nullptr;
@@ -31,10 +31,10 @@ void BlockManager::del_block(Block*& block) {
 void BlockManager::update_vertices() {
     if (!chunks_need_update.empty()) {
         for (auto const& chunk_u : chunks_need_update) {
-            auto chunk_iter = chunks.find(chunk_u.first);
-            if (chunk_iter != chunks.end()) {
-                ChunkID chunk_id = ChunkID(chunk_u.first);
-                chunk_iter->second->update_vertices(
+            ChunkID const& chunk_id = chunk_u.first;
+            Chunk* chunk = get_chunk(chunk_id);
+            if (chunk != nullptr) {
+                chunk->update_vertices(
                     chunk_u.second,
                     {{
                         get_chunk(chunk_id.add(-1, 0)),
