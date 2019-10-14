@@ -7,8 +7,8 @@
 #include <GLFW/glfw3.h>
 
 #include "block.hpp"
-#include "camera.hpp"
 #include "input.hpp"
+#include "player.hpp"
 #include "scene.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
@@ -72,11 +72,11 @@ int main() {
 
     ShaderManager::ins().init();
     Scene::ins().init();
-    Camera::ins().init();
+    Player::ins().init();
     UIManager::ins().init();
 
     load_map(MAP_PATH);
-    Scene::ins().add_object(&Camera::ins());
+    Scene::ins().add_object(&Player::ins());
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.f);
 
@@ -84,7 +84,7 @@ int main() {
         glfwPollEvents();
 
         Scene::ins().update();
-        Camera::ins().update();
+        Player::ins().update();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

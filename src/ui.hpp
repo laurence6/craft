@@ -3,8 +3,8 @@
 
 #include <vector>
 
-#include "camera.hpp"
 #include "config.hpp"
+#include "player.hpp"
 #include "shader.hpp"
 #include "util.hpp"
 
@@ -108,12 +108,12 @@ public:
     }
 
     void render() const {
-        Block* target = Camera::ins().target;
+        Block* target = Player::ins().target;
         if (!target) {
             return;
         }
         vec3 pos = vec3(static_cast<float>(target->x), static_cast<float>(target->y), static_cast<float>(target->z));
-        mat4 mvp = Camera::ins().get_mvp() * glm::translate(pos);
+        mat4 mvp = Player::ins().get_mvp() * glm::translate(pos);
 
         ShaderManager::ins().block_edge_shader.use();
         ShaderManager::ins().block_edge_shader.upload_MVP(mvp);

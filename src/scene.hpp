@@ -7,9 +7,9 @@
 #include <GL/glew.h>
 
 #include "block.hpp"
-#include "camera.hpp"
 #include "config.hpp"
 #include "object.hpp"
+#include "player.hpp"
 #include "shader.hpp"
 #include "util.hpp"
 
@@ -54,7 +54,7 @@ public:
 
     void render() {
         ShaderManager::ins().block_shader.use();
-        ShaderManager::ins().block_shader.upload_MVP(Camera::ins().get_mvp());
+        ShaderManager::ins().block_shader.upload_MVP(Player::ins().get_mvp());
         block_manager.render();
     }
 };

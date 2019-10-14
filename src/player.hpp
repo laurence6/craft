@@ -1,5 +1,5 @@
-#ifndef CAMERA_HPP
-#define CAMERA_HPP
+#ifndef PLAYER_HPP
+#define PLAYER_HPP
 
 #include "block.hpp"
 #include "collider.hpp"
@@ -11,7 +11,7 @@
 
 using namespace std;
 
-class Camera : public Singleton<Camera>, public Object {
+class Player : public Singleton<Player>, public Object {
 public:
     Block* target = nullptr;
 
