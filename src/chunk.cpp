@@ -54,18 +54,17 @@ vector<uint32_t> Chunk::unload(Chunk* chunk) {
     return chunk_data;
 }
 
-void Chunk::update_vertices(uint8_t flags, array<const Chunk*, 4>&& adj_chunks) {
-#define UPDATE_OUTER_SURFACE(S, XY, INDEX_SELF, INDEX_ADJ)                                                                                           \
-    if ((flags & FACE_##S##_BIT) != 0) {                                                                                                             \
-        vd_outer[FACE_##S].clear();                                                                                                                  \
-        for (uint16_t z = 0; z < 256; z++) {                                                                                                         \
-            for (uint16_t XY = 0; XY < CHUNK_WIDTH; XY++) {                                                                                          \
-                Block* block = blocks[z] INDEX_SELF;                                                                                                 \
-                if (block != nullptr && block->has_six_faces() && (adj_chunks[FACE_##S] == nullptr || !adj_chunks[FACE_##S]->opaque[z] INDEX_ADJ)) { \
-                    block->insert_face_vertices(vd_outer[FACE_##S], FACE_##S);                                                                       \
-                }                                                                                                                                    \
-            }                                                                                                                                        \
-        }                                                                                                                                            \
+void Chunk::update_vertices(array<const Chunk*, 4>&& adj_chunks) {
+    vector<BlockVertexData> vertices {};
+
+#define UPDATE_OUTER_SURFACE(S, XY, INDEX_SELF, INDEX_ADJ)                                                                                       \
+    for (uint16_t z = 0; z < 256; z++) {                                                                                                         \
+        for (uint16_t XY = 0; XY < CHUNK_WIDTH; XY++) {                                                                                          \
+            Block* block = blocks[z] INDEX_SELF;                                                                                                 \
+            if (block != nullptr && block->has_six_faces() && (adj_chunks[FACE_##S] == nullptr || !adj_chunks[FACE_##S]->opaque[z] INDEX_ADJ)) { \
+                block->insert_face_vertices(vertices, FACE_##S);                                                                                 \
+            }                                                                                                                                    \
+        }                                                                                                                                        \
     }
 
     UPDATE_OUTER_SURFACE(LEFT,  y, [0][y], [CHUNK_WIDTH-1][y])
@@ -75,39 +74,27 @@ void Chunk::update_vertices(uint8_t flags, array<const Chunk*, 4>&& adj_chunks) 
 
 #undef UPDATE_OUTER_SURFACE
 
-    vd_inner.clear();
     for (uint16_t z = 0; z < 256; z++) {
         for (uint16_t x = 0; x < CHUNK_WIDTH; x++) {
             for (uint16_t y = 0; y < CHUNK_WIDTH; y++) {
                 Block* block = blocks[z][x][y];
-                if (block == nullptr) continue;
+                if (block == nullptr) {
+                    continue;
+                }
 
                 if (block->has_six_faces()) {
-                    if (x > 0             && !opaque[z][x-1][y]) block->insert_face_vertices(vd_inner, FACE_LEFT );
-                    if (x < CHUNK_WIDTH-1 && !opaque[z][x+1][y]) block->insert_face_vertices(vd_inner, FACE_RIGHT);
-                    if (y > 0             && !opaque[z][x][y-1]) block->insert_face_vertices(vd_inner, FACE_FRONT);
-                    if (y < CHUNK_WIDTH-1 && !opaque[z][x][y+1]) block->insert_face_vertices(vd_inner, FACE_BACK );
+                    if (x > 0             && !opaque[z][x-1][y]) block->insert_face_vertices(vertices, FACE_LEFT );
+                    if (x < CHUNK_WIDTH-1 && !opaque[z][x+1][y]) block->insert_face_vertices(vertices, FACE_RIGHT);
+                    if (y > 0             && !opaque[z][x][y-1]) block->insert_face_vertices(vertices, FACE_FRONT);
+                    if (y < CHUNK_WIDTH-1 && !opaque[z][x][y+1]) block->insert_face_vertices(vertices, FACE_BACK );
 
-                    if (z == 0            || !opaque[z-1][x][y]) block->insert_face_vertices(vd_inner, FACE_BOTTOM);
-                    if (z == 255          || !opaque[z+1][x][y]) block->insert_face_vertices(vd_inner, FACE_TOP   );
+                    if (z == 0            || !opaque[z-1][x][y]) block->insert_face_vertices(vertices, FACE_BOTTOM);
+                    if (z == 255          || !opaque[z+1][x][y]) block->insert_face_vertices(vertices, FACE_TOP   );
                 } else {
-                    block->insert_face_vertices(vd_inner);
+                    block->insert_face_vertices(vertices);
                 }
             }
         }
-    }
-
-    size_t c = vd_inner.size();
-    for (int i = 0; i < 4; i++) {
-        c += vd_outer[i].size();
-    }
-
-    vector<BlockVertexData> vertices {};
-    vertices.reserve(c);
-
-    vertices.insert(vertices.end(), vd_inner.begin(), vd_inner.end());
-    for (int i = 0; i < 4; i++) {
-        vertices.insert(vertices.end(), vd_outer[i].begin(), vd_outer[i].end());
     }
 
     chunk_vertices.upload_data(vertices);

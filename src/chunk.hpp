@@ -69,9 +69,6 @@ private:
     array<array<array<Block*, CHUNK_WIDTH>, CHUNK_WIDTH>, 256> blocks {};
     array<array<array<  bool, CHUNK_WIDTH>, CHUNK_WIDTH>, 256> opaque {};
 
-    array<vector<BlockVertexData>, 4> vd_outer {}; // four sides of a chunk
-    vector<BlockVertexData>           vd_inner {};
-
     ChunkVertices chunk_vertices;
 
 public:
@@ -94,7 +91,7 @@ public:
         return _get_block(x, y, z);
     }
 
-    void update_vertices(uint8_t flags, array<Chunk const*, 4>&& adj_chunks);
+    void update_vertices(array<Chunk const*, 4>&& adj_chunks);
 
     void render() const {
         chunk_vertices.render();
