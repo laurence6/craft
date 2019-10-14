@@ -8,7 +8,7 @@
 #include "shader.hpp"
 #include "util.hpp"
 
-class UIElement : public NonCopy<UIElement> {
+class UIElement : private NonCopy<UIElement> {
 public:
     virtual void render() const = 0;
 };

@@ -6,6 +6,7 @@
 
 #include "block.hpp"
 #include "chunk.hpp"
+#include "util.hpp"
 
 using namespace std;
 

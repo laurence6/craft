@@ -6,6 +6,15 @@
 #include "shader.hpp"
 #include "texture.hpp"
 
+constexpr array<array<GLfloat, 3>, 6> face_normal = {{
+    [FACE_LEFT  ] = {{-0.4f, 0.0f, 0.9f }},
+    [FACE_RIGHT ] = {{ 0.4f, 0.0f, 0.9f }},
+    [FACE_FRONT ] = {{ 0.0f, 0.0f, 1.0f }},
+    [FACE_BACK  ] = {{ 0.0f, 0.0f, 1.0f }},
+    [FACE_BOTTOM] = {{ 0.0f, 0.0f,-1.0f }},
+    [FACE_TOP   ] = {{ 0.0f, 0.0f, 1.0f }},
+}};
+
 void BlockShader::init() {
     Shader::init(SHADER_BLOCK_VERTEX_PATH, SHADER_BLOCK_FRAGMENT_PATH);
 
