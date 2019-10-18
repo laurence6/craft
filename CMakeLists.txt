@@ -7,7 +7,7 @@ file ( GLOB craft_source src/*.cpp )
 add_executable ( craft ${craft_source} )
 
 set_target_properties ( craft PROPERTIES
-    CXX_STANDARD 14
+    CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
     CXX_EXTENSIONS OFF
 )

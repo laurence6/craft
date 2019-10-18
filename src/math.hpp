@@ -11,7 +11,6 @@ namespace glmath = glm;
 using glmath::vec3;
 using glmath::mat4;
 
-using glmath::clamp;
 using glmath::cross;
 using glmath::length;
 using glmath::radians;
