@@ -3,10 +3,9 @@
 
 #include <vector>
 
-#include <GL/glew.h>
-
 #include "collider.hpp"
 #include "math.hpp"
+#include "opengl.hpp"
 #include "shader.hpp"
 #include "util.hpp"
 

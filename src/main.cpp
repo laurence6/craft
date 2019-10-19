@@ -3,11 +3,9 @@
 #include <string>
 #include <vector>
 
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-
 #include "block.hpp"
 #include "input.hpp"
+#include "opengl.hpp"
 #include "player.hpp"
 #include "scene.hpp"
 #include "shader.hpp"
@@ -54,8 +52,7 @@ int main() {
 
     glfwMakeContextCurrent(window);
 
-    glewExperimental = true;
-    if (glewInit() != GLEW_OK) {
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         _exit(1);
     }
 

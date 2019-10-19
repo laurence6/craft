@@ -4,7 +4,7 @@
 #include <chrono>
 #include <string>
 
-#include <GL/glew.h>
+#include "opengl.hpp"
 
 template<typename T>
 class NonCopy {

@@ -4,10 +4,9 @@
 #include <array>
 #include <vector>
 
-#include <GL/glew.h>
-
 #include "block.hpp"
 #include "config.hpp"
+#include "opengl.hpp"
 
 using namespace std;
 

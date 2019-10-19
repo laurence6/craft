@@ -1,8 +1,7 @@
 #ifndef INPUT_HPP
 #define INPUT_HPP
 
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+#include "opengl.hpp"
 
 void key_callback(GLFWwindow* window, int key, int, int action, int);
 

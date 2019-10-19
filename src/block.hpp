@@ -3,8 +3,7 @@
 
 #include <vector>
 
-#include <GL/glew.h>
-
+#include "opengl.hpp"
 #include "util.hpp"
 
 using namespace std;

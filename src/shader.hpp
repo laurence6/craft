@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "config.hpp"
+#include "opengl.hpp"
 #include "util.hpp"
 
 using namespace std;

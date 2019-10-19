@@ -4,11 +4,10 @@
 #include <algorithm>
 #include <vector>
 
-#include <GL/glew.h>
-
 #include "block.hpp"
 #include "config.hpp"
 #include "object.hpp"
+#include "opengl.hpp"
 #include "player.hpp"
 #include "shader.hpp"
 #include "util.hpp"

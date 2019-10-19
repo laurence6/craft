@@ -1,7 +1,5 @@
 #include <array>
 
-#include <GL/glew.h>
-
 #include "block.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
