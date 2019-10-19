@@ -1,6 +1,7 @@
 #ifndef UI_HPP
 #define UI_HPP
 
+#include <memory>
 #include <vector>
 
 #include "config.hpp"
@@ -10,6 +11,7 @@
 
 class UIElement : private NonCopy<UIElement> {
 public:
+    virtual ~UIElement() = default;
     virtual void render() const = 0;
 };
 
@@ -128,16 +130,16 @@ public:
 
 class UIManager : public Singleton<UIManager> {
 private:
-    vector<UIElement*> ui_elements;
+    vector<unique_ptr<UIElement>> ui_elements;
 
 public:
     void init() {
-        ui_elements.emplace_back(new UICrosshair());
-        ui_elements.emplace_back(new UITargetBlock());
+        ui_elements.emplace_back(make_unique<UICrosshair>());
+        ui_elements.emplace_back(make_unique<UITargetBlock>());
     }
 
     void render() {
-        for (UIElement* const& e : ui_elements) {
+        for (auto const& e : ui_elements) {
             e->render();
         }
     }

@@ -34,7 +34,7 @@ ChunkVertices::~ChunkVertices() {
     del_vbo(vbo);
 }
 
-vector<uint32_t> Chunk::unload(Chunk* chunk) {
+vector<uint32_t> Chunk::unload(Chunk*& chunk) {
     vector<uint32_t> chunk_data {};
 
     for (uint16_t z = 0; z < 256; z++) {
@@ -50,6 +50,7 @@ vector<uint32_t> Chunk::unload(Chunk* chunk) {
     }
 
     delete chunk;
+    chunk = nullptr;
 
     return chunk_data;
 }

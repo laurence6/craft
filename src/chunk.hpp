@@ -75,7 +75,7 @@ public:
     explicit Chunk(ChunkID chunk_id) : chunk_id(chunk_id) {
     }
 
-    static vector<uint32_t> unload(Chunk* chunk);
+    static vector<uint32_t> unload(Chunk*& chunk);
 
     void add_block(Block* block) {
         _get_block(block->x, block->y, block->z) = block;

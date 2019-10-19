@@ -19,6 +19,13 @@ public:
     void init() {
     }
 
+    ~BlockManager() {
+        for (auto& p : chunks) {
+            Chunk::unload(p.second);
+        }
+        chunks.clear();
+    }
+
     void add_block(Block* block);
 
     void del_block(Block*& block);
