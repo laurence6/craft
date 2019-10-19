@@ -16,12 +16,16 @@ using namespace std;
 
 class Scene : public Singleton<Scene> {
 public:
-    BlockManager  block_manager  = BlockManager();
-    ObjectManager object_manager = ObjectManager();
+    BlockManager  block_manager {};
+    ObjectManager object_manager {};
 
 public:
     void init() {
         block_manager.init();
+    }
+
+    void shutdown() {
+        block_manager.shutdown();
     }
 
     void add_block(Block* block) {

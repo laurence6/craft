@@ -138,6 +138,10 @@ public:
         ui_elements.emplace_back(make_unique<UITargetBlock>());
     }
 
+    void shutdown() {
+        ui_elements.clear();
+    }
+
     void render() {
         for (auto const& e : ui_elements) {
             e->render();

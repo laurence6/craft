@@ -91,5 +91,8 @@ int main() {
         glfwSwapBuffers(window);
     }
 
+    UIManager::ins().shutdown();
+    Scene::ins().shutdown();
+
     _exit(0);
 }

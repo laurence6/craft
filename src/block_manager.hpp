@@ -19,7 +19,7 @@ public:
     void init() {
     }
 
-    ~BlockManager() {
+    void shutdown() {
         for (auto& p : chunks) {
             Chunk::unload(p.second);
         }
