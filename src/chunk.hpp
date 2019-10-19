@@ -91,7 +91,7 @@ public:
         return _get_block(x, y, z);
     }
 
-    void update_vertices(array<Chunk const*, 4>&& adj_chunks);
+    void update(array<Chunk const*, 4>&& adj_chunks);
 
     void render() const {
         chunk_vertices.render();

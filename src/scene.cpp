@@ -47,6 +47,7 @@ void Scene::update() {
 
     last_update = now;
 
-    update_vertices();
+    block_manager.update();
+    object_manager.update();
     update_sun_dir();
 }

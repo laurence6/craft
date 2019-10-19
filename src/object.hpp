@@ -66,7 +66,7 @@ public:
         objects.push_back(obj);
     }
 
-    void update_vertices() {
+    void update() {
         vertices.clear();
         for (const Object* obj : objects) {
             const vector<GLfloat>* _vertices = obj->get_vertices();

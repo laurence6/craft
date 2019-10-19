@@ -39,7 +39,7 @@ public:
         return chunk->get_block(x, y, z);
     }
 
-    void update_vertices();
+    void update();
 
     void render() const {
         for (auto const& chunk : chunks) {

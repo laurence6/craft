@@ -35,11 +35,6 @@ public:
 
     void update();
 
-    void update_vertices() {
-        block_manager.update_vertices();
-        object_manager.update_vertices();
-    }
-
     void update_sun_dir() const {
         static uint64_t last_update = 0;
         uint64_t now = time_now_s();

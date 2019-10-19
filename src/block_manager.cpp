@@ -39,12 +39,12 @@ void BlockManager::set_chunks_need_update(ChunkID chunk_id, Block const* block) 
     else if (y == CHUNK_WIDTH-1) chunks_need_update.insert(chunk_id.add( 0, 1));
 }
 
-void BlockManager::update_vertices() {
+void BlockManager::update() {
     if (!chunks_need_update.empty()) {
         for (auto const& chunk_id : chunks_need_update) {
             Chunk* chunk = get_chunk(chunk_id);
             if (chunk != nullptr) {
-                chunk->update_vertices({{
+                chunk->update({{
                     get_chunk(chunk_id.add(-1, 0)),
                     get_chunk(chunk_id.add( 1, 0)),
                     get_chunk(chunk_id.add( 0,-1)),
