@@ -21,9 +21,10 @@ public:
 
     void shutdown() {
         for (auto& p : chunks) {
-            Chunk::unload(p.second);
+            delete p.second;
         }
         chunks.clear();
+        chunks_need_update.clear();
     }
 
     void add_block(Block* block);

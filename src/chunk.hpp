@@ -2,6 +2,7 @@
 #define CHUNK_HPP
 
 #include <array>
+#include <tuple>
 #include <vector>
 
 #include "block.hpp"
@@ -54,11 +55,11 @@ private:
 public:
     ChunkVertices();
 
+    ~ChunkVertices();
+
     void upload_data(vector<BlockVertexData> const& data);
 
     void render() const;
-
-    ~ChunkVertices();
 };
 
 class Chunk : private NonCopy<Chunk> {
@@ -66,29 +67,31 @@ public:
     const ChunkID chunk_id;
 
 private:
-    array<array<array<Block*, CHUNK_WIDTH>, CHUNK_WIDTH>, 256> blocks {};
-    array<array<array<  bool, CHUNK_WIDTH>, CHUNK_WIDTH>, 256> opaque {};
+    array<array<array<Block*, 256>, CHUNK_WIDTH>, CHUNK_WIDTH> blocks {};
+    array<array<array<  bool, 256>, CHUNK_WIDTH>, CHUNK_WIDTH> opaque {};
 
     ChunkVertices chunk_vertices;
 
 public:
-    explicit Chunk(ChunkID chunk_id) : chunk_id(chunk_id) {
-    }
+    explicit Chunk(ChunkID chunk_id);
 
-    static vector<uint32_t> unload(Chunk*& chunk);
+    ~Chunk();
 
     void add_block(Block* block) {
-        _get_block(block->x, block->y, block->z) = block;
-        _get_opaque(block->x, block->y, block->z) = block->is_opaque();
+        auto [x, y, z] = internal_coord(block);
+        blocks[x][y][z] = block;
+        opaque[x][y][z] = block->is_opaque();
     }
 
     void del_block(Block* block) {
-        _get_block(block->x, block->y, block->z) = nullptr;
-        _get_opaque(block->x, block->y, block->z) = false;
+        auto [x, y, z] = internal_coord(block);
+        blocks[x][y][z] = nullptr;
+        opaque[x][y][z] = false;
     }
 
-    Block* get_block(int32_t x, int32_t y, uint8_t z) {
-        return _get_block(x, y, z);
+    Block* get_block(int32_t _x, int32_t _y, uint8_t _z) {
+        auto [x, y, z] = internal_coord(_x, _y, _z);
+        return blocks[x][y][z];
     }
 
     void update(array<Chunk const*, 4>&& adj_chunks);
@@ -98,41 +101,14 @@ public:
     }
 
 private:
-    Block*& _get_block(int32_t x, int32_t y, uint8_t z) {
-        return blocks[z][static_cast<uint64_t>(x) & BLOCK_INDEX_MASK][static_cast<uint64_t>(y) & BLOCK_INDEX_MASK];
+    using internal_coord_t = tuple<uint16_t, uint16_t, uint8_t>;
+
+    static internal_coord_t internal_coord(int32_t x, int32_t y, uint8_t z) {
+        return { static_cast<uint64_t>(x) & BLOCK_INDEX_MASK, static_cast<uint64_t>(y) & BLOCK_INDEX_MASK, z };
     }
 
-    bool& _get_opaque(int32_t x, int32_t y, uint8_t z) {
-        return opaque[z][static_cast<uint64_t>(x) & BLOCK_INDEX_MASK][static_cast<uint64_t>(y) & BLOCK_INDEX_MASK];
-    }
-
-    // 32 bits:
-    //    x :  4,
-    //    y :  4,
-    //    z :  8,
-    //   id : 10,
-    //      :  6, (currently unused)
-    static uint32_t marshal(Block const* block) {
-        uint32_t v = 0;
-        v += (static_cast<uint32_t>(block->x) & BLOCK_INDEX_MASK) << 28u;
-        v += (static_cast<uint32_t>(block->y) & BLOCK_INDEX_MASK) << 24u;
-        v += static_cast<uint32_t>(block->z) << 16u;
-        v += static_cast<uint32_t>(block->id()) << 6u;
-        return v;
-    }
-
-    static Block* unmarshal(ChunkID chunk_id, uint32_t block) {
-        constexpr uint32_t X_MASK  = 0xf000'0000;
-        constexpr uint32_t Y_MASK  = 0x0f00'0000;
-        constexpr uint32_t Z_MASK  = 0x00ff'0000;
-        constexpr uint32_t ID_MASK = 0x0000'ffc0;
-
-        auto x = static_cast<int32_t>(((block & X_MASK) >> 28u) + chunk_id.x);
-        auto y = static_cast<int32_t>(((block & Y_MASK) >> 24u) + chunk_id.y);
-        auto z = static_cast<uint8_t>((block & Z_MASK) >> 16u);
-        auto id = static_cast<uint16_t>((block & ID_MASK) >> 6u);
-
-        return new_block(id, x, y, z);
+    static internal_coord_t internal_coord(Block* block) {
+        return internal_coord(block->x, block->y, block->z);
     }
 };
 

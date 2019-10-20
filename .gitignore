@@ -1,5 +1,7 @@
 *
+!shader/
 !shader/*.glsl
+!src/
 !src/*.cpp
 !src/*.hpp
 !.gitignore
@@ -9,6 +11,7 @@
 !README.md
 !gen_map.py
 !texture/
+!third_party/
 !third_party/glad
 !third_party/glfw
 !third_party/glm
