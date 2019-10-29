@@ -31,7 +31,7 @@ public:
     void init() {
         pos = vec3(0.f, 0.f, 50.f);
 
-        collider = new Collider(0.3f, 0.0f, 1.95f);
+        collider = make_unique<Collider>(0.3f, 0.0f, 1.95f);
     }
 
     void update() {

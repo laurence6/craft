@@ -1,6 +1,7 @@
 #ifndef OBJECT_HPP
 #define OBJECT_HPP
 
+#include <memory>
 #include <vector>
 
 #include "collider.hpp"
@@ -24,7 +25,7 @@ public:
     vec3 pos;
     vec3 velocity = vec3(0.f, 0.f, 0.f);
 
-    Collider* collider = nullptr;
+    unique_ptr<Collider> collider = nullptr;
 
 public:
     void transit_state(State new_state) {
