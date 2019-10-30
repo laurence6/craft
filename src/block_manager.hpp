@@ -49,7 +49,7 @@ public:
     }
 
 private:
-    Chunk* get_chunk(ChunkID chunk_id) {
+    Chunk* get_chunk(ChunkID const& chunk_id) {
         auto chunk = chunks.find(chunk_id);
         if (chunk != chunks.end()) {
             return chunk->second;
@@ -57,7 +57,7 @@ private:
         return nullptr;
     }
 
-    void set_chunks_need_update(ChunkID chunk_id, Block const* block);
+    void set_chunks_need_update(ChunkID const& chunk_id, Block const* block);
 };
 
 #endif

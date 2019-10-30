@@ -34,7 +34,7 @@ void ChunkVertices::render() const {
     glBindVertexArray(0);
 }
 
-void Chunk::update(array<const Chunk*, 4>&& adj_chunks) {
+void Chunk::update(array<Chunk const*, 4>&& adj_chunks) {
     vector<BlockVertexData> vertices {};
 
 #define UPDATE_OUTER_SURFACE(S, XY, INDEX_SELF, INDEX_ADJ)                                                                                        \

@@ -19,7 +19,7 @@ static uint32_t marshal(Block const* block) {
     return v;
 }
 
-static Block* unmarshal(ChunkID chunk_id, uint32_t block) {
+static Block* unmarshal(ChunkID const& chunk_id, uint32_t block) {
     constexpr uint32_t X_MASK  = 0xf000'0000;
     constexpr uint32_t Y_MASK  = 0x0f00'0000;
     constexpr uint32_t Z_MASK  = 0x00ff'0000;
@@ -33,7 +33,7 @@ static Block* unmarshal(ChunkID chunk_id, uint32_t block) {
     return new_block(id, x, y, z);
 }
 
-Chunk::Chunk(ChunkID chunk_id) : chunk_id(chunk_id) {
+Chunk::Chunk(ChunkID const& chunk_id) : chunk_id(chunk_id) {
     auto it = db.find(chunk_id);
     if (it != db.end()) {
         for (uint32_t const& b : it->second) {

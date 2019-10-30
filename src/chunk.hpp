@@ -73,7 +73,7 @@ private:
     ChunkVertices chunk_vertices;
 
 public:
-    explicit Chunk(ChunkID chunk_id);
+    explicit Chunk(ChunkID const& chunk_id);
 
     ~Chunk();
 

@@ -28,7 +28,7 @@ void BlockManager::del_block(Block*& block) {
     block = nullptr;
 }
 
-void BlockManager::set_chunks_need_update(ChunkID chunk_id, Block const* block) {
+void BlockManager::set_chunks_need_update(ChunkID const& chunk_id, Block const* block) {
     chunks_need_update.insert(chunk_id);
 
     uint64_t x = static_cast<uint64_t>(block->x) & BLOCK_INDEX_MASK;
