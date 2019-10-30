@@ -6,7 +6,7 @@
 
 class Ray {
 public:
-    static Block* cast_block(vec3 const& p0, vec3 const& dir, float max_distance);
+    static Block const* cast_block(vec3 const& p0, vec3 const& dir, float max_distance);
 };
 
 #endif

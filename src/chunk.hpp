@@ -67,8 +67,8 @@ public:
     const ChunkID chunk_id;
 
 private:
-    array<array<array<Block*, 256>, CHUNK_WIDTH>, CHUNK_WIDTH> blocks {};
-    array<array<array<  bool, 256>, CHUNK_WIDTH>, CHUNK_WIDTH> opaque {};
+    array<array<array<Block, 256>, CHUNK_WIDTH>, CHUNK_WIDTH> blocks {};
+    array<array<array< bool, 256>, CHUNK_WIDTH>, CHUNK_WIDTH> opaque {};
 
     ChunkVertices chunk_vertices;
 
@@ -77,21 +77,21 @@ public:
 
     ~Chunk();
 
-    void add_block(Block* block) {
+    void add_block(Block&& block) {
         auto [x, y, z] = internal_coord(block);
-        blocks[x][y][z] = block;
-        opaque[x][y][z] = block->is_opaque();
+        opaque[x][y][z] = block.is_opaque();
+        blocks[x][y][z] = move(block);
     }
 
-    void del_block(Block* block) {
-        auto [x, y, z] = internal_coord(block);
-        blocks[x][y][z] = nullptr;
+    void del_block(Block const* block) {
+        auto [x, y, z] = internal_coord(*block);
         opaque[x][y][z] = false;
+        blocks[x][y][z].clear();
     }
 
-    Block* get_block(int32_t _x, int32_t _y, uint8_t _z) {
+    Block const* get_block(int32_t _x, int32_t _y, uint8_t _z) {
         auto [x, y, z] = internal_coord(_x, _y, _z);
-        return blocks[x][y][z];
+        return &blocks[x][y][z];
     }
 
     void update(array<Chunk const*, 4>&& adj_chunks);
@@ -107,8 +107,8 @@ private:
         return { static_cast<uint64_t>(x) & BLOCK_INDEX_MASK, static_cast<uint64_t>(y) & BLOCK_INDEX_MASK, z };
     }
 
-    static internal_coord_t internal_coord(Block* block) {
-        return internal_coord(block->x, block->y, block->z);
+    static internal_coord_t internal_coord(Block const& block) {
+        return internal_coord(block.x, block.y, block.z);
     }
 };
 

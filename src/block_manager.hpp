@@ -27,11 +27,11 @@ public:
         chunks_need_update.clear();
     }
 
-    void add_block(Block* block);
+    void add_block(Block&& block);
 
-    void del_block(Block*& block);
+    void del_block(Block const*& block);
 
-    Block* get_block(int32_t x, int32_t y, uint8_t z) {
+    Block const* get_block(int32_t x, int32_t y, uint8_t z) {
         ChunkID chunk_id { x, y };
         Chunk* chunk = get_chunk(chunk_id);
         if (chunk == nullptr) {
@@ -57,7 +57,7 @@ private:
         return nullptr;
     }
 
-    void set_chunks_need_update(ChunkID const& chunk_id, Block const* block);
+    void set_chunks_need_update(ChunkID const& chunk_id, Block const& block);
 };
 
 #endif

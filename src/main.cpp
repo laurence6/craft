@@ -28,7 +28,7 @@ static void load_map(string const& map_path) {
         if (map_file.eof()) {
             break;
         }
-        Scene::ins().add_block(new Block(x, y, z, type));
+        Scene::ins().add_block(Block { x, y, z, type });
     }
 }
 

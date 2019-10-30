@@ -110,8 +110,8 @@ public:
     }
 
     void render() const {
-        Block* target = Player::ins().target;
-        if (!target) {
+        Block const* target = Player::ins().target;
+        if (target == nullptr || target->is_null()) {
             return;
         }
         vec3 pos = vec3(static_cast<float>(target->x), static_cast<float>(target->y), static_cast<float>(target->z));

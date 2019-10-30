@@ -27,13 +27,23 @@ private:
 
 class Block : private NonCopy<Block> {
 public:
-    const int32_t x;
-    const int32_t y;
-    const uint8_t z;
-    const uint16_t type;
+    int32_t x;
+    int32_t y;
+    uint8_t z;
+    uint16_t type;
 
 public:
+    Block() = default;
+
     Block(int32_t x, int32_t y, uint8_t z, uint16_t type) : x(x), y(y), z(z), type(type) {
+    }
+
+    void clear() {
+        type = 0;
+    }
+
+    bool is_null() const {
+        return type == 0;
     }
 
     bool is_opaque() const;

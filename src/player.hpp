@@ -13,7 +13,7 @@ using namespace std;
 
 class Player : public Singleton<Player>, public Object {
 public:
-    Block* target = nullptr;
+    Block const* target = nullptr;
 
 private:
     float cam_speed = player_speed;
