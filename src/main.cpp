@@ -23,15 +23,12 @@ static void load_map(string const& map_path) {
     }
 
     while (true) {
-        long id, x, y, z;
-        map_file >> id >> x >> y >> z;
+        int32_t type, x, y, z;
+        map_file >> type >> x >> y >> z;
         if (map_file.eof()) {
             break;
         }
-        Block* block = new_block(id, x, y, z);
-        if (block != nullptr) {
-            Scene::ins().add_block(block);
-        }
+        Scene::ins().add_block(new Block(x, y, z, type));
     }
 }
 

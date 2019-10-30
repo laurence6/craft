@@ -31,7 +31,7 @@ void BlockShader::init() {
     glTexStorage3D(GL_TEXTURE_2D_ARRAY, N_MIP_LEVEL, GL_RGBA8, SUB_TEX_WIDTH, SUB_TEX_HEIGHT, N_TILES);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     auto texture_data = load_texture(TEXTURE_FOLDER_PATH, 4);
-    for (uint8_t i = 0; i < N_MIP_LEVEL; i++) {
+    for (int i = 0; i < N_MIP_LEVEL; i++) {
         uint32_t w = SUB_TEX_WIDTH >> i;
         uint32_t h = SUB_TEX_HEIGHT >> i;
         glTexSubImage3D(GL_TEXTURE_2D_ARRAY, i, 0, 0, 0, w, h, N_TILES, GL_RGBA, GL_UNSIGNED_BYTE, &texture_data[i].front());

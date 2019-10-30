@@ -71,7 +71,7 @@ void Chunk::update(array<Chunk const*, 4>&& adj_chunks) {
                     if (z == 0            || !opaque[x][y][z-1]) block->insert_face_vertices(vertices, FACE_BOTTOM);
                     if (z == 255          || !opaque[x][y][z+1]) block->insert_face_vertices(vertices, FACE_TOP   );
                 } else {
-                    block->insert_face_vertices(vertices);
+                    block->insert_face_vertices(vertices, 0);
                 }
             }
         }

@@ -12,10 +12,10 @@ static unordered_map<ChunkID, vector<uint32_t>, ChunkID::Hasher> db;
 //      :  6, (currently unused)
 static uint32_t marshal(Block const* block) {
     uint32_t v = 0;
-    v += (static_cast<uint32_t>(block->x) & BLOCK_INDEX_MASK) << 28u;
-    v += (static_cast<uint32_t>(block->y) & BLOCK_INDEX_MASK) << 24u;
-    v += static_cast<uint32_t>(block->z) << 16u;
-    v += static_cast<uint32_t>(block->id()) << 6u;
+    v |= (static_cast<uint32_t>(block->x) & BLOCK_INDEX_MASK) << 28u;
+    v |= (static_cast<uint32_t>(block->y) & BLOCK_INDEX_MASK) << 24u;
+    v |= static_cast<uint32_t>(block->z) << 16u;
+    v |= static_cast<uint32_t>(block->type) << 6u;
     return v;
 }
 
@@ -28,9 +28,9 @@ static Block* unmarshal(ChunkID const& chunk_id, uint32_t block) {
     auto x = static_cast<int32_t>(((block & X_MASK) >> 28u) | chunk_id.x);
     auto y = static_cast<int32_t>(((block & Y_MASK) >> 24u) | chunk_id.y);
     auto z = static_cast<uint8_t>((block & Z_MASK) >> 16u);
-    auto id = static_cast<uint16_t>((block & ID_MASK) >> 6u);
+    auto type = static_cast<uint16_t>((block & ID_MASK) >> 6u);
 
-    return new_block(id, x, y, z);
+    return new Block(x, y, z, type);
 }
 
 Chunk::Chunk(ChunkID const& chunk_id) : chunk_id(chunk_id) {

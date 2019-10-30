@@ -18,7 +18,7 @@ array<vector<uint8_t>, N_MIP_LEVEL> load_texture(string tex_folder_path, int n_c
     if (tex_folder_path.back() != '/') {
         tex_folder_path.append("/");
     }
-    for (uint8_t i = 0; i < N_MIP_LEVEL; i++) {
+    for (int i = 0; i < N_MIP_LEVEL; i++) {
         string tex_path;
         {
             stringstream ss;
