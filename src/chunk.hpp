@@ -37,6 +37,9 @@ public:
         y = static_cast<uint32_t>(_y) & CHUNK_ID_MASK;
     }
 
+    ChunkID(BlockID const& block_id) : ChunkID(block_id.x, block_id.y) {
+    }
+
     ChunkID add(int32_t dx, int32_t dy) const {
         return ChunkID { static_cast<int32_t>(x + CHUNK_WIDTH * dx), static_cast<int32_t>(y + CHUNK_WIDTH * dy) };
     }
@@ -67,8 +70,8 @@ public:
     const ChunkID chunk_id;
 
 private:
-    array<array<array<Block, 256>, CHUNK_WIDTH>, CHUNK_WIDTH> blocks {};
-    array<array<array< bool, 256>, CHUNK_WIDTH>, CHUNK_WIDTH> opaque {};
+    array<array<array<BlockData, 256>, CHUNK_WIDTH>, CHUNK_WIDTH> blocks {};
+    array<array<array<     bool, 256>, CHUNK_WIDTH>, CHUNK_WIDTH> opaque {};
 
     ChunkVertices chunk_vertices;
 
@@ -77,20 +80,20 @@ public:
 
     ~Chunk();
 
-    void add_block(Block&& block) {
-        auto [x, y, z] = internal_coord(block);
+    void add_block(BlockID const& block_id, BlockData&& block) {
+        auto [x, y, z] = to_internal_coord(block_id);
         opaque[x][y][z] = block.is_opaque();
         blocks[x][y][z] = move(block);
     }
 
-    void del_block(Block const* block) {
-        auto [x, y, z] = internal_coord(*block);
+    void del_block(BlockID const& block_id) {
+        auto [x, y, z] = to_internal_coord(block_id);
         opaque[x][y][z] = false;
         blocks[x][y][z].clear();
     }
 
-    Block const* get_block(int32_t _x, int32_t _y, uint8_t _z) {
-        auto [x, y, z] = internal_coord(_x, _y, _z);
+    BlockData const* get_block(BlockID const& block_id) {
+        auto [x, y, z] = to_internal_coord(block_id);
         return &blocks[x][y][z];
     }
 
@@ -101,14 +104,20 @@ public:
     }
 
 private:
-    using internal_coord_t = tuple<uint16_t, uint16_t, uint8_t>;
-
-    static internal_coord_t internal_coord(int32_t x, int32_t y, uint8_t z) {
-        return { static_cast<uint64_t>(x) & BLOCK_INDEX_MASK, static_cast<uint64_t>(y) & BLOCK_INDEX_MASK, z };
+    static tuple<uint16_t, uint16_t, uint8_t> to_internal_coord(BlockID const& block_id) {
+        return {
+            static_cast<uint64_t>(block_id.x) & BLOCK_INDEX_MASK,
+            static_cast<uint64_t>(block_id.y) & BLOCK_INDEX_MASK,
+            block_id.z,
+        };
     }
 
-    static internal_coord_t internal_coord(Block const& block) {
-        return internal_coord(block.x, block.y, block.z);
+    BlockID to_block_id(uint16_t x, uint16_t y, uint8_t z) {
+        return {
+            static_cast<int32_t>(chunk_id.x | x),
+            static_cast<int32_t>(chunk_id.y | y),
+            z,
+        };
     }
 };
 

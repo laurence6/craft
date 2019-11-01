@@ -53,8 +53,8 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int) {
         if (action == GLFW_RELEASE) {
             switch (button) {
                 case GLFW_MOUSE_BUTTON_LEFT:
-                    if (Player::ins().target != nullptr) {
-                        Scene::ins().block_manager.del_block(Player::ins().target);
+                    if (Player::ins().target.has_value()) {
+                        Scene::ins().block_manager.del_block(*Player::ins().target);
                     }
                 break;
             }

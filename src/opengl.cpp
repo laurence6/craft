@@ -1,17 +1,12 @@
-#include <cstdlib>
+#include <exception>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
 
-#include "util.hpp"
+#include "opengl.hpp"
 
 using namespace std;
-
-void _exit(int code) {
-    glfwTerminate();
-    exit(code);
-}
 
 GLuint load_shader(string const& vertex_shader_path, string const& fragment_shader_path) {
     GLuint vertex_shader_ID   = glCreateShader(GL_VERTEX_SHADER);
@@ -26,7 +21,7 @@ GLuint load_shader(string const& vertex_shader_path, string const& fragment_shad
         }
     } else {
         cerr << "Cannot open " << vertex_shader_path << endl;
-        _exit(1);
+        throw new exception();
     }
 
     string fragment_shader_code;
@@ -50,8 +45,7 @@ GLuint load_shader(string const& vertex_shader_path, string const& fragment_shad
     if (info_log_length > 0) {
         vector<char> error_message(info_log_length);
         glGetShaderInfoLog(vertex_shader_ID, info_log_length, nullptr, error_message.data());
-        cerr << error_message.data() << endl;
-        _exit(1);
+        throw new runtime_error(error_message.data());
     }
 
     char const* fragment_shader_p = fragment_shader_code.c_str();
@@ -64,7 +58,7 @@ GLuint load_shader(string const& vertex_shader_path, string const& fragment_shad
         vector<char> error_message(info_log_length);
         glGetShaderInfoLog(fragment_shader_ID, info_log_length, nullptr, error_message.data());
         cerr << error_message.data() << endl;
-        _exit(1);
+        throw new runtime_error(error_message.data());
     }
 
     GLuint program_ID = glCreateProgram();
@@ -77,8 +71,7 @@ GLuint load_shader(string const& vertex_shader_path, string const& fragment_shad
     if (info_log_length > 0) {
         vector<char> error_message(info_log_length);
         glGetProgramInfoLog(program_ID, info_log_length, nullptr, error_message.data());
-        cerr << error_message.data() << endl;
-        _exit(1);
+        throw new runtime_error(error_message.data());
     }
 
     glDetachShader(program_ID, vertex_shader_ID);

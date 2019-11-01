@@ -27,17 +27,38 @@ public:
         chunks_need_update.clear();
     }
 
-    void add_block(Block&& block);
+    void add_block(BlockID const& block_id, BlockData&& block) {
+        ChunkID chunk_id { block_id };
+        Chunk* chunk = get_chunk(chunk_id);
+        if (chunk == nullptr) {
+            chunk = new Chunk(chunk_id);
+            chunks.insert(make_pair(chunk_id, chunk));
+        }
 
-    void del_block(Block const*& block);
+        set_chunks_need_update(chunk_id, block_id);
 
-    Block const* get_block(int32_t x, int32_t y, uint8_t z) {
-        ChunkID chunk_id { x, y };
+        chunk->add_block(block_id, move(block));
+    }
+
+    void del_block(BlockID const& block_id) {
+        ChunkID chunk_id { block_id };
+        Chunk* chunk = get_chunk(chunk_id);
+        if (chunk == nullptr) {
+            return;
+        }
+
+        set_chunks_need_update(chunk_id, block_id);
+
+        chunk->del_block(block_id);
+    }
+
+    BlockData const* get_block(BlockID const& block_id) {
+        ChunkID chunk_id { block_id };
         Chunk* chunk = get_chunk(chunk_id);
         if (chunk == nullptr) {
             return nullptr;
         }
-        return chunk->get_block(x, y, z);
+        return chunk->get_block(block_id);
     }
 
     void update();
@@ -57,7 +78,7 @@ private:
         return nullptr;
     }
 
-    void set_chunks_need_update(ChunkID const& chunk_id, Block const& block);
+    void set_chunks_need_update(ChunkID const& chunk_id, BlockID const& block_id);
 };
 
 #endif

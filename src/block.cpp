@@ -5,13 +5,13 @@
 
 using namespace std;
 
-struct BlockData {
+struct BlockConfig {
     bool is_opaque;
     bool has_six_faces;
     array<uint32_t, 6> tex;
 };
 
-static array<BlockData, 5> block_data {{
+static array<BlockConfig, 5> block_config {{
     { },
     { true, true, grass_block_tex },
     { true, true, dirt_block_tex },
@@ -19,12 +19,12 @@ static array<BlockData, 5> block_data {{
     { false, false, {{ grass_tex }} },
 }};
 
-bool Block::is_opaque() const {
-    return block_data[type].is_opaque;
+bool BlockData::is_opaque() const {
+    return block_config[type].is_opaque;
 }
 
-bool Block::has_six_faces() const {
-    return block_data[type].has_six_faces;
+bool BlockData::has_six_faces() const {
+    return block_config[type].has_six_faces;
 }
 
 constexpr GLfloat _0 = 0.f, _1 = 1.f;
@@ -111,28 +111,28 @@ constexpr array<uint8_t, 6> uv_coord = {{
     0b10,
 }};
 
-void Block::insert_face_vertices(vector<BlockVertexData>& vertices, uint8_t f) const {
+void BlockData::insert_face_vertices(vector<BlockVertexData>& vertices, BlockID const& block_id, uint8_t f) const {
     if (has_six_faces()) {
         for (int i = 0; i < 6; i++) {
             vertices.emplace_back(BlockVertexData(
-                id_block_vertices[f][i][0] + static_cast<GLfloat>(x),
-                id_block_vertices[f][i][1] + static_cast<GLfloat>(y),
-                id_block_vertices[f][i][2] + static_cast<GLfloat>(z),
+                id_block_vertices[f][i][0] + static_cast<GLfloat>(block_id.x),
+                id_block_vertices[f][i][1] + static_cast<GLfloat>(block_id.y),
+                id_block_vertices[f][i][2] + static_cast<GLfloat>(block_id.z),
                 f,
                 uv_coord[i],
-                block_data[type].tex[f]
+                block_config[type].tex[f]
             ));
         }
     } else {
         for (int f = 0; f < 2; f++) {
             for (int i = 0; i < 6; i++) {
                 vertices.emplace_back(BlockVertexData(
-                    tf_block_vertices[f*6+i][0] + static_cast<GLfloat>(x),
-                    tf_block_vertices[f*6+i][1] + static_cast<GLfloat>(y),
-                    tf_block_vertices[f*6+i][2] + static_cast<GLfloat>(z),
+                    tf_block_vertices[f*6+i][0] + static_cast<GLfloat>(block_id.x),
+                    tf_block_vertices[f*6+i][1] + static_cast<GLfloat>(block_id.y),
+                    tf_block_vertices[f*6+i][2] + static_cast<GLfloat>(block_id.z),
                     FACE_TOP,
                     uv_coord[i],
-                    block_data[type].tex[0]
+                    block_config[type].tex[0]
                 ));
             }
         }

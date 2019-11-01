@@ -28,8 +28,8 @@ public:
         block_manager.shutdown();
     }
 
-    void add_block(Block&& block) {
-        block_manager.add_block(move(block));
+    void add_block(BlockID const& block_id, BlockData&& block) {
+        block_manager.add_block(block_id, move(block));
     }
 
     void add_object(Object* obj) {

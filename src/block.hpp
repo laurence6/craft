@@ -12,30 +12,34 @@ struct BlockVertexData {
     GLfloat x, y, z;
     GLuint param; // 3 bits: face index, 2 bits: uv_coord, 27 bits: tex index
 
-    constexpr BlockVertexData(GLfloat x, GLfloat y, GLfloat z, uint32_t face, uint32_t uv_coord, uint32_t tex) : x(x), y(y), z(z), param(gen_param(face, uv_coord, tex)) {
-    }
-
-private:
-    constexpr GLuint gen_param(uint32_t face, uint32_t uv_coord, uint32_t tex) {
-        GLuint param = 0;
-        param += face << 29u;
-        param += uv_coord << 27u;
-        param += tex;
-        return param;
+    BlockVertexData(GLfloat x, GLfloat y, GLfloat z, uint32_t face, uint32_t uv_coord, uint32_t tex) : x(x), y(y), z(z) {
+        param = 0;
+        param |= face << 29u;
+        param |= uv_coord << 27u;
+        param |= tex;
     }
 };
 
-class Block : private NonCopy<Block> {
+class BlockID {
 public:
     int32_t x;
     int32_t y;
     uint8_t z;
-    uint16_t type;
 
 public:
-    Block() = default;
+    template<typename T1, typename T2, typename T3>
+    BlockID(T1 x, T2 y, T3 z) : x(x), y(y), z(z) {
+    }
+};
 
-    Block(int32_t x, int32_t y, uint8_t z, uint16_t type) : x(x), y(y), z(z), type(type) {
+class BlockData : private NonCopy<BlockData> {
+public:
+    uint16_t type = 0;
+
+public:
+    BlockData() = default;
+
+    BlockData(uint16_t type) : type(type) {
     }
 
     void clear() {
@@ -50,7 +54,7 @@ public:
 
     bool has_six_faces() const;
 
-    void insert_face_vertices(vector<BlockVertexData>&, uint8_t) const;
+    void insert_face_vertices(vector<BlockVertexData>& vertices, BlockID const& block_id, uint8_t f) const;
 };
 
 #endif

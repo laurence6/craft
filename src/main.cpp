@@ -1,3 +1,4 @@
+#include <exception>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -19,22 +20,24 @@ static void load_map(string const& map_path) {
     ifstream map_file(map_path);
     if (!map_file.is_open()) {
         cerr << "Cannot open " << map_path << endl;
-        _exit(1);
+        throw new exception();
     }
 
     while (true) {
-        int32_t type, x, y, z;
+        uint16_t type;
+        int32_t x, y, z;
         map_file >> type >> x >> y >> z;
         if (map_file.eof()) {
             break;
         }
-        Scene::ins().add_block(Block { x, y, z, type });
+        BlockID block_id { x, y, z };
+        Scene::ins().add_block(block_id, BlockData { type });
     }
 }
 
 int main() {
     if (glfwInit() == 0) {
-        _exit(1);
+        throw new exception();
     }
 
     glfwWindowHint(GLFW_SAMPLES, 4);
@@ -44,13 +47,13 @@ int main() {
 
     GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, nullptr, nullptr);
     if (window == nullptr) {
-        _exit(1);
+        throw new exception();
     }
 
     glfwMakeContextCurrent(window);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        _exit(1);
+        throw new exception();
     }
 
     glfwSetKeyCallback(window, key_callback);
@@ -91,5 +94,5 @@ int main() {
     UIManager::ins().shutdown();
     Scene::ins().shutdown();
 
-    _exit(0);
+    return 0;
 }

@@ -1,4 +1,5 @@
 #include <array>
+#include <exception>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -10,7 +11,6 @@
 #include <stb_image.h>
 
 #include "texture.hpp"
-#include "util.hpp"
 
 array<vector<uint8_t>, N_MIP_LEVEL> load_texture(string tex_folder_path, int n_channels) {
     array<vector<uint8_t>, N_MIP_LEVEL> data {};
@@ -31,8 +31,7 @@ array<vector<uint8_t>, N_MIP_LEVEL> load_texture(string tex_folder_path, int n_c
         int x, y, n, desired_channels = n_channels;
         unsigned char const* tex_data = stbi_load(tex_path.c_str(), &x, &y, &n, desired_channels);
         if (tex_data == nullptr) {
-            cerr << stbi_failure_reason() << endl;
-            _exit(1);
+            throw new runtime_error(stbi_failure_reason());
         }
 
         data[i].insert(data[i].end(), tex_data, tex_data + x*y*desired_channels);

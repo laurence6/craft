@@ -1,6 +1,8 @@
 #ifndef PLAYER_HPP
 #define PLAYER_HPP
 
+#include <optional>
+
 #include "block.hpp"
 #include "collider.hpp"
 #include "config.hpp"
@@ -13,7 +15,7 @@ using namespace std;
 
 class Player : public Singleton<Player>, public Object {
 public:
-    Block const* target = nullptr;
+    optional<BlockID> target = nullopt;
 
 private:
     float cam_speed = player_speed;

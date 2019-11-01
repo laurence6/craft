@@ -3,10 +3,10 @@
 
 constexpr float MAX_DISTANCE = 4294967295.f;
 
-Block const* Ray::cast_block(vec3 const& p0, vec3 const& dir, float max_distance) {
+optional<BlockID> Ray::cast_block(vec3 const& p0, vec3 const& dir, float max_distance) {
     array<int32_t, 3> curr;
     array<int32_t, 3> step;
-    array<float, 3>   next_distance;
+    array<float, 3> next_distance;
 
     auto compute_next_distance = [&](int i) { next_distance[i] = (static_cast<float>(curr[i] + (step[i] < 0 ? 0 : 1)) - p0[i]) / dir[i]; };
 
@@ -30,14 +30,15 @@ Block const* Ray::cast_block(vec3 const& p0, vec3 const& dir, float max_distance
         if (next_distance[i] > max_distance)
             break;
 
-        Block const* block = Scene::ins().block_manager.get_block(curr[0], curr[1], curr[2]);
+        BlockID block_id { curr[0], curr[1], curr[2] };
+        BlockData const* block = Scene::ins().block_manager.get_block(block_id);
         if (block != nullptr && !block->is_null()) {
-            return block;
+            return block_id;
         }
 
         curr[i] += step[i];
         compute_next_distance(i);
     }
 
-    return nullptr;
+    return nullopt;
 }
