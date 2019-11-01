@@ -8,9 +8,8 @@
 
 using namespace std;
 
-class Ray {
-public:
-    static optional<BlockID> cast_block(vec3 const& p0, vec3 const& dir, float max_distance);
-};
+namespace Ray {
+    optional<BlockID> cast_block(vec3 const& p0, vec3 const& dir, float max_distance);
+}
 
 #endif

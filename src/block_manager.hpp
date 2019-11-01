@@ -32,7 +32,7 @@ public:
         Chunk* chunk = get_chunk(chunk_id);
         if (chunk == nullptr) {
             chunk = new Chunk(chunk_id);
-            chunks.insert(make_pair(chunk_id, chunk));
+            chunks.emplace(chunk_id, chunk);
         }
 
         set_chunks_need_update(chunk_id, block_id);
