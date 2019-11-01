@@ -94,7 +94,10 @@ public:
 
     BlockData const* get_block(BlockID const& block_id) {
         auto [x, y, z] = to_internal_coord(block_id);
-        return &blocks[x][y][z];
+        auto& block = blocks[x][y][z];
+        if (block.is_null())
+            return nullptr;
+        return &block;
     }
 
     void update(array<Chunk const*, 4>&& adj_chunks);

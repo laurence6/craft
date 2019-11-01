@@ -32,9 +32,8 @@ optional<BlockID> Ray::cast_block(vec3 const& p0, vec3 const& dir, float max_dis
 
         BlockID block_id { curr[0], curr[1], curr[2] };
         BlockData const* block = Scene::ins().block_manager.get_block(block_id);
-        if (block != nullptr && !block->is_null()) {
+        if (block != nullptr)
             return block_id;
-        }
 
         curr[i] += step[i];
         compute_next_distance(i);

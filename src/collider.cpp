@@ -22,7 +22,7 @@ Collision Collider::collide(vec3 const& pos) {
         for (int32_t x = min_x_b; x <= max_x_b; x++) {
             for (int32_t y = min_y_b; y <= max_y_b; y++) {
                 auto const* b = block_manager.get_block(BlockID { x, y, z });
-                if (b != nullptr && !b->is_null()) {
+                if (b != nullptr) {
                     found = true;
                     break;
                 }
@@ -35,7 +35,7 @@ Collision Collider::collide(vec3 const& pos) {
         for (int32_t x = min_x_b; x <= max_x_b; x++) {
             for (int32_t y = min_y_b; y <= max_y_b; y++) {
                 auto const* b = block_manager.get_block(BlockID { x, y, z });
-                if (b != nullptr && !b->is_null()) {
+                if (b != nullptr) {
                     highest_z_b = max(highest_z_b, z + 1);
                     break;
                 }
