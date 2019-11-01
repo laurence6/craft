@@ -8,6 +8,8 @@
 
 using namespace std;
 
+const string DB_PATH = "db";
+
 const string SHADER_BLOCK_VERTEX_PATH = "shader/block_vertex.glsl";
 const string SHADER_BLOCK_FRAGMENT_PATH = "shader/block_fragment.glsl";
 const string SHADER_BLOCK_EDGE_VERTEX_PATH = "shader/block_edge_vertex.glsl";

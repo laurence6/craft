@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "block.hpp"
+#include "db.hpp"
 #include "input.hpp"
 #include "opengl.hpp"
 #include "player.hpp"
@@ -16,10 +17,14 @@
 
 using namespace std;
 
-static void load_map(string const& map_path) {
-    ifstream map_file(map_path);
+static void load_map() {
+    if (!DB::ins().chunks.empty()) {
+        return;
+    }
+
+    ifstream map_file(MAP_PATH);
     if (!map_file.is_open()) {
-        cerr << "Cannot open " << map_path << endl;
+        cerr << "Cannot open " << MAP_PATH << endl;
         throw new exception();
     }
 
@@ -67,12 +72,13 @@ int main() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    DB::ins().init();
     ShaderManager::ins().init();
     Scene::ins().init();
     Player::ins().init();
     UIManager::ins().init();
 
-    load_map(MAP_PATH);
+    load_map();
     Scene::ins().add_object(&Player::ins());
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.f);
@@ -93,6 +99,7 @@ int main() {
 
     UIManager::ins().shutdown();
     Scene::ins().shutdown();
+    DB::ins().shutdown();
 
     return 0;
 }

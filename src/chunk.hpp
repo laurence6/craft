@@ -32,6 +32,8 @@ public:
     uint32_t x, y;
 
 public:
+    ChunkID() = default;
+
     ChunkID(int32_t _x, int32_t _y) {
         x = static_cast<uint32_t>(_x) & CHUNK_ID_MASK;
         y = static_cast<uint32_t>(_y) & CHUNK_ID_MASK;

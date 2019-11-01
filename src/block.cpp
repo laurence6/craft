@@ -3,8 +3,6 @@
 #include "block.hpp"
 #include "config.hpp"
 
-using namespace std;
-
 struct BlockConfig {
     bool is_opaque;
     bool has_six_faces;

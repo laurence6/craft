@@ -16,16 +16,9 @@ private:
     unordered_set<ChunkID, ChunkID::Hasher>         chunks_need_update {};
 
 public:
-    void init() {
-    }
+    void init();
 
-    void shutdown() {
-        for (auto& p : chunks) {
-            delete p.second;
-        }
-        chunks.clear();
-        chunks_need_update.clear();
-    }
+    void shutdown();
 
     void add_block(BlockID const& block_id, BlockData&& block) {
         ChunkID chunk_id { block_id };
@@ -61,7 +54,22 @@ public:
         return chunk->get_block(block_id);
     }
 
-    void update();
+    void update(){
+        if (!chunks_need_update.empty()) {
+            for (auto const& chunk_id : chunks_need_update) {
+                Chunk* chunk = get_chunk(chunk_id);
+                if (chunk != nullptr) {
+                    chunk->update({{
+                        get_chunk(chunk_id.add(-1, 0)),
+                        get_chunk(chunk_id.add( 1, 0)),
+                        get_chunk(chunk_id.add( 0,-1)),
+                        get_chunk(chunk_id.add( 0, 1)),
+                    }});
+                }
+            }
+            chunks_need_update.clear();
+        }
+    }
 
     void render() const {
         for (auto const& chunk : chunks) {
@@ -78,7 +86,16 @@ private:
         return nullptr;
     }
 
-    void set_chunks_need_update(ChunkID const& chunk_id, BlockID const& block_id);
+    void set_chunks_need_update(ChunkID const& chunk_id, BlockID const& block_id) {
+        chunks_need_update.insert(chunk_id);
+
+        uint64_t x = static_cast<uint64_t>(block_id.x) & BLOCK_INDEX_MASK;
+        uint64_t y = static_cast<uint64_t>(block_id.y) & BLOCK_INDEX_MASK;
+        if      (x == 0)             chunks_need_update.insert(chunk_id.add(-1, 0));
+        else if (x == CHUNK_WIDTH-1) chunks_need_update.insert(chunk_id.add( 1, 0));
+        if      (y == 0)             chunks_need_update.insert(chunk_id.add( 0,-1));
+        else if (y == CHUNK_WIDTH-1) chunks_need_update.insert(chunk_id.add( 0, 1));
+    }
 };
 
 #endif

@@ -1,8 +1,7 @@
 #include <unordered_map>
 
 #include "chunk.hpp"
-
-static unordered_map<ChunkID, vector<uint32_t>, ChunkID::Hasher> db;
+#include "db.hpp"
 
 // 32 bits:
 //    x :  4,
@@ -12,10 +11,10 @@ static unordered_map<ChunkID, vector<uint32_t>, ChunkID::Hasher> db;
 //      :  6, (currently unused)
 static uint32_t marshal(uint16_t x, uint16_t y, uint16_t z, BlockData const& block) {
     uint32_t v = 0;
-    v |= (static_cast<uint32_t>(x) & BLOCK_INDEX_MASK) << 28u;
-    v |= (static_cast<uint32_t>(y) & BLOCK_INDEX_MASK) << 24u;
-    v |=  static_cast<uint32_t>(z) << 16u;
-    v |=  static_cast<uint32_t>(block.type) << 6u;
+    v |= static_cast<uint32_t>(x) << 28u;
+    v |= static_cast<uint32_t>(y) << 24u;
+    v |= static_cast<uint32_t>(z) << 16u;
+    v |= static_cast<uint32_t>(block.type) << 6u;
     return v;
 }
 
@@ -34,8 +33,8 @@ static tuple<BlockID, BlockData> unmarshal(ChunkID const& chunk_id, uint32_t blo
 }
 
 Chunk::Chunk(ChunkID const& chunk_id) : chunk_id(chunk_id) {
-    auto it = db.find(chunk_id);
-    if (it != db.end()) {
+    auto it = DB::ins().chunks.find(chunk_id);
+    if (it != DB::ins().chunks.end()) {
         for (uint32_t const& b : it->second) {
             auto [block_id, block] = unmarshal(chunk_id, b);
             add_block(block_id, move(block));
@@ -56,5 +55,5 @@ Chunk::~Chunk() {
         }
     }
 
-    db.insert_or_assign(chunk_id, chunk_data);
+    DB::ins().chunks.insert_or_assign(chunk_id, chunk_data);
 }
