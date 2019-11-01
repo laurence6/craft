@@ -36,6 +36,10 @@ void DB::init() {
         chunk.resize(n_blocks);
         db.read(*chunk.data(), n_blocks);
     }
+
+    vec3 _player_pos;
+    db.read(_player_pos);
+    player_pos = _player_pos;
 }
 
 void DB::shutdown() {
@@ -50,4 +54,6 @@ void DB::shutdown() {
         db.write(p.second.size());
         db.write(*p.second.data(), p.second.size());
     }
+
+    db.write(*player_pos);
 }

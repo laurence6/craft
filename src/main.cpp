@@ -98,6 +98,7 @@ int main() {
     }
 
     UIManager::ins().shutdown();
+    Player::ins().shutdown();
     Scene::ins().shutdown();
     DB::ins().shutdown();
 

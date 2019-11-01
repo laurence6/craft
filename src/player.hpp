@@ -6,6 +6,7 @@
 #include "block.hpp"
 #include "collider.hpp"
 #include "config.hpp"
+#include "db.hpp"
 #include "math.hpp"
 #include "object.hpp"
 #include "ray.hpp"
@@ -31,9 +32,13 @@ private:
 
 public:
     void init() {
-        pos = vec3(0.f, 0.f, 50.f);
+        pos = DB::ins().player_pos.value_or(vec3(0.f, 0.f, 50.f));
 
         collider = make_unique<Collider>(0.3f, 0.0f, 1.95f);
+    }
+
+    void shutdown() {
+        DB::ins().player_pos = pos;
     }
 
     void update() {
