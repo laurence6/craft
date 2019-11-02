@@ -95,10 +95,10 @@ constexpr array<uint8_t, 6> uv_coord = {{
     0b10,
 }};
 
-void BlockData::insert_face_vertices(vector<BlockVertexData>& vertices, BlockID const& block_id, uint8_t f) const {
+void BlockData::insert_face_vertices(vector<BlockVertex>& vertices, BlockID const& block_id, uint8_t f) const {
     if (has_six_faces()) {
         for (int i = 0; i < 6; i++) {
-            vertices.emplace_back(BlockVertexData(
+            vertices.emplace_back(BlockVertex(
                 id_block_vertices[f][i][0] + static_cast<GLfloat>(block_id.x),
                 id_block_vertices[f][i][1] + static_cast<GLfloat>(block_id.y),
                 id_block_vertices[f][i][2] + static_cast<GLfloat>(block_id.z),
@@ -110,7 +110,7 @@ void BlockData::insert_face_vertices(vector<BlockVertexData>& vertices, BlockID 
     } else {
         for (int f = 0; f < 2; f++) {
             for (int i = 0; i < 6; i++) {
-                vertices.emplace_back(BlockVertexData(
+                vertices.emplace_back(BlockVertex(
                     tf_block_vertices[f*6+i][0] + static_cast<GLfloat>(block_id.x),
                     tf_block_vertices[f*6+i][1] + static_cast<GLfloat>(block_id.y),
                     tf_block_vertices[f*6+i][2] + static_cast<GLfloat>(block_id.z),

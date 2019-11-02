@@ -8,11 +8,11 @@
 
 using namespace std;
 
-struct BlockVertexData {
+struct BlockVertex {
     GLfloat x, y, z;
     GLuint param; // 3 bits: face index, 2 bits: uv_coord, 27 bits: tex index
 
-    BlockVertexData(GLfloat x, GLfloat y, GLfloat z, uint32_t face, uint32_t uv_coord, uint32_t tex) : x(x), y(y), z(z) {
+    BlockVertex(GLfloat x, GLfloat y, GLfloat z, uint32_t face, uint32_t uv_coord, uint32_t tex) : x(x), y(y), z(z) {
         param = 0;
         param |= face << 29u;
         param |= uv_coord << 27u;
@@ -53,7 +53,7 @@ public:
 
     bool has_six_faces() const;
 
-    void insert_face_vertices(vector<BlockVertexData>& vertices, BlockID const& block_id, uint8_t f) const;
+    void insert_face_vertices(vector<BlockVertex>& vertices, BlockID const& block_id, uint8_t f) const;
 };
 
 #endif

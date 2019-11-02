@@ -63,7 +63,7 @@ public:
 
     ~ChunkVertices();
 
-    void upload_data(vector<BlockVertexData> const& data);
+    void upload_data(vector<BlockVertex> const& data);
 
     void render() const;
 };

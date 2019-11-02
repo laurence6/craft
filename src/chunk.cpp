@@ -11,8 +11,8 @@ ChunkVertices::ChunkVertices() {
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(BlockVertexData), (GLvoid*)0);
-    glVertexAttribIPointer(1, 1, GL_UNSIGNED_INT, sizeof(BlockVertexData), (GLvoid*)(3 * sizeof(GLfloat)));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(BlockVertex), (GLvoid*)0);
+    glVertexAttribIPointer(1, 1, GL_UNSIGNED_INT, sizeof(BlockVertex), (GLvoid*)(3 * sizeof(GLfloat)));
     glBindVertexArray(0);
 }
 
@@ -21,9 +21,9 @@ ChunkVertices::~ChunkVertices() {
     del_vbo(vbo);
 }
 
-void ChunkVertices::upload_data(vector<BlockVertexData> const& data) {
+void ChunkVertices::upload_data(vector<BlockVertex> const& data) {
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(BlockVertexData) * data.size(), data.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(BlockVertex) * data.size(), data.data(), GL_STATIC_DRAW);
 
     count = data.size();
 }
@@ -35,7 +35,7 @@ void ChunkVertices::render() const {
 }
 
 void Chunk::update(array<Chunk const*, 4>&& adj_chunks) {
-    vector<BlockVertexData> vertices {};
+    vector<BlockVertex> vertices {};
 
 #define UPDATE_OUTER_SURFACE(S, XY, X, Y, INDEX_ADJ)                                                                                             \
     for (uint16_t z = 0; z < 256; z++) {                                                                                                         \
