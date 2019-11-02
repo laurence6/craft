@@ -54,9 +54,18 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int) {
             switch (button) {
                 case GLFW_MOUSE_BUTTON_LEFT:
                     if (Player::ins().target.has_value()) {
-                        Scene::ins().block_manager.del_block(*Player::ins().target);
+                        Scene::ins().block_manager.del_block(Player::ins().target->at(0));
                     }
-                break;
+                    break;
+                case GLFW_MOUSE_BUTTON_RIGHT:
+                    if (Player::ins().target.has_value()) {
+                        BlockID const& block_id_front = Player::ins().target->at(1);
+                        BlockData const* block = Scene::ins().block_manager.get_block(block_id_front);
+                        if (block == nullptr) {
+                            Scene::ins().block_manager.add_block(block_id_front, BlockData { Player::ins().new_block });
+                        }
+                    }
+                    break;
             }
         }
     } else {
@@ -69,4 +78,10 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int) {
             }
         }
     }
+}
+
+void scroll_callback(GLFWwindow*, double, double yoffset) {
+    auto& type = Player::ins().new_block.type;
+    uint32_t tot = block_config.size();
+    type = (type - 1 + (yoffset < 0.f ? 1u : tot-1u)) % tot + 1;
 }

@@ -114,7 +114,7 @@ public:
         if (!target.has_value()) {
             return;
         }
-        vec3 pos = vec3(static_cast<float>(target->x), static_cast<float>(target->y), static_cast<float>(target->z));
+        vec3 pos = target->at(0).to_vec3();
         mat4 mvp = Player::ins().get_mvp() * glm::translate(pos);
 
         ShaderManager::ins().block_edge_shader.use();

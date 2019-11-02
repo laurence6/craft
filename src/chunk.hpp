@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "block.hpp"
+#include "util.hpp"
 
 using namespace std;
 

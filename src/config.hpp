@@ -32,6 +32,12 @@ constexpr float CROSSHAIR_X = 30.f / 1280.f, CROSSHAIR_Y = 32.f / 960.f, CROSSHA
 
 constexpr uint64_t DAYTIME = 600; // sec
 
+constexpr float player_speed  = 0.05f  / 10.f;
+constexpr float gravity_acc   = 0.015f / 10.f;
+constexpr float fall_speed    = 0.3f   / 10.f;
+constexpr float jump_speed    = 0.2f   / 10.f;
+constexpr float cam_rot_speed = 0.25f;
+
 constexpr uint32_t SUB_TEX_WIDTH = 64, SUB_TEX_HEIGHT = 64, N_TILES = 5;
 constexpr int32_t N_MIP_LEVEL = 7;
 
@@ -43,16 +49,17 @@ constexpr uint8_t
     FACE_BOTTOM = 4, FACE_BOTTOM_BIT = 1u << 4u,
     FACE_TOP    = 5, FACE_TOP_BIT    = 1u << 5u;
 
+struct BlockConfig {
+    bool is_opaque;
+    bool has_six_faces;
+    array<uint32_t, 6> tex;
+};
+
+extern array<BlockConfig, 5> block_config;
+
 constexpr array<uint32_t, 6> grass_block_tex = {{ 1, 1, 1, 1, 2, 0 }};
 constexpr array<uint32_t, 6> dirt_block_tex  = {{ 2, 2, 2, 2, 2, 2 }};
 constexpr array<uint32_t, 6> stone_block_tex = {{ 3, 3, 3, 3, 3, 3 }};
 constexpr uint32_t           grass_tex = 4;
-
-constexpr float player_speed = 0.05f  / 10.f;
-constexpr float gravity_acc  = 0.015f / 10.f;
-constexpr float fall_speed   = 0.3f   / 10.f;
-constexpr float jump_speed   = 0.2f   / 10.f;
-
-constexpr float cam_rot_speed = 0.25f;
 
 #endif

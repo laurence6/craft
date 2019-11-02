@@ -3,8 +3,8 @@
 
 #include <vector>
 
+#include "math.hpp"
 #include "opengl.hpp"
-#include "util.hpp"
 
 using namespace std;
 
@@ -30,18 +30,17 @@ public:
     template<typename T1, typename T2, typename T3>
     BlockID(T1 x, T2 y, T3 z) : x(x), y(y), z(z) {
     }
+
+    vec3 to_vec3() const {
+        return vec3(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
+    }
 };
 
-class BlockData : private NonCopy<BlockData> {
+class BlockData {
 public:
     uint16_t type = 0;
 
 public:
-    BlockData() = default;
-
-    BlockData(uint16_t type) : type(type) {
-    }
-
     void clear() {
         type = 0;
     }

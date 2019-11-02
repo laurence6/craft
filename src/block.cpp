@@ -3,20 +3,6 @@
 #include "block.hpp"
 #include "config.hpp"
 
-struct BlockConfig {
-    bool is_opaque;
-    bool has_six_faces;
-    array<uint32_t, 6> tex;
-};
-
-static array<BlockConfig, 5> block_config {{
-    { },
-    { true, true, grass_block_tex },
-    { true, true, dirt_block_tex },
-    { true, true, stone_block_tex },
-    { false, false, {{ grass_tex }} },
-}};
-
 bool BlockData::is_opaque() const {
     return block_config[type].is_opaque;
 }
