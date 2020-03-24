@@ -61,26 +61,7 @@ public:
         return chunk->get_block(block_id);
     }
 
-    void update()
-    {
-        if (!chunks_need_update.empty())
-        {
-            for (auto const& chunk_id : chunks_need_update)
-            {
-                Chunk* chunk = get_chunk(chunk_id);
-                if (chunk != nullptr)
-                {
-                    chunk->update({ {
-                        get_chunk(chunk_id.add(-1, 0)),
-                        get_chunk(chunk_id.add(1, 0)),
-                        get_chunk(chunk_id.add(0, -1)),
-                        get_chunk(chunk_id.add(0, 1)),
-                    } });
-                }
-            }
-            chunks_need_update.clear();
-        }
-    }
+    void update();
 
     void render() const
     {
@@ -99,6 +80,15 @@ private:
             return chunk->second;
         }
         return nullptr;
+    }
+
+    void set_chunks_need_update(ChunkID const& chunk_id)
+    {
+        chunks_need_update.insert(chunk_id);
+        chunks_need_update.insert(chunk_id.add(-1, 0));
+        chunks_need_update.insert(chunk_id.add(1, 0));
+        chunks_need_update.insert(chunk_id.add(0, -1));
+        chunks_need_update.insert(chunk_id.add(0, 1));
     }
 
     void set_chunks_need_update(ChunkID const& chunk_id, BlockID const& block_id)

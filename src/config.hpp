@@ -17,7 +17,6 @@ const string SHADER_BLOCK_EDGE_FRAGMENT_PATH = "shader/block_edge_fragment.glsl"
 const string SHADER_LINE_VERTEX_PATH         = "shader/line_vertex.glsl";
 const string SHADER_LINE_FRAGMENT_PATH       = "shader/line_fragment.glsl";
 const string TEXTURE_FOLDER_PATH             = "texture";
-const string MAP_PATH                        = "map";
 
 constexpr int     WINDOW_WIDTH = 1280, WINDOW_HEIGHT = 960;
 char const* const WINDOW_TITLE = "craft";
@@ -48,6 +47,14 @@ constexpr uint8_t FACE_LEFT = 0, FACE_LEFT_BIT = 1u << 0u, //
     FACE_BOTTOM = 4, FACE_BOTTOM_BIT = 1u << 4u,           //
     FACE_TOP = 5, FACE_TOP_BIT = 1u << 5u;
 
+enum BlockType : uint16_t
+{
+    grass_block = 1,
+    dirt_block  = 2,
+    stone_block = 3,
+    grass       = 4,
+};
+
 struct BlockConfig
 {
     bool               is_opaque;
@@ -55,11 +62,17 @@ struct BlockConfig
     array<uint32_t, 6> tex;
 };
 
-extern array<BlockConfig, 5> block_config;
-
 constexpr array<uint32_t, 6> grass_block_tex = { { 1, 1, 1, 1, 2, 0 } };
 constexpr array<uint32_t, 6> dirt_block_tex  = { { 2, 2, 2, 2, 2, 2 } };
 constexpr array<uint32_t, 6> stone_block_tex = { { 3, 3, 3, 3, 3, 3 } };
 constexpr uint32_t           grass_tex       = 4;
+
+constexpr array<BlockConfig, 5> block_config { {
+    {},
+    { true, true, grass_block_tex },
+    { true, true, dirt_block_tex },
+    { true, true, stone_block_tex },
+    { false, false, { { grass_tex } } },
+} };
 
 #endif

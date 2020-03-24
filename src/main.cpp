@@ -1,10 +1,8 @@
 #include <exception>
-#include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
 
-#include "block.hpp"
 #include "db.hpp"
 #include "input.hpp"
 #include "opengl.hpp"
@@ -17,33 +15,6 @@
 
 using namespace std;
 
-static void load_map()
-{
-    if (!DB::ins().chunks.empty())
-    {
-        return;
-    }
-
-    ifstream map_file(MAP_PATH);
-    if (!map_file.is_open())
-    {
-        cerr << "Cannot open " << MAP_PATH << endl;
-        throw new exception();
-    }
-
-    while (true)
-    {
-        uint16_t type;
-        int32_t  x, y, z;
-        map_file >> type >> x >> y >> z;
-        if (map_file.eof())
-        {
-            break;
-        }
-        BlockID block_id { x, y, z };
-        Scene::ins().add_block(block_id, BlockData { type });
-    }
-}
 
 int main()
 {
@@ -88,7 +59,6 @@ int main()
     Player::ins().init();
     UIManager::ins().init();
 
-    load_map();
     Scene::ins().add_object(&Player::ins());
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.f);
