@@ -9,7 +9,8 @@
 
 using namespace std;
 
-namespace Ray {
+namespace Ray
+{
     optional<array<BlockID, 2>> cast_block(vec3 const& p0, vec3 const& dir, float max_distance);
 }
 

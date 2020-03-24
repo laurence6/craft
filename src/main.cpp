@@ -17,22 +17,27 @@
 
 using namespace std;
 
-static void load_map() {
-    if (!DB::ins().chunks.empty()) {
+static void load_map()
+{
+    if (!DB::ins().chunks.empty())
+    {
         return;
     }
 
     ifstream map_file(MAP_PATH);
-    if (!map_file.is_open()) {
+    if (!map_file.is_open())
+    {
         cerr << "Cannot open " << MAP_PATH << endl;
         throw new exception();
     }
 
-    while (true) {
+    while (true)
+    {
         uint16_t type;
-        int32_t x, y, z;
+        int32_t  x, y, z;
         map_file >> type >> x >> y >> z;
-        if (map_file.eof()) {
+        if (map_file.eof())
+        {
             break;
         }
         BlockID block_id { x, y, z };
@@ -40,8 +45,10 @@ static void load_map() {
     }
 }
 
-int main() {
-    if (glfwInit() == 0) {
+int main()
+{
+    if (glfwInit() == 0)
+    {
         throw new exception();
     }
 
@@ -51,13 +58,15 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, nullptr, nullptr);
-    if (window == nullptr) {
+    if (window == nullptr)
+    {
         throw new exception();
     }
 
     glfwMakeContextCurrent(window);
 
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress))
+    {
         throw new exception();
     }
 
@@ -84,7 +93,8 @@ int main() {
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.f);
 
-    while (glfwWindowShouldClose(window) == 0) {
+    while (glfwWindowShouldClose(window) == 0)
+    {
         glfwPollEvents();
 
         Scene::ins().update();

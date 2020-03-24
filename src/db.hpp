@@ -11,7 +11,8 @@
 
 using namespace std;
 
-class DB : public Singleton<DB> {
+class DB : public Singleton<DB>
+{
 public:
     unordered_map<ChunkID, vector<uint32_t>, ChunkID::Hasher> chunks {};
 

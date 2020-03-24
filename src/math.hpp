@@ -8,8 +8,8 @@
 
 namespace glmath = glm;
 
-using glmath::vec3;
 using glmath::mat4;
+using glmath::vec3;
 
 using glmath::cross;
 using glmath::length;

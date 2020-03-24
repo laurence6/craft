@@ -1,29 +1,34 @@
 #ifndef OPENGL_HPP
 #define OPENGL_HPP
 
-#include <string>
-
 #include <glad/glad.h>
+
 #include <GLFW/glfw3.h>
 
-inline GLuint gen_vbo() {
+#include <string>
+
+inline GLuint gen_vbo()
+{
     GLuint vbo;
     glGenBuffers(1, &vbo);
     return vbo;
 }
 
-inline void del_vbo(GLuint& vbo) {
+inline void del_vbo(GLuint& vbo)
+{
     glDeleteBuffers(1, &vbo);
     vbo = 0;
 }
 
-inline GLuint gen_vao() {
+inline GLuint gen_vao()
+{
     GLuint vao;
     glGenVertexArrays(1, &vao);
     return vao;
 }
 
-inline void del_vao(GLuint& vao) {
+inline void del_vao(GLuint& vao)
+{
     glDeleteVertexArrays(1, &vao);
     vao = 0;
 }

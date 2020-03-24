@@ -8,11 +8,13 @@
 
 using namespace std;
 
-struct BlockVertex {
+struct BlockVertex
+{
     GLfloat x, y, z;
-    GLuint param; // 3 bits: face index, 2 bits: uv_coord, 27 bits: tex index
+    GLuint  param; // 3 bits: face index, 2 bits: uv_coord, 27 bits: tex index
 
-    BlockVertex(GLfloat x, GLfloat y, GLfloat z, uint32_t face, uint32_t uv_coord, uint32_t tex) : x(x), y(y), z(z) {
+    BlockVertex(GLfloat x, GLfloat y, GLfloat z, uint32_t face, uint32_t uv_coord, uint32_t tex) : x(x), y(y), z(z)
+    {
         param = 0;
         param |= face << 29u;
         param |= uv_coord << 27u;
@@ -20,7 +22,8 @@ struct BlockVertex {
     }
 };
 
-class BlockID {
+class BlockID
+{
 public:
     int32_t x;
     int32_t y;
@@ -28,24 +31,29 @@ public:
 
 public:
     template<typename T1, typename T2, typename T3>
-    BlockID(T1 x, T2 y, T3 z) : x(x), y(y), z(z) {
+    BlockID(T1 x, T2 y, T3 z) : x(x), y(y), z(z)
+    {
     }
 
-    vec3 to_vec3() const {
+    vec3 to_vec3() const
+    {
         return vec3(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
     }
 };
 
-class BlockData {
+class BlockData
+{
 public:
     uint16_t type = 0;
 
 public:
-    void clear() {
+    void clear()
+    {
         type = 0;
     }
 
-    bool is_null() const {
+    bool is_null() const
+    {
         return type == 0;
     }
 

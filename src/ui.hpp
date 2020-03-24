@@ -9,23 +9,23 @@
 #include "shader.hpp"
 #include "util.hpp"
 
-class UIElement : private NonCopy<UIElement> {
+class UIElement : private NonCopy<UIElement>
+{
 public:
-    virtual ~UIElement() = default;
+    virtual ~UIElement()        = default;
     virtual void render() const = 0;
 };
 
-class UICrosshair : public UIElement {
+class UICrosshair : public UIElement
+{
 private:
     GLuint vao;
 
 public:
-    UICrosshair() {
+    UICrosshair()
+    {
         vector<GLfloat> data {
-            -CROSSHAIR_X, 0.f, 0.f,
-             CROSSHAIR_X, 0.f, 0.f,
-            0.f, -CROSSHAIR_Y, 0.f,
-            0.f,  CROSSHAIR_Y, 0.f,
+            -CROSSHAIR_X, 0.f, 0.f, CROSSHAIR_X, 0.f, 0.f, 0.f, -CROSSHAIR_Y, 0.f, 0.f, CROSSHAIR_Y, 0.f,
         };
         GLuint vbo = gen_vbo();
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -35,11 +35,12 @@ public:
         glBindVertexArray(vao);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 3, (GLvoid*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 3, (GLvoid*) 0);
         glBindVertexArray(0);
     }
 
-    void render() const {
+    void render() const
+    {
         ShaderManager::ins().line_shader.use();
 
         glLineWidth(CROSSHAIR_WIDTH);
@@ -50,52 +51,102 @@ public:
     }
 };
 
-class UITargetBlock : public UIElement {
+class UITargetBlock : public UIElement
+{
 private:
     GLuint vao;
 
 public:
-    UITargetBlock() {
+    UITargetBlock()
+    {
         constexpr GLfloat _0 = -0.001f, _1 = 1.001f;
-        vector<GLfloat> data {
+        vector<GLfloat>   data {
             // bottom
-            _0, _0, _0,
-            _1, _0, _0,
+            _0,
+            _0,
+            _0,
+            _1,
+            _0,
+            _0,
 
-            _1, _0, _0,
-            _1, _1, _0,
+            _1,
+            _0,
+            _0,
+            _1,
+            _1,
+            _0,
 
-            _1, _1, _0,
-            _0, _1, _0,
+            _1,
+            _1,
+            _0,
+            _0,
+            _1,
+            _0,
 
-            _0, _1, _0,
-            _0, _0, _0,
+            _0,
+            _1,
+            _0,
+            _0,
+            _0,
+            _0,
 
             // top
-            _0, _0, _1,
-            _1, _0, _1,
+            _0,
+            _0,
+            _1,
+            _1,
+            _0,
+            _1,
 
-            _1, _0, _1,
-            _1, _1, _1,
+            _1,
+            _0,
+            _1,
+            _1,
+            _1,
+            _1,
 
-            _1, _1, _1,
-            _0, _1, _1,
+            _1,
+            _1,
+            _1,
+            _0,
+            _1,
+            _1,
 
-            _0, _1, _1,
-            _0, _0, _1,
+            _0,
+            _1,
+            _1,
+            _0,
+            _0,
+            _1,
 
             //
-            _0, _0, _0,
-            _0, _0, _1,
+            _0,
+            _0,
+            _0,
+            _0,
+            _0,
+            _1,
 
-            _1, _0, _0,
-            _1, _0, _1,
+            _1,
+            _0,
+            _0,
+            _1,
+            _0,
+            _1,
 
-            _1, _1, _0,
-            _1, _1, _1,
+            _1,
+            _1,
+            _0,
+            _1,
+            _1,
+            _1,
 
-            _0, _1, _0,
-            _0, _1, _1,
+            _0,
+            _1,
+            _0,
+            _0,
+            _1,
+            _1,
         };
         GLuint vbo = gen_vbo();
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -105,13 +156,15 @@ public:
         glBindVertexArray(vao);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 3, (GLvoid*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 3, (GLvoid*) 0);
         glBindVertexArray(0);
     }
 
-    void render() const {
+    void render() const
+    {
         auto const& target = Player::ins().target;
-        if (!target.has_value()) {
+        if (!target.has_value())
+        {
             return;
         }
         vec3 pos = target->at(0).to_vec3();
@@ -128,22 +181,27 @@ public:
     }
 };
 
-class UIManager : public Singleton<UIManager> {
+class UIManager : public Singleton<UIManager>
+{
 private:
     vector<unique_ptr<UIElement>> ui_elements;
 
 public:
-    void init() {
+    void init()
+    {
         ui_elements.emplace_back(make_unique<UICrosshair>());
         ui_elements.emplace_back(make_unique<UITargetBlock>());
     }
 
-    void shutdown() {
+    void shutdown()
+    {
         ui_elements.clear();
     }
 
-    void render() {
-        for (auto const& e : ui_elements) {
+    void render()
+    {
+        for (auto const& e : ui_elements)
+        {
             e->render();
         }
     }

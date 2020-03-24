@@ -4,7 +4,8 @@
 #include <chrono>
 
 template<typename T>
-class NonCopy {
+class NonCopy
+{
 protected:
     constexpr NonCopy() = default;
 
@@ -20,9 +21,11 @@ protected:
 };
 
 template<typename T>
-class Singleton {
+class Singleton
+{
 public:
-    static T& ins() {
+    static T& ins()
+    {
         static T ins;
         return ins;
     }
@@ -36,15 +39,17 @@ protected:
     Singleton(Singleton&&)      = delete;
 
     Singleton& operator=(Singleton const&) = delete;
-    Singleton& operator=(Singleton&&)      = delete;
+    Singleton& operator=(Singleton&&) = delete;
 };
 
-inline uint64_t time_now_ms() noexcept {
+inline uint64_t time_now_ms() noexcept
+{
     using namespace std::chrono;
     return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 }
 
-inline uint64_t time_now_s() noexcept {
+inline uint64_t time_now_s() noexcept
+{
     using namespace std::chrono;
     return duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
 }

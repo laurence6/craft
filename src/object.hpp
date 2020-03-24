@@ -12,13 +12,15 @@
 
 using namespace std;
 
-enum State {
+enum State
+{
     Fixed,
     Normal,
     Falling,
 };
 
-class Object {
+class Object
+{
 public:
     State state = State::Normal;
 
@@ -28,49 +30,53 @@ public:
     unique_ptr<Collider> collider = nullptr;
 
 public:
-    void transit_state(State new_state) {
-        switch (new_state) {
-            case Fixed:
-                velocity = vec3(0.f, 0.f, 0.f);
-                break;
-            case Normal:
-                velocity.z = 0.f;
-                break;
-            case Falling:
-                velocity.z -= gravity_acc;
-                break;
+    void transit_state(State new_state)
+    {
+        switch (new_state)
+        {
+            case Fixed: velocity = vec3(0.f, 0.f, 0.f); break;
+            case Normal: velocity.z = 0.f; break;
+            case Falling: velocity.z -= gravity_acc; break;
         }
         state = new_state;
     }
 
-    void jump() {
-        if (state == State::Normal) {
+    void jump()
+    {
+        if (state == State::Normal)
+        {
             transit_state(State::Falling);
             velocity.z = jump_speed;
         }
     }
 
-    virtual const vector<GLfloat>* get_vertices() const {
+    virtual const vector<GLfloat>* get_vertices() const
+    {
         return nullptr;
     }
 };
 
-class ObjectManager : private NonCopy<ObjectManager> {
+class ObjectManager : private NonCopy<ObjectManager>
+{
 private:
     vector<Object*> objects {};
 
     vector<GLfloat> vertices {};
 
 public:
-    void add_object(Object* obj) {
+    void add_object(Object* obj)
+    {
         objects.push_back(obj);
     }
 
-    void update() {
+    void update()
+    {
         vertices.clear();
-        for (const Object* obj : objects) {
+        for (const Object* obj : objects)
+        {
             const vector<GLfloat>* _vertices = obj->get_vertices();
-            if (_vertices != nullptr) {
+            if (_vertices != nullptr)
+            {
                 vertices.insert(vertices.end(), _vertices->begin(), _vertices->end());
             }
         }
@@ -78,7 +84,8 @@ public:
         // FIXME
     }
 
-    const vector<Object*>& get_objects() {
+    const vector<Object*>& get_objects()
+    {
         return objects;
     }
 };
