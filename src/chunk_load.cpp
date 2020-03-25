@@ -1,9 +1,12 @@
+#include <random>
 #include <unordered_map>
 
 #include "chunk.hpp"
 #include "config.hpp"
 #include "db.hpp"
 #include "perlin.hpp"
+
+using namespace std;
 
 // 32 bits:
 //    x :  4,
@@ -49,6 +52,9 @@ Chunk::Chunk(ChunkID const& chunk_id) : chunk_id(chunk_id)
     }
     else
     {
+        mt19937                           rng { chunk_id.x + chunk_id.y };
+        uniform_int_distribution<uint8_t> dist { 1, 10 };
+
         for (uint32_t _x = 0; _x < CHUNK_WIDTH; _x++)
         {
             auto x = static_cast<int32_t>(_x | chunk_id.x);
@@ -56,17 +62,17 @@ Chunk::Chunk(ChunkID const& chunk_id) : chunk_id(chunk_id)
             {
                 auto y = static_cast<int32_t>(_y | chunk_id.y);
 
-                auto z1 = static_cast<uint8_t>(round(PerlinNoise::noise(x / 96.0, y / 96.0, 0.0) * 24.0));
-                z1 += 32;
-                auto z0 = static_cast<uint8_t>(round((PerlinNoise::noise(x / 3.0, y / 3.0, 0.0) + 1.0) / 2.0 * 8.0));
-                z0      = z1 - 4 - z0;
+                auto h       = static_cast<uint8_t>(round(PerlinNoise::noise(x / 96.0, y / 96.0, 0.0) * 24.0) + 32);
+                auto h_stone = h - static_cast<uint8_t>(round((PerlinNoise::noise(x / 3.0, y / 3.0, 0.0) + 1.0) / 2.0 * 8.0) + 4);
 
                 uint8_t z = 0;
-                for (; z < z0; z++)
+                for (; z < h_stone; z++)
                     add_block(BlockID { x, y, z }, BlockData { BlockType::stone_block });
-                for (; z < z1; z++)
+                for (; z < h; z++)
                     add_block(BlockID { x, y, z }, BlockData { BlockType::dirt_block });
                 add_block(BlockID { x, y, z }, BlockData { BlockType::grass_block });
+                if (dist(rng) == 1)
+                    add_block(BlockID { x, y, z + 1 }, BlockData { BlockType::grass });
             }
         }
     }
