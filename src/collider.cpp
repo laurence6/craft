@@ -27,7 +27,7 @@ Collision Collider::collide(vec3 const& pos)
             for (int32_t y = min_y_b; y <= max_y_b; y++)
             {
                 auto const* b = block_manager.get_block(BlockID { x, y, z });
-                if (b != nullptr)
+                if (b != nullptr && b->is_opaque())
                 {
                     found = true;
                     break;
@@ -44,7 +44,7 @@ Collision Collider::collide(vec3 const& pos)
             for (int32_t y = min_y_b; y <= max_y_b; y++)
             {
                 auto const* b = block_manager.get_block(BlockID { x, y, z });
-                if (b != nullptr)
+                if (b != nullptr && b->is_opaque())
                 {
                     highest_z_b = max(highest_z_b, z + 1);
                     break;
