@@ -11,7 +11,7 @@ const vec4 fog_color = vec4(0.5, 0.6, 0.7, 1.0);
 
 void main() {
     vec4 tex_color = texture(sampler, uv);
-    if (tex_color.a < 0.1) {
+    if (tex_color.a < 0.5) {
         discard;
     }
 
