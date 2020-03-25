@@ -67,14 +67,34 @@ Chunk::Chunk(ChunkID const& chunk_id) : chunk_id(chunk_id)
 
                 uint8_t z = 0;
                 for (; z < h_stone; z++)
+                {
                     add_block(BlockID { x, y, z }, BlockData { BlockType::stone_block });
+                }
                 for (; z < h; z++)
+                {
                     add_block(BlockID { x, y, z }, BlockData { BlockType::dirt_block });
-                add_block(BlockID { x, y, z }, BlockData { BlockType::grass_block });
-                if (dist(rng) == 1)
-                    add_block(BlockID { x, y, z + 1 }, BlockData { BlockType::flower });
-                else if (dist(rng) <= 10)
-                    add_block(BlockID { x, y, z + 1 }, BlockData { BlockType::grass });
+                }
+
+                if (z < 24)
+                {
+                    for (; z < 24; z++)
+                    {
+                        add_block(BlockID { x, y, z }, BlockData { BlockType::water_block });
+                    }
+                }
+                else
+                {
+                    add_block(BlockID { x, y, z }, BlockData { BlockType::grass_block });
+                    auto p = dist(rng);
+                    if (p == 1)
+                    {
+                        add_block(BlockID { x, y, z + 1 }, BlockData { BlockType::flower });
+                    }
+                    else if (p <= 10)
+                    {
+                        add_block(BlockID { x, y, z + 1 }, BlockData { BlockType::grass });
+                    }
+                }
             }
         }
     }

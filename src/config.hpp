@@ -37,7 +37,7 @@ constexpr float fall_speed    = 0.3f / 10.f;
 constexpr float jump_speed    = 0.2f / 10.f;
 constexpr float cam_rot_speed = 0.25f;
 
-constexpr uint32_t SUB_TEX_WIDTH = 16, SUB_TEX_HEIGHT = 16, N_TILES = 6;
+constexpr uint32_t SUB_TEX_WIDTH = 16, SUB_TEX_HEIGHT = 16, N_TILES = 7;
 constexpr int32_t  N_MIP_LEVEL = 5;
 
 constexpr uint8_t FACE_LEFT = 0, FACE_LEFT_BIT = 1u << 0u, //
@@ -52,8 +52,9 @@ enum BlockType : uint16_t
     grass_block = 1,
     dirt_block  = 2,
     stone_block = 3,
-    grass       = 4,
-    flower      = 5,
+    water_block = 4,
+    grass       = 5,
+    flower      = 6,
 };
 
 struct BlockConfig
@@ -63,19 +64,14 @@ struct BlockConfig
     array<uint32_t, 6> tex;
 };
 
-constexpr array<uint32_t, 6> grass_block_tex = { { 1, 1, 1, 1, 2, 0 } };
-constexpr array<uint32_t, 6> dirt_block_tex  = { { 2, 2, 2, 2, 2, 2 } };
-constexpr array<uint32_t, 6> stone_block_tex = { { 3, 3, 3, 3, 3, 3 } };
-constexpr uint32_t           grass_tex       = 4;
-constexpr uint32_t           flower_tex      = 5;
-
-constexpr array<BlockConfig, 6> block_config { {
+constexpr array<BlockConfig, 7> block_config { {
     {},
-    { true, true, grass_block_tex },
-    { true, true, dirt_block_tex },
-    { true, true, stone_block_tex },
-    { false, false, { { grass_tex } } },
-    { false, false, { { flower_tex } } },
+    { true, true, { { 1, 1, 1, 1, 2, 0 } } },
+    { true, true, { { 2, 2, 2, 2, 2, 2 } } },
+    { true, true, { { 3, 3, 3, 3, 3, 3 } } },
+    { true, true, { { 4, 4, 4, 4, 4, 4 } } },
+    { false, false, { { 5 } } },
+    { false, false, { { 6 } } },
 } };
 
 #endif
