@@ -26,7 +26,7 @@ void BlockManager::shutdown()
 void BlockManager::update()
 {
     vec3    player_pos = Player::ins().pos;
-    ChunkID chunk_id_0 { player_pos.x, player_pos.y };
+    ChunkID chunk_id_0 { static_cast<int32_t>(player_pos.x), static_cast<int32_t>(player_pos.y) };
     for (int32_t dx = -1; dx <= 1; dx++)
     {
         for (int32_t dy = -1; dy <= 1; dy++)

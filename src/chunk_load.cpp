@@ -53,7 +53,7 @@ Chunk::Chunk(ChunkID const& chunk_id) : chunk_id(chunk_id)
     else
     {
         mt19937                           rng { chunk_id.x + chunk_id.y };
-        uniform_int_distribution<uint8_t> dist { 1, 10 };
+        uniform_int_distribution<uint8_t> dist { 1, 100 };
 
         for (uint32_t _x = 0; _x < CHUNK_WIDTH; _x++)
         {
@@ -72,6 +72,8 @@ Chunk::Chunk(ChunkID const& chunk_id) : chunk_id(chunk_id)
                     add_block(BlockID { x, y, z }, BlockData { BlockType::dirt_block });
                 add_block(BlockID { x, y, z }, BlockData { BlockType::grass_block });
                 if (dist(rng) == 1)
+                    add_block(BlockID { x, y, z + 1 }, BlockData { BlockType::flower });
+                else if (dist(rng) <= 10)
                     add_block(BlockID { x, y, z + 1 }, BlockData { BlockType::grass });
             }
         }
