@@ -73,17 +73,23 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int)
                 case GLFW_MOUSE_BUTTON_LEFT:
                     if (Player::ins().target.has_value())
                     {
-                        Scene::ins().block_manager.del_block(Player::ins().target->at(0));
+                        BlockID const&   block_id = Player::ins().target->at(0);
+                        BlockData const* block    = Scene::ins().block_manager.get_block(block_id);
+                        if (block != nullptr)
+                        {
+                            Player::ins().new_block = *block;
+                            Scene::ins().block_manager.del_block(block_id);
+                        }
                     }
                     break;
                 case GLFW_MOUSE_BUTTON_RIGHT:
                     if (Player::ins().target.has_value())
                     {
-                        BlockID const&   block_id_front = Player::ins().target->at(1);
-                        BlockData const* block          = Scene::ins().block_manager.get_block(block_id_front);
+                        BlockID const&   block_id = Player::ins().target->at(1);
+                        BlockData const* block    = Scene::ins().block_manager.get_block(block_id);
                         if (block == nullptr)
                         {
-                            Scene::ins().block_manager.add_block(block_id_front, BlockData { Player::ins().new_block });
+                            Scene::ins().block_manager.add_block(block_id, BlockData { Player::ins().new_block });
                         }
                     }
                     break;
