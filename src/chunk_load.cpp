@@ -47,7 +47,7 @@ Chunk::Chunk(ChunkID const& chunk_id) : chunk_id(chunk_id)
         for (uint32_t const& b : it->second)
         {
             auto [block_id, block] = unmarshal(chunk_id, b);
-            add_block(block_id, move(block));
+            add_block(block_id, forward<BlockData>(block));
         }
     }
     else
@@ -62,8 +62,8 @@ Chunk::Chunk(ChunkID const& chunk_id) : chunk_id(chunk_id)
             {
                 auto y = static_cast<int32_t>(_y | chunk_id.y);
 
-                auto h       = static_cast<uint8_t>(round(PerlinNoise::noise(x / 96.0, y / 96.0, 0.0) * 24.0) + 32);
-                auto h_stone = h - static_cast<uint8_t>(round((PerlinNoise::noise(x / 3.0, y / 3.0, 0.0) + 1.0) / 2.0 * 8.0) + 4);
+                auto    h       = static_cast<uint8_t>(round(PerlinNoise::noise(x / 96.0, y / 96.0, 0.0) * 24.0) + 32);
+                uint8_t h_stone = h - static_cast<uint8_t>(round((PerlinNoise::noise(x / 3.0, y / 3.0, 0.0) + 1.0) / 2.0 * 8.0) + 4);
 
                 uint8_t z = 0;
                 for (; z < h_stone; z++)

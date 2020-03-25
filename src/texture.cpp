@@ -33,7 +33,7 @@ array<vector<uint8_t>, N_MIP_LEVEL> load_texture(string tex_folder_path, int n_c
         unsigned char const* tex_data = stbi_load(tex_path.c_str(), &x, &y, &n, desired_channels);
         if (tex_data == nullptr)
         {
-            throw new runtime_error(stbi_failure_reason());
+            throw runtime_error(stbi_failure_reason());
         }
 
         data[i].insert(data[i].end(), tex_data, tex_data + x * y * desired_channels);

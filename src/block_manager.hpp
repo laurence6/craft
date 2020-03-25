@@ -33,7 +33,7 @@ public:
 
         set_chunks_need_update(chunk_id, block_id);
 
-        chunk->add_block(block_id, move(block));
+        chunk->add_block(block_id, forward<BlockData>(block));
     }
 
     void del_block(BlockID const& block_id)

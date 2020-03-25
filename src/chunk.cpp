@@ -46,7 +46,7 @@ void Chunk::update(array<Chunk const*, 4>&& adj_chunks)
 #define UPDATE_OUTER_SURFACE(S, XY, X, Y, INDEX_ADJ)                                                                                          \
     for (uint16_t z = 0; z < 256; z++)                                                                                                        \
     {                                                                                                                                         \
-        for (uint16_t XY = 0; XY < CHUNK_WIDTH; XY++)                                                                                         \
+        for (uint16_t XY = 0; (XY) < CHUNK_WIDTH; (XY)++)                                                                                     \
         {                                                                                                                                     \
             auto& block = blocks[X][Y][z];                                                                                                    \
             if (!block.is_null() && block.has_six_faces() && (adj_chunks[FACE_##S] == nullptr || !adj_chunks[FACE_##S]->opaque INDEX_ADJ[z])) \

@@ -6,14 +6,16 @@
 template<typename T>
 class NonCopy
 {
+public:
+    NonCopy(const NonCopy&) = delete;
+    NonCopy& operator=(const NonCopy&) = delete;
+
 protected:
     constexpr NonCopy()         = default;
-    NonCopy(const NonCopy&)     = delete;
     NonCopy(NonCopy&&) noexcept = default;
 
     ~NonCopy() = default;
 
-    NonCopy& operator=(const NonCopy&) = delete;
     NonCopy& operator=(NonCopy&&) noexcept = default;
 };
 
@@ -27,15 +29,16 @@ public:
         return ins;
     }
 
-protected:
-    Singleton()                     = default;
     Singleton(Singleton const&)     = delete;
     Singleton(Singleton&&) noexcept = delete;
 
-    ~Singleton() = default;
-
     Singleton& operator=(Singleton const&) = delete;
     Singleton& operator=(Singleton&&) noexcept = delete;
+
+protected:
+    Singleton() = default;
+
+    ~Singleton() = default;
 };
 
 inline uint64_t time_now_ms() noexcept

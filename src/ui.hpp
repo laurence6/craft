@@ -39,7 +39,7 @@ public:
         glBindVertexArray(0);
     }
 
-    void render() const
+    void render() const override
     {
         ShaderManager::ins().line_shader.use();
 
@@ -160,7 +160,7 @@ public:
         glBindVertexArray(0);
     }
 
-    void render() const
+    void render() const override
     {
         auto const& target = Player::ins().target;
         if (!target.has_value())

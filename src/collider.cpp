@@ -52,7 +52,7 @@ Collision Collider::collide(vec3 const& pos)
             }
         }
     }
-    float highest_z = static_cast<float>(highest_z_b);
+    auto  highest_z = static_cast<float>(highest_z_b);
     float grounded  = (min_z - highest_z < 5e-6f) ? highest_z + height_l : NAN;
 
     return Collision { found, grounded };

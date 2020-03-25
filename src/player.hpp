@@ -48,16 +48,16 @@ public:
         target = Ray::cast_block(pos, forward, 24);
     }
 
-#define MOVE_FUNC(d, v, as1, as2)                          \
-    void start_move_##d()                                  \
-    {                                                      \
-        v = clamp(v as1 cam_speed, -cam_speed, cam_speed); \
-        update_velocity();                                 \
-    }                                                      \
-    void stop_move_##d()                                   \
-    {                                                      \
-        v = clamp(v as2 cam_speed, -cam_speed, cam_speed); \
-        update_velocity();                                 \
+#define MOVE_FUNC(d, v, as1, as2)                            \
+    void start_move_##d()                                    \
+    {                                                        \
+        (v) = clamp(v as1 cam_speed, -cam_speed, cam_speed); \
+        update_velocity();                                   \
+    }                                                        \
+    void stop_move_##d()                                     \
+    {                                                        \
+        (v) = clamp(v as2 cam_speed, -cam_speed, cam_speed); \
+        update_velocity();                                   \
     }
 
     MOVE_FUNC(forward, v_forward, +, -)
@@ -82,7 +82,7 @@ public:
         update_velocity();
     }
 
-    mat4 get_mvp() const
+    [[nodiscard]] mat4 get_mvp() const
     {
         const mat4 projection = perspective(FOVY, ASPECT, Z_NEAR, Z_FAR);
         mat4       view       = lookAt(pos, pos + forward, vec3(0.f, 0.f, 1.f));

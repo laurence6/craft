@@ -9,7 +9,7 @@ private:
     fstream db;
 
 public:
-    DBFile(fstream::openmode mode)
+    explicit DBFile(fstream::openmode mode)
     {
         db.open(DB_PATH, fstream::binary | mode);
     }
@@ -43,7 +43,7 @@ void DB::init()
     db.read(n_chunks);
     for (size_t i = 0; i < n_chunks; i++)
     {
-        ChunkID chunk_id;
+        ChunkID chunk_id {};
         db.read(chunk_id);
         size_t n_blocks;
         db.read(n_blocks);

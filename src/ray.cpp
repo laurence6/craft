@@ -6,9 +6,9 @@ constexpr float MAX_DISTANCE = 4294967295.f;
 
 optional<array<BlockID, 2>> Ray::cast_block(vec3 const& p0, vec3 const& dir, float max_distance)
 {
-    array<int32_t, 3> curr;
-    array<int32_t, 3> step;
-    array<float, 3>   next_distance;
+    array<int32_t, 3> curr {};
+    array<int32_t, 3> step {};
+    array<float, 3>   next_distance {};
 
     auto compute_next_distance = [&](int i) { next_distance[i] = (static_cast<float>(curr[i] + (step[i] < 0 ? 0 : 1)) - p0[i]) / dir[i]; };
 

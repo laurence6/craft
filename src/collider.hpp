@@ -20,7 +20,7 @@ public:
     {
     }
 
-    bool is_grounded() const
+    [[nodiscard]] bool is_grounded() const
     {
         return !isnan(grounded);
     }

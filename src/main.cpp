@@ -20,7 +20,7 @@ int main()
 {
     if (glfwInit() == 0)
     {
-        throw new exception();
+        throw exception();
     }
 
     glfwWindowHint(GLFW_SAMPLES, 4);
@@ -31,14 +31,14 @@ int main()
     GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, nullptr, nullptr);
     if (window == nullptr)
     {
-        throw new exception();
+        throw exception();
     }
 
     glfwMakeContextCurrent(window);
 
-    if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress))
+    if (gladLoadGLLoader((GLADloadproc) glfwGetProcAddress) == 0)
     {
-        throw new exception();
+        throw exception();
     }
 
     glfwSetKeyCallback(window, key_callback);

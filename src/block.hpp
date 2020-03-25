@@ -35,7 +35,7 @@ public:
     {
     }
 
-    vec3 to_vec3() const
+    [[nodiscard]] vec3 to_vec3() const
     {
         return vec3(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
     }
@@ -52,14 +52,14 @@ public:
         type = 0;
     }
 
-    bool is_null() const
+    [[nodiscard]] bool is_null() const
     {
         return type == 0;
     }
 
-    bool is_opaque() const;
+    [[nodiscard]] bool is_opaque() const;
 
-    bool has_six_faces() const;
+    [[nodiscard]] bool has_six_faces() const;
 
     void insert_face_vertices(vector<BlockVertex>& vertices, BlockID const& block_id, uint8_t f) const;
 };

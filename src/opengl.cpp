@@ -26,7 +26,7 @@ GLuint load_shader(string const& vertex_shader_path, string const& fragment_shad
     else
     {
         cerr << "Cannot open " << vertex_shader_path << endl;
-        throw new exception();
+        throw exception();
     }
 
     string   fragment_shader_code;
@@ -53,7 +53,7 @@ GLuint load_shader(string const& vertex_shader_path, string const& fragment_shad
     {
         vector<char> error_message(info_log_length);
         glGetShaderInfoLog(vertex_shader_ID, info_log_length, nullptr, error_message.data());
-        throw new runtime_error(error_message.data());
+        throw runtime_error(error_message.data());
     }
 
     char const* fragment_shader_p = fragment_shader_code.c_str();
@@ -67,7 +67,7 @@ GLuint load_shader(string const& vertex_shader_path, string const& fragment_shad
         vector<char> error_message(info_log_length);
         glGetShaderInfoLog(fragment_shader_ID, info_log_length, nullptr, error_message.data());
         cerr << error_message.data() << endl;
-        throw new runtime_error(error_message.data());
+        throw runtime_error(error_message.data());
     }
 
     GLuint program_ID = glCreateProgram();
@@ -81,7 +81,7 @@ GLuint load_shader(string const& vertex_shader_path, string const& fragment_shad
     {
         vector<char> error_message(info_log_length);
         glGetProgramInfoLog(program_ID, info_log_length, nullptr, error_message.data());
-        throw new runtime_error(error_message.data());
+        throw runtime_error(error_message.data());
     }
 
     glDetachShader(program_ID, vertex_shader_ID);

@@ -50,7 +50,7 @@ public:
         }
     }
 
-    virtual const vector<GLfloat>* get_vertices() const
+    [[nodiscard]] virtual const vector<GLfloat>* get_vertices() const
     {
         return nullptr;
     }

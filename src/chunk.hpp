@@ -44,11 +44,11 @@ public:
         y = static_cast<uint32_t>(_y) & CHUNK_ID_MASK;
     }
 
-    ChunkID(BlockID const& block_id) : ChunkID(block_id.x, block_id.y)
+    explicit ChunkID(BlockID const& block_id) : ChunkID(block_id.x, block_id.y)
     {
     }
 
-    ChunkID add(int32_t dx, int32_t dy) const
+    [[nodiscard]] ChunkID add(int32_t dx, int32_t dy) const
     {
         return ChunkID { static_cast<int32_t>(x + CHUNK_WIDTH * dx), static_cast<int32_t>(y + CHUNK_WIDTH * dy) };
     }
@@ -96,7 +96,7 @@ public:
     {
         auto [x, y, z]  = to_internal_coord(block_id);
         opaque[x][y][z] = block.is_opaque();
-        blocks[x][y][z] = move(block);
+        blocks[x][y][z] = forward<BlockData>(block);
     }
 
     void del_block(BlockID const& block_id)
