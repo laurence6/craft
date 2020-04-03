@@ -2,18 +2,6 @@
 
 #include <array>
 
-#include "config.hpp"
-
-bool BlockData::is_opaque() const
-{
-    return block_config[type].is_opaque;
-}
-
-bool BlockData::has_six_faces() const
-{
-    return block_config[type].has_six_faces;
-}
-
 constexpr GLfloat                               _0 = 0.f, _1 = 1.f;
 constexpr array<array<array<GLfloat, 3>, 6>, 6> id_block_vertices = { {
     [FACE_LEFT]   = { {
@@ -108,6 +96,7 @@ void BlockData::insert_face_vertices(vector<BlockVertex>& vertices, BlockID cons
                                               id_block_vertices[f][i][1] + static_cast<GLfloat>(block_id.y), //
                                               id_block_vertices[f][i][2] + static_cast<GLfloat>(block_id.z), //
                                               f,                                                             //
+                                              block_config[type].is_opaque,                                  //
                                               uv_coord[i],                                                   //
                                               block_config[type].tex[f])                                     //
             );
@@ -123,6 +112,7 @@ void BlockData::insert_face_vertices(vector<BlockVertex>& vertices, BlockID cons
                                                   tf_block_vertices[f * 6 + i][1] + static_cast<GLfloat>(block_id.y), //
                                                   tf_block_vertices[f * 6 + i][2] + static_cast<GLfloat>(block_id.z), //
                                                   FACE_TOP,                                                           //
+                                                  block_config[type].is_opaque,                                       //
                                                   uv_coord[i],                                                        //
                                                   block_config[type].tex[0])                                          //
                 );

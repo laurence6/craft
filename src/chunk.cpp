@@ -60,7 +60,7 @@ void Chunk::update(array<Chunk const*, 4>&& adj_chunks)
                 {
                     auto adj_block = [&](uint8_t f, uint16_t _x, uint16_t _y) { return adj_chunks[f] == nullptr ? nullptr : &adj_chunks[f]->blocks[_x][_y][z]; };
                     auto insert    = [&](uint8_t f, BlockData const* other) {
-                        if (other == nullptr || (!other->is_opaque() && (block.is_opaque() || block.type != other->type)))
+                        if (other == nullptr || (!(other->is_opaque() && other->has_six_faces()) && (block.is_opaque() || block.type != other->type)))
                             block.insert_face_vertices(vertices, block_id, f);
                     };
                     insert(FACE_LEFT, x > 0 ? &blocks[x - 1][y][z] : adj_block(FACE_LEFT, CHUNK_WIDTH - 1, y));

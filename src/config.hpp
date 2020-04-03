@@ -70,8 +70,8 @@ constexpr array<BlockConfig, 7> block_config { {
     { true, true, { { 2, 2, 2, 2, 2, 2 } } },
     { true, true, { { 3, 3, 3, 3, 3, 3 } } },
     { false, true, { { 4, 4, 4, 4, 4, 4 } } },
-    { false, false, { { 5 } } },
-    { false, false, { { 6 } } },
+    { true, false, { { 5 } } },
+    { true, false, { { 6 } } },
 } };
 
 #endif

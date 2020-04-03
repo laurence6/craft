@@ -3,6 +3,7 @@
 
 #include <vector>
 
+#include "config.hpp"
 #include "math.hpp"
 #include "opengl.hpp"
 
@@ -11,13 +12,14 @@ using namespace std;
 struct BlockVertex
 {
     GLfloat x, y, z;
-    GLuint  param; // 3 bits: face index, 2 bits: uv_coord, 27 bits: tex index
+    GLuint  param; // 3 bits: face index, 1 bit: opaque, 2 bits: uv_coord, 26 bits: tex index
 
-    BlockVertex(GLfloat x, GLfloat y, GLfloat z, uint32_t face, uint32_t uv_coord, uint32_t tex) : x(x), y(y), z(z)
+    BlockVertex(GLfloat x, GLfloat y, GLfloat z, uint32_t face, uint32_t opaque, uint32_t uv_coord, uint32_t tex) : x(x), y(y), z(z)
     {
         param = 0;
         param |= face << 29u;
-        param |= uv_coord << 27u;
+        param |= opaque << 28u;
+        param |= uv_coord << 26u;
         param |= tex;
     }
 };
@@ -57,9 +59,15 @@ public:
         return type == 0;
     }
 
-    [[nodiscard]] bool is_opaque() const;
+    [[nodiscard]] bool is_opaque() const
+    {
+        return block_config[type].is_opaque;
+    }
 
-    [[nodiscard]] bool has_six_faces() const;
+    [[nodiscard]] bool has_six_faces() const
+    {
+        return block_config[type].has_six_faces;
+    }
 
     void insert_face_vertices(vector<BlockVertex>& vertices, BlockID const& block_id, uint8_t f) const;
 };
