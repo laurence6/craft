@@ -83,7 +83,6 @@ public:
 
 private:
     array<array<array<BlockData, 256>, CHUNK_WIDTH>, CHUNK_WIDTH> blocks {};
-    array<array<array<bool, 256>, CHUNK_WIDTH>, CHUNK_WIDTH>      opaque {};
 
     ChunkVertices chunk_vertices;
 
@@ -95,14 +94,12 @@ public:
     void add_block(BlockID const& block_id, BlockData&& block)
     {
         auto [x, y, z]  = to_internal_coord(block_id);
-        opaque[x][y][z] = block.is_opaque();
         blocks[x][y][z] = forward<BlockData>(block);
     }
 
     void del_block(BlockID const& block_id)
     {
-        auto [x, y, z]  = to_internal_coord(block_id);
-        opaque[x][y][z] = false;
+        auto [x, y, z] = to_internal_coord(block_id);
         blocks[x][y][z].clear();
     }
 

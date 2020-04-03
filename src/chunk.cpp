@@ -43,27 +43,6 @@ void Chunk::update(array<Chunk const*, 4>&& adj_chunks)
 {
     vector<BlockVertex> vertices {};
 
-#define UPDATE_OUTER_SURFACE(S, XY, X, Y, INDEX_ADJ)                                                                                          \
-    for (uint16_t z = 0; z < 256; z++)                                                                                                        \
-    {                                                                                                                                         \
-        for (uint16_t XY = 0; (XY) < CHUNK_WIDTH; (XY)++)                                                                                     \
-        {                                                                                                                                     \
-            auto& block = blocks[X][Y][z];                                                                                                    \
-            if (!block.is_null() && block.has_six_faces() && (adj_chunks[FACE_##S] == nullptr || !adj_chunks[FACE_##S]->opaque INDEX_ADJ[z])) \
-            {                                                                                                                                 \
-                auto block_id = to_block_id(X, Y, z);                                                                                         \
-                block.insert_face_vertices(vertices, block_id, FACE_##S);                                                                     \
-            }                                                                                                                                 \
-        }                                                                                                                                     \
-    }
-
-    UPDATE_OUTER_SURFACE(LEFT, y, 0, y, [CHUNK_WIDTH - 1][y])
-    UPDATE_OUTER_SURFACE(RIGHT, y, CHUNK_WIDTH - 1, y, [0][y])
-    UPDATE_OUTER_SURFACE(FRONT, x, x, 0, [x][CHUNK_WIDTH - 1])
-    UPDATE_OUTER_SURFACE(BACK, x, x, CHUNK_WIDTH - 1, [x][0])
-
-#undef UPDATE_OUTER_SURFACE
-
     for (uint16_t x = 0; x < CHUNK_WIDTH; x++)
     {
         for (uint16_t y = 0; y < CHUNK_WIDTH; y++)
@@ -79,18 +58,17 @@ void Chunk::update(array<Chunk const*, 4>&& adj_chunks)
                 auto block_id = to_block_id(x, y, z);
                 if (block.has_six_faces())
                 {
-                    if (x > 0 && !opaque[x - 1][y][z])
-                        block.insert_face_vertices(vertices, block_id, FACE_LEFT);
-                    if (x < CHUNK_WIDTH - 1 && !opaque[x + 1][y][z])
-                        block.insert_face_vertices(vertices, block_id, FACE_RIGHT);
-                    if (y > 0 && !opaque[x][y - 1][z])
-                        block.insert_face_vertices(vertices, block_id, FACE_FRONT);
-                    if (y < CHUNK_WIDTH - 1 && !opaque[x][y + 1][z])
-                        block.insert_face_vertices(vertices, block_id, FACE_BACK);
-                    if (z == 0 || !opaque[x][y][z - 1])
-                        block.insert_face_vertices(vertices, block_id, FACE_BOTTOM);
-                    if (z == 255 || !opaque[x][y][z + 1])
-                        block.insert_face_vertices(vertices, block_id, FACE_TOP);
+                    auto adj_block = [&](uint8_t f, uint16_t _x, uint16_t _y) { return adj_chunks[f] == nullptr ? nullptr : &adj_chunks[f]->blocks[_x][_y][z]; };
+                    auto insert    = [&](uint8_t f, BlockData const* other) {
+                        if (other == nullptr || (!other->is_opaque() && (block.is_opaque() || block.type != other->type)))
+                            block.insert_face_vertices(vertices, block_id, f);
+                    };
+                    insert(FACE_LEFT, x > 0 ? &blocks[x - 1][y][z] : adj_block(FACE_LEFT, CHUNK_WIDTH - 1, y));
+                    insert(FACE_RIGHT, x < CHUNK_WIDTH - 1 ? &blocks[x + 1][y][z] : adj_block(FACE_RIGHT, 0, y));
+                    insert(FACE_FRONT, y > 0 ? &blocks[x][y - 1][z] : adj_block(FACE_FRONT, x, CHUNK_WIDTH - 1));
+                    insert(FACE_BACK, y < CHUNK_WIDTH - 1 ? &blocks[x][y + 1][z] : adj_block(FACE_BACK, x, 0));
+                    insert(FACE_BOTTOM, z > 0 ? &blocks[x][y][z - 1] : nullptr);
+                    insert(FACE_TOP, z < 255 ? &blocks[x][y][z + 1] : nullptr);
                 }
                 else
                 {
