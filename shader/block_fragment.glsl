@@ -23,7 +23,7 @@ float dither2x2(vec2 position, vec3 color) {
 
 void main() {
     vec4 tex_color = texture(sampler, uv);
-    if (opaque == 0 || gl_FragCoord.w / gl_FragCoord.z < 0.01)
+    if (opaque == 0)
         tex_color *= dither2x2(gl_FragCoord.xy, tex_color.rgb);
     if (tex_color.a < 0.5)
         discard;

@@ -20,5 +20,5 @@ void main() {
     );
     vec3 vertex_n = normals[(vertex_param & (0x7u << 29)) >> 29];
     light = clamp(dot(sun_dir, vertex_n), 0.6, 1.0);
-    opaque = (vertex_param & (0x1u << 28)) >> 28;
+    opaque = ((vertex_param & (0x1u << 28)) >> 28) & uint(length(gl_Position.xyz) < 160);
 }

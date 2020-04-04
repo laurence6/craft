@@ -25,11 +25,12 @@ void BlockManager::shutdown()
 
 void BlockManager::update()
 {
-    vec3    player_pos = Player::ins().pos;
-    ChunkID chunk_id_0 { static_cast<int32_t>(player_pos.x), static_cast<int32_t>(player_pos.y) };
-    for (int32_t dx = -1; dx <= 1; dx++)
+    vec3              player_pos = Player::ins().pos;
+    ChunkID           chunk_id_0 { static_cast<int32_t>(player_pos.x), static_cast<int32_t>(player_pos.y) };
+    constexpr int32_t range = 10;
+    for (int32_t dx = -range; dx <= range; dx++)
     {
-        for (int32_t dy = -1; dy <= 1; dy++)
+        for (int32_t dy = -range; dy <= range; dy++)
         {
             ChunkID chunk_id = chunk_id_0.add(dx, dy);
             if (get_chunk(chunk_id) == nullptr)
