@@ -9,7 +9,6 @@
 !CMakeLists.txt
 !LICENSE.md
 !README.md
-!gen_map.py
 !texture/
 !third_party/
 !third_party/glad
